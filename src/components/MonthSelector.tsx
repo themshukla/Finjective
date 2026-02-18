@@ -10,11 +10,17 @@ const MonthSelector = () => {
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
 
-  const months = [
-    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy") },
-    { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy") },
-    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy") },
-  ];
+  const months = isCurrentMonth
+    ? [
+        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
+        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth },
+        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
+      ]
+    : [
+        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
+        { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now },
+        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
+      ];
 
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
@@ -32,7 +38,7 @@ const MonthSelector = () => {
           return (
             <button
               key={i}
-              onClick={() => setSelectedMonth(m.date)}
+              onClick={() => setSelectedMonth(m.action)}
               className={`flex flex-col items-center px-4 py-1.5 rounded-lg transition-colors ${
                 isCenter
                   ? "bg-primary text-primary-foreground"
