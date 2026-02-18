@@ -5,6 +5,7 @@ import BudgetTab from "@/components/BudgetTab";
 import CashFlowTab from "@/components/CashFlowTab";
 import NetWorthTab from "@/components/NetWorthTab";
 import ProfileTab from "@/components/ProfileTab";
+import MonthSelector from "@/components/MonthSelector";
 
 const Index = () => {
   return (
@@ -32,6 +33,9 @@ const Index = () => {
                 <h1 className="text-base font-bold tracking-tight">💰 Finjective</h1>
               </div>
             </header>
+
+            {/* Month selector */}
+            <MonthSelector />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
