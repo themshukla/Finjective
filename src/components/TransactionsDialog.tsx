@@ -71,12 +71,12 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
             )}
             {sorted.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between rounded-xl bg-muted/50 border border-border p-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
+              <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-primary truncate">{tx.merchant}</p>
                   <p className="text-[10px] text-muted-foreground">{format(new Date(tx.date + "T00:00:00"), "MMM d, yyyy")}</p>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
-                  <span className="text-sm font-bold tabular-nums text-foreground">
+                  <span className="text-lg font-bold tabular-nums text-foreground">
                     ${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                   <button onClick={() => setDeletingId(tx.id)} className="text-muted-foreground hover:text-destructive p-1 rounded transition-colors">
