@@ -23,10 +23,10 @@ const MonthSelector = () => {
       ];
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
+    <div className="flex items-center justify-between px-4 py-2 bg-background border-b border-border">
       <button
         onClick={() => setSelectedMonth(prev)}
-        className="p-1 rounded-md active:bg-muted transition-colors"
+        className="p-1.5 rounded-lg active:bg-card transition-colors"
       >
         <ChevronLeft className="h-4 w-4 text-muted-foreground" />
       </button>
@@ -42,10 +42,10 @@ const MonthSelector = () => {
               className={`flex flex-col items-center px-4 py-1.5 rounded-lg transition-colors ${
                 isCenter
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground active:bg-muted"
+                  : "text-muted-foreground active:bg-card"
               }`}
             >
-              <span className={`text-xs font-semibold ${isCenter ? "" : ""}`}>{m.label}</span>
+              <span className="text-xs font-semibold">{m.label}</span>
               <span className={`text-[9px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                 {m.subLabel}
                 {isCurrent && !isCenter && " •"}
@@ -60,7 +60,7 @@ const MonthSelector = () => {
 
       <button
         onClick={() => setSelectedMonth(next)}
-        className="p-1 rounded-md active:bg-muted transition-colors"
+        className="p-1.5 rounded-lg active:bg-card transition-colors"
       >
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </button>

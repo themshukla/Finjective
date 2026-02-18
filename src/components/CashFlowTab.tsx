@@ -60,15 +60,15 @@ const CashFlowTab = () => {
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-2">
         <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-muted-foreground">Income</p>
-          <p className="text-lg font-bold text-income tabular-nums">${totalIncome.toLocaleString()}</p>
+          <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
+          <p className="text-lg font-bold text-foreground tabular-nums">${totalIncome.toLocaleString()}</p>
         </div>
         <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-muted-foreground">Expenses</p>
-          <p className="text-lg font-bold text-expense tabular-nums">${totalExpenses.toLocaleString()}</p>
+          <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
+          <p className="text-lg font-bold text-foreground tabular-nums">${totalExpenses.toLocaleString()}</p>
         </div>
         <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-muted-foreground">Net</p>
+          <p className="text-[10px] text-primary uppercase tracking-wider">Net</p>
           <p className={`text-lg font-bold tabular-nums ${netCashFlow >= 0 ? "text-income" : "text-expense"}`}>${netCashFlow.toLocaleString()}</p>
         </div>
       </div>
@@ -77,12 +77,12 @@ const CashFlowTab = () => {
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlow} barGap={2}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 90%)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(220 10% 46%)" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(220 10% 46%)" }} axisLine={false} tickLine={false} width={35} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(220 15% 90%)", fontSize: 12 }} formatter={(value: number) => [`$${value.toLocaleString()}`]} />
-              <Bar dataKey="income" name="Income" fill="hsl(152 60% 40%)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" name="Expenses" fill="hsl(0 72% 51%)" radius={[3, 3, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 5% 18%)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(40 6% 50%)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(40 6% 50%)" }} axisLine={false} tickLine={false} width={35} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(30 5% 18%)", fontSize: 12, backgroundColor: "hsl(30 5% 10%)", color: "hsl(40 10% 90%)" }} formatter={(value: number) => [`$${value.toLocaleString()}`]} />
+              <Bar dataKey="income" name="Income" fill="hsl(40 55% 50%)" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="expenses" name="Expenses" fill="hsl(0 62% 50%)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -91,14 +91,16 @@ const CashFlowTab = () => {
       <div className="rounded-xl bg-card border border-border overflow-hidden">
         <div className="flex justify-between items-center p-3 pb-1">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Monthly</h3>
-          <button onClick={() => setEditing("add")} className="text-primary p-1"><Plus className="h-4 w-4" /></button>
+          <button onClick={() => setEditing("add")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1 rounded-full bg-secondary border border-border">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
         </div>
         <div className="divide-y divide-border">
           {[...cashFlow].reverse().map((m, ri) => {
             const actualIndex = cashFlow.length - 1 - ri;
             return (
-              <button key={m.month} onClick={() => setEditing(actualIndex)} className="w-full flex items-center justify-between px-3 py-2.5 text-left active:bg-muted/50 transition-colors">
-                <span className="font-medium text-xs">{m.month}</span>
+              <button key={m.month} onClick={() => setEditing(actualIndex)} className="w-full flex items-center justify-between px-3 py-2.5 text-left active:bg-card/50 transition-colors">
+                <span className="font-medium text-xs text-foreground">{m.month}</span>
                 <div className="flex gap-4 text-xs tabular-nums">
                   <span className="text-income">+${m.income.toLocaleString()}</span>
                   <span className="text-expense">-${m.expenses.toLocaleString()}</span>
