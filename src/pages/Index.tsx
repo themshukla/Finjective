@@ -29,7 +29,7 @@ const Index = () => {
             {/* Header */}
             <header className="border-b border-border bg-card">
               <div className="px-4 py-2.5">
-                <h1 className="text-base font-bold tracking-tight">💰 BudgetFlow</h1>
+                <h1 className="text-base font-bold tracking-tight">💰 Finjective</h1>
               </div>
             </header>
 
