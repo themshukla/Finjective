@@ -349,11 +349,11 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const over = category.spent > category.budgeted;
 
   return (
-    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-4 py-2 text-left active:scale-[0.98] transition-transform">
-      <div className="flex justify-between items-start mb-1">
+    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
+      <div className="flex justify-between items-start mb-0.5">
         <div>
           <p className="text-xs font-medium text-primary">{category.name}</p>
-          <p className="text-base font-bold tabular-nums text-foreground">
+          <p className="text-sm font-bold tabular-nums text-foreground">
             ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </div>
