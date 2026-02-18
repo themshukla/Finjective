@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Plus, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, ChevronRight, Trash2, Pencil } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
@@ -14,6 +14,7 @@ const BudgetTab = () => {
   const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
+  const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
 
   if (needsSetup) return <MonthSetupPrompt />;
 
@@ -74,6 +75,12 @@ const BudgetTab = () => {
 
   const handleDeleteSection = (sectionId: string) => {
     setCustomSections(customSections.filter(s => s.id !== sectionId));
+  };
+
+  const handleRenameSection = () => {
+    if (!renamingSection || !renamingSection.name.trim()) return;
+    setCustomSections(customSections.map(s => s.id === renamingSection.id ? { ...s, name: renamingSection.name.trim() } : s));
+    setRenamingSection(null);
   };
 
   const handleCreateSection = () => {
@@ -219,6 +226,9 @@ const BudgetTab = () => {
                 <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
+                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="text-muted-foreground hover:text-primary p-1.5 rounded-full transition-colors">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
                 <button onClick={() => handleDeleteSection(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -252,6 +262,27 @@ const BudgetTab = () => {
             />
             <Button size="sm" className="w-full" onClick={handleCreateSection}>
               Create
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Section Dialog */}
+      <Dialog open={!!renamingSection} onOpenChange={(open) => !open && setRenamingSection(null)}>
+        <DialogContent className="max-w-[340px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">Rename Section</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <Input
+              placeholder="Section name"
+              value={renamingSection?.name ?? ""}
+              onChange={e => setRenamingSection(prev => prev ? { ...prev, name: e.target.value } : null)}
+              className="h-10"
+              onKeyDown={e => e.key === "Enter" && handleRenameSection()}
+            />
+            <Button size="sm" className="w-full" onClick={handleRenameSection}>
+              Save
             </Button>
           </div>
         </DialogContent>
