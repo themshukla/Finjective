@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import EditItemDialog from "./EditItemDialog";
+import SortableCategoryList from "./SortableCategoryList";
 
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities } = useBudget();
@@ -103,16 +104,19 @@ const NetWorthTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-1.5">
-          {assets.map((a, i) => {
+        <SortableCategoryList
+          items={assets.map((a, i) => ({ name: a.name, budgeted: 0, spent: 0, icon: "", _value: a.value, _iconIndex: i } as any))}
+          onReorder={(reordered) => setAssets(reordered.map((r: any) => ({ name: r.name, value: r._value ?? r.value ?? 0 })))}
+          containerId="assets"
+          renderItem={(cat: any, i) => {
             const Icon = assetIcons[i % assetIcons.length];
             return (
-              <button key={i} onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
+              <button onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-medium text-primary">{a.name}</p>
+                    <p className="text-xs font-medium text-primary">{cat.name}</p>
                     <p className="text-sm font-bold tabular-nums text-foreground">
-                      ${a.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      ${(cat._value ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -124,8 +128,8 @@ const NetWorthTab = () => {
                 </div>
               </button>
             );
-          })}
-        </div>
+          }}
+        />
       </section>
 
       {/* Liabilities section */}
@@ -136,14 +140,17 @@ const NetWorthTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-1.5">
-          {liabilities.map((l, i) => (
-            <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
+        <SortableCategoryList
+          items={liabilities.map((l) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: l.value } as any))}
+          onReorder={(reordered) => setLiabilities(reordered.map((r: any) => ({ name: r.name, value: r._value ?? r.value ?? 0 })))}
+          containerId="liabilities"
+          renderItem={(cat: any, i) => (
+            <button onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-medium text-primary">{l.name}</p>
+                  <p className="text-xs font-medium text-primary">{cat.name}</p>
                   <p className="text-sm font-bold tabular-nums text-liability">
-                    ${l.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    ${(cat._value ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -154,8 +161,8 @@ const NetWorthTab = () => {
                 </div>
               </div>
             </button>
-          ))}
-        </div>
+          )}
+        />
       </section>
 
       {ed && <EditItemDialog open={editing !== null} onClose={() => setEditing(null)} {...ed} />}
