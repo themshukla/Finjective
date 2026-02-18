@@ -1,21 +1,38 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBudget } from "@/context/BudgetContext";
-import { ChevronRight, Moon, Bell, Shield, HelpCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { ChevronRight, Moon, Bell, Shield, HelpCircle, LogOut, Download } from "lucide-react";
+import { exportBudgetToCSV } from "@/lib/csvExport";
+import { toast } from "sonner";
 
 const ProfileTab = () => {
-  const { income, expenses, assets, liabilities } = useBudget();
+  const { income, expenses, assets, liabilities, customSections, monthKey } = useBudget();
+  const { user, signOut } = useAuth();
 
   const totalIncome = income.reduce((s, c) => s + c.budgeted, 0);
   const totalExpenses = expenses.reduce((s, c) => s + c.spent, 0);
   const totalAssets = assets.reduce((s, a) => s + a.value, 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + l.value, 0);
 
+  const displayName = user?.user_metadata?.display_name || user?.email || "User";
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  const handleExportCSV = () => {
+    exportBudgetToCSV(monthKey, income, expenses, customSections);
+    toast.success("CSV downloaded!");
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   const menuItems = [
+    { icon: Download, label: "Export as CSV", onClick: handleExportCSV },
     { icon: Moon, label: "Appearance", detail: "Dark" },
     { icon: Bell, label: "Notifications", detail: "On" },
     { icon: Shield, label: "Privacy & Security" },
     { icon: HelpCircle, label: "Help & Support" },
-    { icon: LogOut, label: "Sign Out", destructive: true },
+    { icon: LogOut, label: "Sign Out", destructive: true, onClick: handleSignOut },
   ];
 
   return (
@@ -24,10 +41,10 @@ const ProfileTab = () => {
       <div className="rounded-xl bg-card border border-border p-5 flex flex-col items-center text-center">
         <Avatar className="h-16 w-16 mb-3">
           <AvatarImage src="" />
-          <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">JD</AvatarFallback>
+          <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">{initials}</AvatarFallback>
         </Avatar>
-        <h2 className="text-base font-bold text-foreground">John Doe</h2>
-        <p className="text-xs text-muted-foreground">john.doe@email.com</p>
+        <h2 className="text-base font-bold text-foreground">{displayName}</h2>
+        <p className="text-xs text-muted-foreground">{user?.email}</p>
       </div>
 
       {/* Quick stats */}
@@ -51,6 +68,7 @@ const ProfileTab = () => {
         {menuItems.map((item) => (
           <button
             key={item.label}
+            onClick={item.onClick}
             className="w-full flex items-center gap-3 px-3 py-3 text-left active:bg-secondary transition-colors"
           >
             <item.icon className={`h-4 w-4 ${item.destructive ? "text-destructive" : "text-primary"}`} />
