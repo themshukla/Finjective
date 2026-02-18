@@ -95,22 +95,13 @@ const NetWorthTab = () => {
         </div>
       </div>
 
-      {/* Add button */}
-      <button
-        onClick={() => setEditing("addAsset")}
-        className="w-full rounded-xl bg-card border border-border p-3 flex items-center gap-2 text-primary text-xs font-medium"
-      >
-        <Plus className="h-4 w-4" />
-        Add assets & liabilities
-      </button>
-
       {/* Assets section */}
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-foreground">Assets</h3>
-          <span className="text-xs text-primary font-medium flex items-center gap-0.5">
-            View all <ChevronRight className="h-3.5 w-3.5" />
-          </span>
+          <button onClick={() => setEditing("addAsset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
         </div>
         <div className="space-y-2.5">
           {assets.map((a, i) => {
@@ -141,9 +132,9 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-foreground">Liabilities</h3>
-          <span className="text-xs text-primary font-medium flex items-center gap-0.5">
-            View all <ChevronRight className="h-3.5 w-3.5" />
-          </span>
+          <button onClick={() => setEditing("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
         </div>
         <div className="space-y-2.5">
           {liabilities.map((l, i) => (
