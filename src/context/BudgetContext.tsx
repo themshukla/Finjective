@@ -1,6 +1,8 @@
-import { useState, createContext, useContext, ReactNode, useCallback } from "react";
+import { useState, createContext, useContext, ReactNode, useCallback, useEffect, useRef } from "react";
 import { BudgetCategory, CashFlowItem, AssetItem, LiabilityItem, CustomSection, incomeCategories as defaultIncome, expenseCategories as defaultExpenses, cashFlowData as defaultCashFlow, assets as defaultAssets, liabilities as defaultLiabilities } from "@/data/budgetData";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, subMonths } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MonthData {
   income: BudgetCategory[];
@@ -29,6 +31,7 @@ interface BudgetState {
   importFromPreviousMonth: () => void;
   createEmptyMonth: () => void;
   needsSetup: boolean;
+  saving: boolean;
 }
 
 const BudgetContext = createContext<BudgetState | null>(null);
@@ -45,7 +48,6 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const now = new Date();
   const currentKey = getMonthKey(now);
 
-  // Store per-month budget data
   const [monthlyData, setMonthlyData] = useState<Record<string, MonthData>>({
     [currentKey]: { income: defaultIncome, expenses: defaultExpenses, customSections: [] },
   });
@@ -54,6 +56,8 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const [cashFlow, setCashFlow] = useState<CashFlowItem[]>(defaultCashFlow);
   const [assets, setAssets] = useState<AssetItem[]>(defaultAssets);
   const [liabilities, setLiabilities] = useState<LiabilityItem[]>(defaultLiabilities);
+  const [saving, setSaving] = useState(false);
+  const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
 
   const monthKey = getMonthKey(selectedMonth);
   const currentMonthData = monthlyData[monthKey];
@@ -62,6 +66,91 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const income = currentMonthData?.income ?? [];
   const expenses = currentMonthData?.expenses ?? [];
   const customSections = currentMonthData?.customSections ?? [];
+
+  // Load month data from database
+  useEffect(() => {
+    const loadMonth = async () => {
+      if (loadedMonths.has(monthKey)) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await (supabase
+        .from('budget_months') as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('month_key', monthKey)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading budget:', error);
+        return;
+      }
+
+      if (data) {
+        setMonthlyData(prev => ({
+          ...prev,
+          [monthKey]: {
+            income: data.income as unknown as BudgetCategory[],
+            expenses: data.expenses as unknown as BudgetCategory[],
+            customSections: (data.custom_sections as unknown as CustomSection[]) ?? [],
+          },
+        }));
+      }
+
+      setLoadedMonths(prev => new Set(prev).add(monthKey));
+    };
+
+    loadMonth();
+  }, [monthKey, loadedMonths]);
+
+  // Save to database
+  const saveToDb = useCallback(async (key: string, data: MonthData) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    setSaving(true);
+    const payload = {
+      user_id: user.id,
+      month_key: key,
+      income: data.income as unknown as Record<string, unknown>[],
+      expenses: data.expenses as unknown as Record<string, unknown>[],
+      custom_sections: data.customSections as unknown as Record<string, unknown>[],
+    };
+    const { error } = await (supabase
+      .from('budget_months') as any)
+      .upsert(payload, { onConflict: 'user_id,month_key' });
+
+    setSaving(false);
+
+    if (error) {
+      console.error('Error saving budget:', error);
+      toast.error('Failed to save changes');
+    } else {
+      toast.success('Saved!', { duration: 1500 });
+    }
+  }, []);
+
+  // Debounced auto-save
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevDataRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!currentMonthData || !loadedMonths.has(monthKey)) return;
+
+    const serialized = JSON.stringify(currentMonthData);
+    if (serialized === prevDataRef.current) return;
+    prevDataRef.current = serialized;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveToDb(monthKey, currentMonthData);
+    }, 1000);
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [currentMonthData, monthKey, saveToDb, loadedMonths]);
 
   const setIncome = useCallback((v: BudgetCategory[]) => {
     setMonthlyData(prev => ({
@@ -123,7 +212,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       customSections, setCustomSections, addCustomSection,
       setIncome, setExpenses, setCashFlow, setAssets, setLiabilities,
       selectedMonth, setSelectedMonth, monthKey,
-      hasMonthData, importFromPreviousMonth, createEmptyMonth, needsSetup,
+      hasMonthData, importFromPreviousMonth, createEmptyMonth, needsSetup, saving,
     }}>
       {children}
     </BudgetContext.Provider>
