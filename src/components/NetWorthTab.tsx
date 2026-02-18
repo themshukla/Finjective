@@ -72,24 +72,24 @@ const NetWorthTab = () => {
   return (
     <div className="space-y-5">
       {/* Net Worth summary card */}
-      <div className="rounded-xl bg-card border border-border p-4 text-center">
-        <p className="text-[10px] text-primary uppercase tracking-wider mb-1">Net Worth</p>
-        <p className="text-2xl font-bold tabular-nums text-foreground">
+      <div className="rounded-xl bg-card border border-border px-3 py-1.5 text-center">
+        <p className="text-[10px] text-primary uppercase tracking-wider mb-0.5">Net Worth</p>
+        <p className="text-sm font-bold tabular-nums text-foreground">
           ${netWorth.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
       </div>
 
       {/* Assets & Liabilities summary */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-card border border-border p-3">
+        <div className="rounded-xl bg-card border border-border px-3 py-1.5">
           <p className="text-[10px] text-primary uppercase tracking-wider">Total Assets</p>
-          <p className="text-lg font-bold tabular-nums text-foreground">
+          <p className="text-sm font-bold tabular-nums text-foreground">
             ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="rounded-xl bg-card border border-border p-3">
+        <div className="rounded-xl bg-card border border-border px-3 py-1.5">
           <p className="text-[10px] text-primary uppercase tracking-wider">Total Liabilities</p>
-          <p className="text-lg font-bold tabular-nums text-destructive">
+          <p className="text-sm font-bold tabular-nums text-destructive">
             ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </div>
@@ -107,15 +107,15 @@ const NetWorthTab = () => {
           {assets.map((a, i) => {
             const Icon = assetIcons[i % assetIcons.length];
             return (
-              <button key={i} onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border p-4 text-left active:scale-[0.98] transition-transform">
+              <button key={i} onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs font-medium text-primary">{a.name}</p>
-                    <p className="text-lg font-bold tabular-nums text-foreground mt-0.5">
+                    <p className="text-sm font-bold tabular-nums text-foreground">
                       ${a.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex flex-col items-end gap-1">
                     <Icon className="h-5 w-5 text-primary" />
                     <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                       View <ChevronRight className="h-3 w-3" />
@@ -138,15 +138,15 @@ const NetWorthTab = () => {
         </div>
         <div className="space-y-2.5">
           {liabilities.map((l, i) => (
-            <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border p-4 text-left active:scale-[0.98] transition-transform">
+            <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-xs font-medium text-primary">{l.name}</p>
-                  <p className="text-lg font-bold tabular-nums text-liability mt-0.5">
+                  <p className="text-sm font-bold tabular-nums text-liability">
                     ${l.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-1">
                   <CreditCard className="h-5 w-5 text-muted-foreground" />
                   <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                     View <ChevronRight className="h-3 w-3" />
