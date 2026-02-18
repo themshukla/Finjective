@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_months: {
+        Row: {
+          custom_sections: Json
+          expenses: Json
+          id: string
+          income: Json
+          month_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          custom_sections?: Json
+          expenses?: Json
+          id?: string
+          income?: Json
+          month_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          custom_sections?: Json
+          expenses?: Json
+          id?: string
+          income?: Json
+          month_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
