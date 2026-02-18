@@ -4,10 +4,13 @@ import { Plus } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
+import MonthSetupPrompt from "./MonthSetupPrompt";
 
 const BudgetTab = () => {
-  const { income, expenses, setIncome, setExpenses } = useBudget();
+  const { income, expenses, setIncome, setExpenses, needsSetup } = useBudget();
   const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | "addIncome" | "addExpense" | null>(null);
+
+  if (needsSetup) return <MonthSetupPrompt />;
 
   const totalIncome = income.reduce((s, c) => s + c.spent, 0);
   const totalBudgetedIncome = income.reduce((s, c) => s + c.budgeted, 0);
