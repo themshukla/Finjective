@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, TrendingUp, PieChart, User } from "lucide-react";
 import { BudgetProvider } from "@/context/BudgetContext";
@@ -6,6 +7,7 @@ import CashFlowTab from "@/components/CashFlowTab";
 import NetWorthTab from "@/components/NetWorthTab";
 import ProfileTab from "@/components/ProfileTab";
 import MonthSelector from "@/components/MonthSelector";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const Index = () => {
   return (
@@ -35,12 +37,16 @@ const Index = () => {
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
               <Tabs defaultValue="budget" className="w-full h-full flex flex-col">
-                <div className="flex-1 overflow-y-auto px-4 py-3 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <PullToRefresh
+                  onRefresh={() => new Promise(r => setTimeout(r, 600))}
+                  className="flex-1 overflow-y-auto px-4 py-3 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                   <TabsContent value="budget" className="mt-0"><BudgetTab /></TabsContent>
                   <TabsContent value="cashflow" className="mt-0"><CashFlowTab /></TabsContent>
                   <TabsContent value="networth" className="mt-0"><NetWorthTab /></TabsContent>
                   <TabsContent value="profile" className="mt-0"><ProfileTab /></TabsContent>
-                </div>
+                </PullToRefresh>
 
                 {/* Bottom tab bar */}
                 <div className="border-t border-border bg-background px-2 pb-5 pt-1.5">
