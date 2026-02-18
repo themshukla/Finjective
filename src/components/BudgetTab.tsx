@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
-import { BudgetCategory } from "@/data/budgetData";
+import { BudgetCategory, Transaction } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
+import TransactionsDialog from "./TransactionsDialog";
 import MonthSetupPrompt from "./MonthSetupPrompt";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,7 +18,7 @@ const BudgetTab = () => {
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
-
+  const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   if (needsSetup) return <MonthSetupPrompt />;
 
   const totalIncome = income.reduce((s, c) => s + c.spent, 0);
@@ -184,7 +185,7 @@ const BudgetTab = () => {
         </div>
         <div className="space-y-2.5">
           {income.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} />
+            <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
           ))}
         </div>
       </section>
@@ -199,7 +200,7 @@ const BudgetTab = () => {
         </div>
         <div className="space-y-2.5">
           {expenses.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} />
+            <CategoryCard key={i} category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
           ))}
         </div>
       </section>
@@ -235,7 +236,7 @@ const BudgetTab = () => {
             </div>
             <div className="space-y-2.5">
               {section.items.map((cat, i) => (
-                <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} />
+                <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
               ))}
               {section.items.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap "Add" to get started.</p>
@@ -304,11 +305,46 @@ const BudgetTab = () => {
       </AlertDialog>
 
       {ed && <EditItemDialog open={!!editing} onClose={() => setEditing(null)} {...ed} />}
+
+      {viewingTransactions && (() => {
+        const vt = viewingTransactions;
+        let cat: BudgetCategory | undefined;
+        if (vt.list === "custom" && "sectionId" in vt) {
+          cat = customSections.find(s => s.id === vt.sectionId)?.items[vt.index];
+        } else {
+          cat = vt.list === "income" ? income[vt.index] : expenses[vt.index];
+        }
+        if (!cat) return null;
+        return (
+          <TransactionsDialog
+            open
+            onClose={() => setViewingTransactions(null)}
+            categoryName={cat.name}
+            transactions={cat.transactions ?? []}
+            onUpdate={(txs: Transaction[]) => {
+              if (vt.list === "custom" && "sectionId" in vt) {
+                const updated = customSections.map(s => {
+                  if (s.id !== vt.sectionId) return s;
+                  const items = [...s.items];
+                  items[vt.index] = { ...items[vt.index], transactions: txs };
+                  return { ...s, items };
+                });
+                setCustomSections(updated);
+              } else {
+                const setter = vt.list === "income" ? setIncome : setExpenses;
+                const arr = vt.list === "income" ? [...income] : [...expenses];
+                arr[vt.index] = { ...arr[vt.index], transactions: txs };
+                setter(arr);
+              }
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };
 
-function CategoryCard({ category, variant, onTap }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void }) {
+function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
   const pct = category.budgeted > 0 ? Math.min((category.spent / category.budgeted) * 100, 100) : 0;
   const over = category.spent > category.budgeted;
 
@@ -321,8 +357,12 @@ function CategoryCard({ category, variant, onTap }: { category: BudgetCategory; 
             ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <span className="text-[10px]">View</span>
+        <div
+          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          onClick={(e) => { e.stopPropagation(); onTransactions(); }}
+          role="button"
+        >
+          <span className="text-[10px]">Transactions</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
       </div>

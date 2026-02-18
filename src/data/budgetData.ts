@@ -1,8 +1,16 @@
+export interface Transaction {
+  id: string;
+  date: string;
+  amount: number;
+  merchant: string;
+}
+
 export interface BudgetCategory {
   name: string;
   budgeted: number;
   spent: number;
   icon: string;
+  transactions?: Transaction[];
 }
 
 export interface CashFlowItem {
