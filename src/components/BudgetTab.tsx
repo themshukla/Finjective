@@ -154,24 +154,24 @@ const BudgetTab = () => {
   return (
     <div className="space-y-5">
       {/* Balance hero */}
-      <div className="rounded-xl bg-card border border-border p-4 text-center">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
-        <p className={`text-2xl font-bold tabular-nums ${remaining >= 0 ? "text-foreground" : "text-expense"}`}>
-          ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </p>
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
-          <p className="text-lg font-bold tabular-nums text-foreground">${totalIncome.toLocaleString()}</p>
-          <p className="text-[10px] text-muted-foreground">of ${totalBudgetedIncome.toLocaleString()}</p>
+      <div className="space-y-2">
+        <div className="rounded-xl bg-card border border-border p-4 text-center">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
+          <p className={`text-2xl font-bold tabular-nums ${remaining >= 0 ? "text-foreground" : "text-expense"}`}>
+            ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
         </div>
-        <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
-          <p className="text-lg font-bold tabular-nums text-foreground">${totalExpenses.toLocaleString()}</p>
-          <p className="text-[10px] text-muted-foreground">of ${totalBudgetedExpenses.toLocaleString()}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-card p-3 border border-border">
+            <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
+            <p className="text-lg font-bold tabular-nums text-foreground">${totalIncome.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">of ${totalBudgetedIncome.toLocaleString()}</p>
+          </div>
+          <div className="rounded-xl bg-card p-3 border border-border">
+            <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
+            <p className="text-lg font-bold tabular-nums text-foreground">${totalExpenses.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">of ${totalBudgetedExpenses.toLocaleString()}</p>
+          </div>
         </div>
       </div>
 
