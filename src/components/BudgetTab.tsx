@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
 import MonthSetupPrompt from "./MonthSetupPrompt";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const BudgetTab = () => {
-  const { income, expenses, setIncome, setExpenses, needsSetup } = useBudget();
-  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | "addIncome" | "addExpense" | null>(null);
+  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
+  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
 
   if (needsSetup) return <MonthSetupPrompt />;
 
@@ -39,6 +44,45 @@ const BudgetTab = () => {
     setter(arr);
   };
 
+  const handleSaveCustomItem = (sectionId: string, index: number, values: Record<string, string | number>) => {
+    const updated = customSections.map(s => {
+      if (s.id !== sectionId) return s;
+      const items = [...s.items];
+      items[index] = { ...items[index], name: String(values.name), budgeted: Number(values.budgeted), spent: Number(values.spent) };
+      return { ...s, items };
+    });
+    setCustomSections(updated);
+  };
+
+  const handleDeleteCustomItem = (sectionId: string, index: number) => {
+    const updated = customSections.map(s => {
+      if (s.id !== sectionId) return s;
+      const items = [...s.items];
+      items.splice(index, 1);
+      return { ...s, items };
+    });
+    setCustomSections(updated);
+  };
+
+  const handleAddCustomItem = (sectionId: string, values: Record<string, string | number>) => {
+    const updated = customSections.map(s => {
+      if (s.id !== sectionId) return s;
+      return { ...s, items: [...s.items, { name: String(values.name), budgeted: Number(values.budgeted), spent: Number(values.spent), icon: "📌" }] };
+    });
+    setCustomSections(updated);
+  };
+
+  const handleDeleteSection = (sectionId: string) => {
+    setCustomSections(customSections.filter(s => s.id !== sectionId));
+  };
+
+  const handleCreateSection = () => {
+    if (!newSectionName.trim()) return;
+    addCustomSection(newSectionName.trim());
+    setNewSectionName("");
+    setShowAddSection(false);
+  };
+
   const getEditingData = () => {
     if (!editing) return null;
     if (editing === "addIncome" || editing === "addExpense") {
@@ -52,17 +96,47 @@ const BudgetTab = () => {
         onSave: (v: Record<string, string | number>) => handleAdd(editing === "addIncome" ? "income" : "expense", v),
       };
     }
-    const cat = editing.list === "income" ? income[editing.index] : expenses[editing.index];
-    return {
-      title: `Edit ${cat.name}`,
-      fields: [
-        { key: "name", label: "Name", type: "text" as const, value: cat.name },
-        { key: "budgeted", label: "Budgeted", type: "number" as const, value: cat.budgeted },
-        { key: "spent", label: "Actual", type: "number" as const, value: cat.spent },
-      ],
-      onSave: (v: Record<string, string | number>) => handleSaveCategory(editing.list, editing.index, v),
-      onDelete: () => handleDelete(editing.list, editing.index),
-    };
+    if (typeof editing === "object" && "type" in editing && editing.type === "addCustomItem") {
+      const section = customSections.find(s => s.id === editing.sectionId);
+      return {
+        title: `Add to ${section?.name ?? "Section"}`,
+        fields: [
+          { key: "name", label: "Name", type: "text" as const, value: "" },
+          { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
+          { key: "spent", label: "Actual", type: "number" as const, value: 0 },
+        ],
+        onSave: (v: Record<string, string | number>) => handleAddCustomItem(editing.sectionId, v),
+      };
+    }
+    if (typeof editing === "object" && "list" in editing && editing.list === "custom") {
+      const section = customSections.find(s => s.id === editing.sectionId);
+      const cat = section?.items[editing.index];
+      if (!cat) return null;
+      return {
+        title: `Edit ${cat.name}`,
+        fields: [
+          { key: "name", label: "Name", type: "text" as const, value: cat.name },
+          { key: "budgeted", label: "Budgeted", type: "number" as const, value: cat.budgeted },
+          { key: "spent", label: "Actual", type: "number" as const, value: cat.spent },
+        ],
+        onSave: (v: Record<string, string | number>) => handleSaveCustomItem(editing.sectionId, editing.index, v),
+        onDelete: () => handleDeleteCustomItem(editing.sectionId, editing.index),
+      };
+    }
+    if (typeof editing === "object" && "list" in editing) {
+      const cat = editing.list === "income" ? income[editing.index] : expenses[editing.index];
+      return {
+        title: `Edit ${cat.name}`,
+        fields: [
+          { key: "name", label: "Name", type: "text" as const, value: cat.name },
+          { key: "budgeted", label: "Budgeted", type: "number" as const, value: cat.budgeted },
+          { key: "spent", label: "Actual", type: "number" as const, value: cat.spent },
+        ],
+        onSave: (v: Record<string, string | number>) => handleSaveCategory(editing.list as "income" | "expense", editing.index, v),
+        onDelete: () => handleDelete(editing.list as "income" | "expense", editing.index),
+      };
+    }
+    return null;
   };
 
   const ed = getEditingData();
@@ -89,6 +163,47 @@ const BudgetTab = () => {
           <p className="text-lg font-bold tabular-nums text-foreground">${totalExpenses.toLocaleString()}</p>
           <p className="text-[10px] text-muted-foreground">of ${totalBudgetedExpenses.toLocaleString()}</p>
         </div>
+      </div>
+
+      {/* Custom standalone sections */}
+      {customSections.map(section => {
+        const sectionTotal = section.items.reduce((s, c) => s + c.spent, 0);
+        const sectionBudgeted = section.items.reduce((s, c) => s + c.budgeted, 0);
+        return (
+          <section key={section.id}>
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
+                <span className="text-[10px] text-muted-foreground tabular-nums">
+                  ${sectionTotal.toLocaleString()} / ${sectionBudgeted.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+                  <Plus className="h-3.5 w-3.5" /> Add
+                </button>
+                <button onClick={() => handleDeleteSection(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              {section.items.map((cat, i) => (
+                <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} />
+              ))}
+              {section.items.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap "Add" to get started.</p>
+              )}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* Add Section button */}
+      <div className="flex justify-center">
+        <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+          <Plus className="h-3.5 w-3.5" /> Add Section
+        </button>
       </div>
 
       {/* Income section */}
@@ -121,13 +236,34 @@ const BudgetTab = () => {
         </div>
       </section>
 
+      {/* Add Section Dialog */}
+      <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
+        <DialogContent className="max-w-[340px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">New Section</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <Input
+              placeholder="Section name"
+              value={newSectionName}
+              onChange={e => setNewSectionName(e.target.value)}
+              className="h-10"
+              onKeyDown={e => e.key === "Enter" && handleCreateSection()}
+            />
+            <Button size="sm" className="w-full" onClick={handleCreateSection}>
+              Create
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {ed && <EditItemDialog open={!!editing} onClose={() => setEditing(null)} {...ed} />}
     </div>
   );
 };
 
 function CategoryCard({ category, variant, onTap }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void }) {
-  const pct = Math.min((category.spent / category.budgeted) * 100, 100);
+  const pct = category.budgeted > 0 ? Math.min((category.spent / category.budgeted) * 100, 100) : 0;
   const over = category.spent > category.budgeted;
 
   return (
