@@ -5,6 +5,7 @@ import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
 import MonthSetupPrompt from "./MonthSetupPrompt";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ const BudgetTab = () => {
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
+  const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
 
   if (needsSetup) return <MonthSetupPrompt />;
 
@@ -226,7 +228,7 @@ const BudgetTab = () => {
                 <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
-                <button onClick={() => handleDeleteSection(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
+                <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -284,6 +286,22 @@ const BudgetTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Section Confirm */}
+      <AlertDialog open={!!deletingSectionId} onOpenChange={(open) => !open && setDeletingSectionId(null)}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete section?</AlertDialogTitle>
+            <AlertDialogDescription>This will remove the section and all its items. This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { if (deletingSectionId) handleDeleteSection(deletingSectionId); setDeletingSectionId(null); }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {ed && <EditItemDialog open={!!editing} onClose={() => setEditing(null)} {...ed} />}
     </div>
