@@ -71,6 +71,30 @@ const NetWorthTab = () => {
 
   return (
     <div className="space-y-5">
+      {/* Net Worth summary card */}
+      <div className="rounded-xl bg-card border border-border p-4 text-center">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Net Worth</p>
+        <p className={`text-2xl font-bold tabular-nums ${netWorth >= 0 ? "text-foreground" : "text-destructive"}`}>
+          ${netWorth.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </p>
+      </div>
+
+      {/* Assets & Liabilities summary */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-xl bg-card border border-border p-3">
+          <p className="text-[10px] text-primary uppercase tracking-wider">Total Assets</p>
+          <p className="text-lg font-bold tabular-nums text-foreground">
+            ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="rounded-xl bg-card border border-border p-3">
+          <p className="text-[10px] text-primary uppercase tracking-wider">Total Liabilities</p>
+          <p className="text-lg font-bold tabular-nums text-destructive">
+            ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+      </div>
+
       {/* Add button */}
       <button
         onClick={() => setEditing("addAsset")}
