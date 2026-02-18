@@ -368,7 +368,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       </div>
       <div className="flex justify-between items-center">
         <Progress value={pct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
+        <span className={`text-xs tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           ${category.budgeted.toLocaleString()} budget
         </span>
       </div>
