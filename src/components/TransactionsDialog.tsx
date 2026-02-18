@@ -62,7 +62,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent className="max-w-[380px] rounded-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-base">{categoryName} Transactions</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-primary">{categoryName} Transactions</DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
