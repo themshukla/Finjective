@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.34b804e51454426d85a094ae034c814b",
+  "appName": "BudgetFlow",
+  "webDir": "dist",
+  "server": {
+    "url": "https://34b804e5-1454-426d-85a0-94ae034c814b.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
