@@ -165,6 +165,43 @@ const BudgetTab = () => {
         </div>
       </div>
 
+      {/* Income section */}
+      <section>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-bold text-foreground">Income</h3>
+          <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
+        </div>
+        <div className="space-y-2.5">
+          {income.map((cat, i) => (
+            <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} />
+          ))}
+        </div>
+      </section>
+
+      {/* Expenses section */}
+      <section>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-bold text-foreground">Expenses</h3>
+          <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+            <Plus className="h-3.5 w-3.5" /> Add
+          </button>
+        </div>
+        <div className="space-y-2.5">
+          {expenses.map((cat, i) => (
+            <CategoryCard key={i} category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} />
+          ))}
+        </div>
+      </section>
+
+      {/* Add Section button */}
+      <div className="flex justify-center">
+        <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+          <Plus className="h-3.5 w-3.5" /> Add Section
+        </button>
+      </div>
+
       {/* Custom standalone sections */}
       {customSections.map(section => {
         const sectionTotal = section.items.reduce((s, c) => s + c.spent, 0);
@@ -198,43 +235,6 @@ const BudgetTab = () => {
           </section>
         );
       })}
-
-      {/* Add Section button */}
-      <div className="flex justify-center">
-        <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
-          <Plus className="h-3.5 w-3.5" /> Add Section
-        </button>
-      </div>
-
-      {/* Income section */}
-      <section>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Income</h3>
-          <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-        <div className="space-y-2.5">
-          {income.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} />
-          ))}
-        </div>
-      </section>
-
-      {/* Expenses section */}
-      <section>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Expenses</h3>
-          <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-        <div className="space-y-2.5">
-          {expenses.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} />
-          ))}
-        </div>
-      </section>
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
