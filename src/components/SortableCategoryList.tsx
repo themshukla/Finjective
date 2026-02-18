@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
   useSensor,
   useSensors,
   DragEndEvent,
   DragStartEvent,
   DragOverlay,
+  MouseSensor,
+  TouchSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -19,9 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
-import { BudgetCategory } from "@/data/budgetData";
 
-// We need the modifiers package
 const modifiers = [restrictToVerticalAxis, restrictToParentElement];
 
 interface SortableCategoryListProps {
@@ -34,9 +33,11 @@ interface SortableCategoryListProps {
 function SortableItem({
   id,
   children,
+  isActive,
 }: {
   id: string;
   children: React.ReactNode;
+  isActive: boolean;
 }) {
   const {
     attributes,
@@ -45,13 +46,19 @@ function SortableItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    transition: {
+      duration: 250,
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    },
+  });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 50 : "auto" as any,
+    transition: transition ?? "transform 250ms cubic-bezier(0.25,1,0.5,1)",
+    opacity: isDragging ? 0.3 : 1,
+    zIndex: isDragging ? 50 : "auto",
   };
 
   return (
@@ -69,23 +76,30 @@ export default function SortableCategoryList({
 }: SortableCategoryListProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // Long-press activation: delay 250ms, tolerance 5px
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    }),
+    useSensor(MouseSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  // Use index-based IDs scoped to container
   const ids = items.map((_, i) => `${containerId}-${i}`);
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(String(event.active.id));
-  };
+    // Haptic feedback if available
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(30);
+    }
+  }, []);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -95,7 +109,11 @@ export default function SortableCategoryList({
     if (oldIndex === -1 || newIndex === -1) return;
 
     onReorder(arrayMove([...items], oldIndex, newIndex));
-  };
+  }, [ids, items, onReorder]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+  }, []);
 
   const activeIndex = activeId ? ids.indexOf(activeId) : -1;
 
@@ -105,20 +123,24 @@ export default function SortableCategoryList({
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
       modifiers={modifiers}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <div className="space-y-1.5">
           {items.map((cat, i) => (
-            <SortableItem key={ids[i]} id={ids[i]}>
+            <SortableItem key={ids[i]} id={ids[i]} isActive={activeId === ids[i]}>
               {renderItem(cat, i)}
             </SortableItem>
           ))}
         </div>
       </SortableContext>
-      <DragOverlay>
+      <DragOverlay dropAnimation={{
+        duration: 200,
+        easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+      }}>
         {activeIndex >= 0 ? (
-          <div className="opacity-90 scale-105 shadow-lg rounded-xl">
+          <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20 animate-scale-in">
             {renderItem(items[activeIndex], activeIndex)}
           </div>
         ) : null}
