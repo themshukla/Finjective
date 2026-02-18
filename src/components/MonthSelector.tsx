@@ -45,8 +45,8 @@ const MonthSelector = () => {
                   : "text-muted-foreground active:bg-card"
               }`}
             >
-              <span className="text-xs font-semibold">{m.label}</span>
-              <span className={`text-[9px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+              <span className="text-sm font-bold">{m.label}</span>
+              <span className={`text-[10px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                 {m.subLabel}
                 {isCurrent && !isCenter && " •"}
               </span>
