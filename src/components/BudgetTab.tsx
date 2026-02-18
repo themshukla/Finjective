@@ -153,9 +153,9 @@ const BudgetTab = () => {
   return (
     <div className="space-y-5">
       {/* Balance hero */}
-      <div className="text-center py-4">
+      <div className="rounded-xl bg-card border border-border p-4 text-center">
         <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
-        <p className={`text-3xl font-bold tabular-nums ${remaining >= 0 ? "text-foreground" : "text-expense"}`}>
+        <p className={`text-2xl font-bold tabular-nums ${remaining >= 0 ? "text-foreground" : "text-expense"}`}>
           ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
       </div>
