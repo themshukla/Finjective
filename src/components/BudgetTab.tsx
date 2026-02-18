@@ -362,13 +362,13 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           onClick={(e) => { e.stopPropagation(); onTransactions(); }}
           role="button"
         >
-          <span className="text-[10px]">Transactions</span>
+          <span className="text-xs">Transactions</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
       </div>
       <div className="flex justify-between items-center">
         <Progress value={pct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
+        <span className={`text-xs tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           ${category.budgeted.toLocaleString()} budget
         </span>
       </div>
