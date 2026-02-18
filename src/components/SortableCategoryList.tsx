@@ -48,15 +48,12 @@ function SortableItem({
     isDragging,
   } = useSortable({
     id,
-    transition: {
-      duration: 250,
-      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-    },
+    transition: null,
   });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition: transition ?? "transform 250ms cubic-bezier(0.25,1,0.5,1)",
+    transition: transition ?? undefined,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 50 : "auto",
   };
@@ -135,10 +132,7 @@ export default function SortableCategoryList({
           ))}
         </div>
       </SortableContext>
-      <DragOverlay dropAnimation={{
-        duration: 200,
-        easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-      }}>
+      <DragOverlay dropAnimation={null}>
         {activeIndex >= 0 ? (
           <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20 animate-scale-in">
             {renderItem(items[activeIndex], activeIndex)}
