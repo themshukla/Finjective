@@ -21,6 +21,12 @@ export interface LiabilityItem {
   value: number;
 }
 
+export interface CustomSection {
+  id: string;
+  name: string;
+  items: BudgetCategory[];
+}
+
 export const incomeCategories: BudgetCategory[] = [
   { name: "Salary", budgeted: 5500, spent: 5500, icon: "💼" },
   { name: "Freelance", budgeted: 1200, spent: 800, icon: "💻" },
