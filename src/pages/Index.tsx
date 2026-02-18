@@ -27,12 +27,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Header */}
-            <header className="bg-background">
-              <div className="px-4 py-2.5">
-                <h1 className="text-base font-bold tracking-tight text-center text-foreground">💰 Finjective</h1>
-              </div>
-            </header>
+            {/* Spacer for status bar */}
 
             {/* Month selector */}
             <MonthSelector />
