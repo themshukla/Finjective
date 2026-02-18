@@ -16,7 +16,7 @@ interface EditItemDialogProps {
 
 const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete }: EditItemDialogProps) => {
   const [values, setValues] = useState<Record<string, string | number>>(
-    Object.fromEntries(fields.map((f) => [f.key, f.value]))
+    Object.fromEntries(fields.map((f) => [f.key, f.type === "number" && f.value === 0 ? "" : f.value]))
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -36,14 +36,15 @@ const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete }: Edit
             {fields.map((f) => (
               <div key={f.key}>
                 <Label className="text-xs text-muted-foreground">{f.label}</Label>
-                <Input
-                  type={f.type}
-                  value={values[f.key]}
-                  onChange={(e) =>
-                    setValues((v) => ({ ...v, [f.key]: f.type === "number" ? Number(e.target.value) : e.target.value }))
-                  }
-                  className="mt-1 h-10"
-                />
+              <Input
+                type={f.type}
+                value={values[f.key]}
+                placeholder={f.type === "number" ? "$0.00" : ""}
+                onChange={(e) =>
+                  setValues((v) => ({ ...v, [f.key]: f.type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value }))
+                }
+                className="mt-1 h-10"
+              />
               </div>
             ))}
             <div className="flex gap-2 pt-2">
