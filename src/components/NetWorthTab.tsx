@@ -73,7 +73,7 @@ const NetWorthTab = () => {
     <div className="space-y-5">
       {/* Net Worth summary card */}
       <div className="rounded-xl bg-card border border-border p-4 text-center">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Net Worth</p>
+        <p className="text-[10px] text-primary uppercase tracking-wider mb-1">Net Worth</p>
         <p className="text-2xl font-bold tabular-nums text-foreground">
           ${netWorth.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
