@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Plus, ChevronRight, Trash2, Pencil } from "lucide-react";
+import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
@@ -216,18 +216,15 @@ const BudgetTab = () => {
         return (
           <section key={section.id}>
             <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2">
+              <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
                 <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
                 <span className="text-[10px] text-muted-foreground tabular-nums">
                   ${sectionTotal.toLocaleString()} / ${sectionBudgeted.toLocaleString()}
                 </span>
-              </div>
+              </button>
               <div className="flex items-center gap-1">
                 <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
                   <Plus className="h-3.5 w-3.5" /> Add
-                </button>
-                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="text-muted-foreground hover:text-primary p-1.5 rounded-full transition-colors">
-                  <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button onClick={() => handleDeleteSection(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
                   <Trash2 className="h-3.5 w-3.5" />
