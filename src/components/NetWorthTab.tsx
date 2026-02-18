@@ -103,7 +103,7 @@ const NetWorthTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-2.5">
+        <div className="space-y-1.5">
           {assets.map((a, i) => {
             const Icon = assetIcons[i % assetIcons.length];
             return (
@@ -136,7 +136,7 @@ const NetWorthTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-2.5">
+        <div className="space-y-1.5">
           {liabilities.map((l, i) => (
             <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
               <div className="flex justify-between items-start">
