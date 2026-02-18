@@ -6,6 +6,7 @@ import { BudgetCategory, Transaction } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
 import TransactionsDialog from "./TransactionsDialog";
 import MonthSetupPrompt from "./MonthSetupPrompt";
+import SortableCategoryList from "./SortableCategoryList";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -183,11 +184,14 @@ const BudgetTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-1.5">
-          {income.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
-          ))}
-        </div>
+        <SortableCategoryList
+          items={income}
+          onReorder={setIncome}
+          containerId="income"
+          renderItem={(cat, i) => (
+            <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+          )}
+        />
       </section>
 
       {/* Expenses section */}
@@ -198,11 +202,14 @@ const BudgetTab = () => {
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        <div className="space-y-1.5">
-          {expenses.map((cat, i) => (
-            <CategoryCard key={i} category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
-          ))}
-        </div>
+        <SortableCategoryList
+          items={expenses}
+          onReorder={setExpenses}
+          containerId="expenses"
+          renderItem={(cat, i) => (
+            <CategoryCard category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
+          )}
+        />
       </section>
 
       {/* Add Section button */}
