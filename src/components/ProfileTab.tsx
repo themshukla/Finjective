@@ -1,13 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useBudget } from "@/context/BudgetContext";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, Moon, Bell, Shield, HelpCircle, LogOut, Download } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+import { ChevronRight, Moon, Sun, Bell, Shield, HelpCircle, LogOut, Download } from "lucide-react";
 import { exportBudgetToCSV } from "@/lib/csvExport";
 import { toast } from "sonner";
 
 const ProfileTab = () => {
   const { income, expenses, assets, liabilities, customSections, monthKey } = useBudget();
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const totalIncome = income.reduce((s, c) => s + c.budgeted, 0);
   const totalExpenses = expenses.reduce((s, c) => s + c.spent, 0);
@@ -28,7 +30,7 @@ const ProfileTab = () => {
 
   const menuItems = [
     { icon: Download, label: "Export as CSV", onClick: handleExportCSV },
-    { icon: Moon, label: "Appearance", detail: "Dark" },
+    { icon: theme === "dark" ? Moon : Sun, label: "Appearance", detail: theme === "dark" ? "Dark" : "Light", onClick: toggleTheme },
     { icon: Bell, label: "Notifications", detail: "On" },
     { icon: Shield, label: "Privacy & Security" },
     { icon: HelpCircle, label: "Help & Support" },

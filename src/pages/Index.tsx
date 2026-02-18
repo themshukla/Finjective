@@ -13,10 +13,10 @@ const Index = () => {
   return (
     <BudgetProvider>
       {/* iPhone device frame */}
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="relative w-[375px] h-[812px] bg-black rounded-[52px] shadow-2xl p-3 flex-shrink-0 border border-border">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="relative w-[375px] h-[812px] bg-foreground/5 rounded-[52px] shadow-2xl p-3 flex-shrink-0 border border-border">
           {/* Notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-black rounded-b-2xl z-20" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-foreground/5 rounded-b-2xl z-20" />
           {/* Screen */}
           <div className="w-full h-full bg-background rounded-[42px] overflow-hidden flex flex-col">
             {/* Status bar */}

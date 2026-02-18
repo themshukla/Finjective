@@ -4,6 +4,58 @@
 
 @layer base {
   :root {
+    --background: 40 20% 97%;
+    --foreground: 30 10% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 10% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 10% 15%;
+
+    --primary: 40 55% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 10% 92%;
+    --secondary-foreground: 30 10% 30%;
+
+    --muted: 40 10% 93%;
+    --muted-foreground: 30 6% 45%;
+
+    --accent: 40 55% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 45 60% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 6% 4%;
+
+    --income: 45 60% 42%;
+    --expense: 0 62% 50%;
+    --asset: 40 55% 45%;
+    --liability: 0 62% 50%;
+
+    --border: 40 10% 88%;
+    --input: 40 10% 88%;
+    --ring: 40 55% 45%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 40 15% 95%;
+    --sidebar-foreground: 30 10% 15%;
+    --sidebar-primary: 40 55% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 10% 90%;
+    --sidebar-accent-foreground: 30 10% 15%;
+    --sidebar-border: 40 10% 88%;
+    --sidebar-ring: 40 55% 45%;
+  }
+
+  .dark {
     --background: 30 6% 4%;
     --foreground: 40 10% 90%;
 
