@@ -40,7 +40,7 @@ const Index = () => {
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
               <Tabs defaultValue="budget" className="w-full h-full flex flex-col">
-                <div className="flex-1 overflow-y-auto px-4 py-3">
+                <div className="flex-1 overflow-y-auto px-4 py-3 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   <TabsContent value="budget" className="mt-0"><BudgetTab /></TabsContent>
                   <TabsContent value="cashflow" className="mt-0"><CashFlowTab /></TabsContent>
                   <TabsContent value="networth" className="mt-0"><NetWorthTab /></TabsContent>
