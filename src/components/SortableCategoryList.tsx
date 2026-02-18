@@ -25,9 +25,9 @@ import { BudgetCategory } from "@/data/budgetData";
 const modifiers = [restrictToVerticalAxis, restrictToParentElement];
 
 interface SortableCategoryListProps {
-  items: BudgetCategory[];
-  onReorder: (items: BudgetCategory[]) => void;
-  renderItem: (category: BudgetCategory, index: number) => React.ReactNode;
+  items: any[];
+  onReorder: (items: any[]) => void;
+  renderItem: (item: any, index: number) => React.ReactNode;
   containerId: string;
 }
 
