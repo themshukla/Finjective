@@ -358,7 +358,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           </p>
         </div>
         <div
-          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
           onClick={(e) => { e.stopPropagation(); onTransactions(); }}
           role="button"
         >
