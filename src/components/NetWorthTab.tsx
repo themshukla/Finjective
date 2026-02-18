@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Plus } from "lucide-react";
+import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import EditItemDialog from "./EditItemDialog";
 
@@ -16,7 +16,7 @@ const NetWorthTab = () => {
     { name: "Assets", value: totalAssets },
     { name: "Liabilities", value: totalLiabilities },
   ];
-  const COLORS = ["hsl(172 50% 36%)", "hsl(0 72% 51%)"];
+  const COLORS = ["hsl(40 55% 50%)", "hsl(0 62% 50%)"];
 
   const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
     if (list === "asset") {
@@ -67,61 +67,81 @@ const NetWorthTab = () => {
 
   const ed = getEditingData();
 
+  const assetIcons = [TrendingUp, DollarSign, TrendingUp, DollarSign, TrendingUp, DollarSign];
+
   return (
     <div className="space-y-5">
-      <div className="rounded-xl bg-card border border-border p-5 text-center">
-        <p className="text-xs text-muted-foreground mb-0.5">Net Worth</p>
-        <p className={`text-3xl font-bold ${netWorth >= 0 ? "text-income" : "text-expense"}`}>${netWorth.toLocaleString()}</p>
-        <div className="flex justify-center gap-6 mt-2 text-xs">
-          <span className="text-muted-foreground">Assets: <span className="text-asset font-semibold">${totalAssets.toLocaleString()}</span></span>
-          <span className="text-muted-foreground">Debt: <span className="text-liability font-semibold">${totalLiabilities.toLocaleString()}</span></span>
-        </div>
-      </div>
+      {/* Add button */}
+      <button
+        onClick={() => setEditing("addAsset")}
+        className="w-full rounded-xl bg-card border border-border p-3 flex items-center gap-2 text-primary text-xs font-medium"
+      >
+        <Plus className="h-4 w-4" />
+        Add assets & liabilities
+      </button>
 
-      <div className="rounded-xl bg-card border border-border p-3">
-        <div className="h-44">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={68} paddingAngle={4} dataKey="value">
-                {pieData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
-              </Pie>
-              <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} contentStyle={{ borderRadius: 12, border: "1px solid hsl(220 15% 90%)", fontSize: 12 }} />
-            </PieChart>
-          </ResponsiveContainer>
+      {/* Assets section */}
+      <section>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-bold text-foreground">Assets</h3>
+          <span className="text-xs text-primary font-medium flex items-center gap-0.5">
+            View all <ChevronRight className="h-3.5 w-3.5" />
+          </span>
         </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="rounded-xl bg-card border border-border overflow-hidden">
-          <div className="flex justify-between items-center p-3 pb-1">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assets</h3>
-            <button onClick={() => setEditing("addAsset")} className="text-primary p-1"><Plus className="h-4 w-4" /></button>
-          </div>
-          <div className="divide-y divide-border">
-            {assets.map((a, i) => (
-              <button key={i} onClick={() => setEditing({ list: "asset", index: i })} className="w-full flex justify-between px-3 py-2.5 text-left active:bg-muted/50 transition-colors">
-                <span className="text-xs">{a.name}</span>
-                <span className="text-xs font-semibold text-asset tabular-nums">${a.value.toLocaleString()}</span>
+        <div className="space-y-2.5">
+          {assets.map((a, i) => {
+            const Icon = assetIcons[i % assetIcons.length];
+            return (
+              <button key={i} onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border p-4 text-left active:scale-[0.98] transition-transform">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-primary">{a.name}</p>
+                    <p className="text-lg font-bold tabular-nums text-foreground mt-0.5">
+                      ${a.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Icon className="h-5 w-5 text-primary" />
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                      View <ChevronRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </div>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
+      </section>
 
-        <div className="rounded-xl bg-card border border-border overflow-hidden">
-          <div className="flex justify-between items-center p-3 pb-1">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Liabilities</h3>
-            <button onClick={() => setEditing("addLiability")} className="text-primary p-1"><Plus className="h-4 w-4" /></button>
-          </div>
-          <div className="divide-y divide-border">
-            {liabilities.map((l, i) => (
-              <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full flex justify-between px-3 py-2.5 text-left active:bg-muted/50 transition-colors">
-                <span className="text-xs">{l.name}</span>
-                <span className="text-xs font-semibold text-liability tabular-nums">${l.value.toLocaleString()}</span>
-              </button>
-            ))}
-          </div>
+      {/* Liabilities section */}
+      <section>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-bold text-foreground">Liabilities</h3>
+          <span className="text-xs text-primary font-medium flex items-center gap-0.5">
+            View all <ChevronRight className="h-3.5 w-3.5" />
+          </span>
         </div>
-      </div>
+        <div className="space-y-2.5">
+          {liabilities.map((l, i) => (
+            <button key={i} onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border p-4 text-left active:scale-[0.98] transition-transform">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-medium text-primary">{l.name}</p>
+                  <p className="text-lg font-bold tabular-nums text-liability mt-0.5">
+                    ${l.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                    View <ChevronRight className="h-3 w-3" />
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {ed && <EditItemDialog open={editing !== null} onClose={() => setEditing(null)} {...ed} />}
     </div>

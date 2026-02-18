@@ -11,10 +11,10 @@ const Index = () => {
   return (
     <BudgetProvider>
       {/* iPhone device frame */}
-      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-        <div className="relative w-[375px] h-[812px] bg-foreground rounded-[52px] shadow-2xl p-3 flex-shrink-0">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="relative w-[375px] h-[812px] bg-black rounded-[52px] shadow-2xl p-3 flex-shrink-0 border border-border">
           {/* Notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-foreground rounded-b-2xl z-20" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-black rounded-b-2xl z-20" />
           {/* Screen */}
           <div className="w-full h-full bg-background rounded-[42px] overflow-hidden flex flex-col">
             {/* Status bar */}
@@ -28,9 +28,9 @@ const Index = () => {
             </div>
 
             {/* Header */}
-            <header className="border-b border-border bg-card">
+            <header className="bg-background">
               <div className="px-4 py-2.5">
-                <h1 className="text-base font-bold tracking-tight">💰 Finjective</h1>
+                <h1 className="text-base font-bold tracking-tight text-center text-foreground">💰 Finjective</h1>
               </div>
             </header>
 
@@ -48,7 +48,7 @@ const Index = () => {
                 </div>
 
                 {/* Bottom tab bar */}
-                <div className="border-t border-border bg-card px-2 pb-5 pt-1.5">
+                <div className="border-t border-border bg-background px-2 pb-5 pt-1.5">
                   <TabsList className="w-full grid grid-cols-4 h-auto bg-transparent gap-0">
                     <TabsTrigger value="budget" className="flex-col gap-0.5 text-[10px] py-1 px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground">
                       <DollarSign className="h-5 w-5" />
