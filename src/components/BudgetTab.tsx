@@ -355,7 +355,8 @@ const BudgetTab = () => {
 };
 
 function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
-  const pct = category.budgeted > 0 ? Math.min((category.spent / category.budgeted) * 100, 100) : 0;
+  const pct = category.budgeted > 0 ? (category.spent / category.budgeted) * 100 : 0;
+  const barPct = Math.min(pct, 100);
   const over = category.spent > category.budgeted;
 
   return (
@@ -380,7 +381,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         </div>
       </div>
       <div className="flex justify-between items-center">
-        <Progress value={pct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
         <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           {pct.toFixed(0)}% spent
         </span>
