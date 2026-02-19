@@ -232,7 +232,7 @@ const BudgetTab = () => {
               <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
                 <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
                 <span className="text-[10px] text-muted-foreground tabular-nums">
-                  ${sectionTotal.toLocaleString()} / ${sectionBudgeted.toLocaleString()}
+                  ${sectionBudgeted.toLocaleString()} / ${sectionTotal.toLocaleString()} actual
                 </span>
               </button>
               <div className="flex items-center gap-1">
