@@ -213,12 +213,13 @@ const BudgetTab = () => {
         />
       </section>
 
-      {/* Add Section button */}
-      <div className="flex justify-center">
-        <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
-          <Plus className="h-3.5 w-3.5" /> Add Section
-        </button>
-      </div>
+      {customSections.length === 0 && (
+        <div className="flex justify-center">
+          <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+            <Plus className="h-3.5 w-3.5" /> Add Section
+          </button>
+        </div>
+      )}
 
       {/* Custom standalone sections */}
       {customSections.map(section => {
@@ -253,6 +254,14 @@ const BudgetTab = () => {
           </section>
         );
       })}
+
+      {customSections.length > 0 && (
+        <div className="flex justify-center">
+          <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+            <Plus className="h-3.5 w-3.5" /> Add Section
+          </button>
+        </div>
+      )}
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
