@@ -165,13 +165,13 @@ const BudgetTab = () => {
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl bg-card p-3 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
-            <p className="text-lg font-bold tabular-nums text-foreground">${totalIncome.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">of ${totalBudgetedIncome.toLocaleString()}</p>
+            <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
           </div>
           <div className="rounded-xl bg-card p-3 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
-            <p className="text-lg font-bold tabular-nums text-foreground">${totalExpenses.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">of ${totalBudgetedExpenses.toLocaleString()}</p>
+            <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
           </div>
         </div>
       </div>
