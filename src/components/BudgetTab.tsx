@@ -379,7 +379,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             onClick={(e) => { e.stopPropagation(); onTransactions(); }}
             role="button"
           >
-            <span className="text-[10px]">Transactions</span>
+            <span className="text-xs">Transactions</span>
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
           <p className={`text-[10px] font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
