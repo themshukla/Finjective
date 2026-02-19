@@ -271,17 +271,15 @@ const BudgetTab = () => {
         </div>
       )}
 
-      {/* Reset Budget button for future months */}
-      {isFutureMonth && (
-        <div className="flex justify-center">
-          <button
-            onClick={() => setShowResetConfirm(true)}
-            className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium px-4 py-2 rounded-full bg-card border border-border"
-          >
-            Reset to last month's budget
-          </button>
-        </div>
-      )}
+      {/* Reset Budget button */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setShowResetConfirm(true)}
+          className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium px-4 py-2 rounded-full bg-card border border-border"
+        >
+          Reset to last month's budget
+        </button>
+      </div>
 
       {/* Reset Budget Confirm */}
       <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
