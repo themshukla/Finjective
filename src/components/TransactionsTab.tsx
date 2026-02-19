@@ -41,6 +41,7 @@ const TransactionsTab = () => {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   if (needsSetup) {
     return (
@@ -225,7 +226,7 @@ const TransactionsTab = () => {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Date</Label>
-              <Popover>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className={cn("w-full mt-1 h-9 justify-start text-left font-normal", !date && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-3.5 w-3.5" />
@@ -234,6 +235,9 @@ const TransactionsTab = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar mode="single" selected={date} onSelect={setDate} initialFocus className="p-3 pointer-events-auto" />
+                  <div className="p-2 pt-0">
+                    <Button size="sm" className="w-full" onClick={() => setCalendarOpen(false)}>Done</Button>
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>
