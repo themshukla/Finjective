@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,7 +126,7 @@ const Auth = () => {
               if (error) {
                 toast.error(error.message);
               } else if (data?.url) {
-                window.location.href = data.url;
+                await Browser.open({ url: data.url });
               }
             } else {
               const { error } = await lovable.auth.signInWithOAuth("google", {
