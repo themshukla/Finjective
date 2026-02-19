@@ -382,15 +382,15 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             <span className="text-[10px]">Transactions</span>
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
-          <p className={`text-xs font-semibold tabular-nums ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+          <p className={`text-xs font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
             {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-[10px] text-muted-foreground">remaining</p>
+          <p className={`text-[10px] ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>remaining</p>
         </div>
       </div>
       <div className="flex justify-between items-center">
-        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
+        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-green-500"}`} />
+        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-green-500"}`}>
           {pct.toFixed(0)}% spent
         </span>
       </div>
