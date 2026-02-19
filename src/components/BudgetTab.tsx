@@ -351,11 +351,12 @@ const BudgetTab = () => {
 };
 
 function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
-  const pct = category.budgeted > 0 ? (category.spent / category.budgeted) * 100 : 0;
+  const spent = isNaN(category.spent) ? 0 : category.spent;
+  const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
+  const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
   const barPct = Math.min(pct, 100);
-  const over = category.spent > category.budgeted;
-
-  const remainingAmt = category.budgeted - category.spent;
+  const over = spent > budgeted;
+  const remainingAmt = budgeted - spent;
 
   return (
     <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
@@ -363,10 +364,10 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         <div>
           <p className="text-xs font-medium text-primary">{category.name}</p>
           <p className="text-sm font-bold tabular-nums text-foreground">
-            ${category.budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[10px] text-muted-foreground tabular-nums">
-            ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
         </div>
         <div className="flex flex-col items-end gap-0.5">
