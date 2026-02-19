@@ -162,23 +162,18 @@ const BudgetTab = () => {
     <div className="space-y-5">
       {/* Balance hero */}
       <div className="space-y-2">
-        <div className="rounded-xl bg-card border border-border p-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1 text-center">Balance</p>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
-                ${Math.abs(totalBudgetedIncome - totalBudgetedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </p>
-              <p className={`text-[10px] tabular-nums ${remaining >= 0 ? "text-muted-foreground" : "text-expense"}`}>
-                ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-              </p>
-            </div>
-            <div className="text-right">
-              <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses - remaining) >= 0 ? "text-green-500" : "text-expense"}`}>
-                {((totalBudgetedIncome - totalBudgetedExpenses) - remaining) < 0 ? "-" : ""}${Math.abs((totalBudgetedIncome - totalBudgetedExpenses) - remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-[10px] text-muted-foreground">remaining</p>
-            </div>
+        <div className="rounded-xl bg-card border border-border p-4 text-center">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
+          <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
+            ${Math.abs(totalBudgetedIncome - totalBudgetedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <div className="flex justify-center gap-4 mt-1">
+            <p className={`text-[10px] tabular-nums ${remaining >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+              ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+            </p>
+            <p className={`text-[10px] font-semibold tabular-nums ${((totalBudgetedIncome - totalBudgetedExpenses) - remaining) >= 0 ? "text-green-500" : "text-expense"}`}>
+              {((totalBudgetedIncome - totalBudgetedExpenses) - remaining) < 0 ? "-" : ""}${Math.abs((totalBudgetedIncome - totalBudgetedExpenses) - remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
