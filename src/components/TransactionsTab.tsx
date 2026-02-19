@@ -50,6 +50,7 @@ const TransactionsTab = () => {
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(new Date());
   const [editCalendarOpen, setEditCalendarOpen] = useState(false);
+  const [editCategory, setEditCategory] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (needsSetup) {
@@ -182,10 +183,27 @@ const TransactionsTab = () => {
     setSelectedCategory("");
   };
 
+  // Find the category option value for a transaction
+  const findCategoryOptionForTx = (txId: string): string => {
+    for (let i = 0; i < income.length; i++) {
+      if (income[i].transactions?.some(t => t.id === txId)) return `income-${i}`;
+    }
+    for (let i = 0; i < expenses.length; i++) {
+      if (expenses[i].transactions?.some(t => t.id === txId)) return `expense-${i}`;
+    }
+    for (const section of customSections) {
+      for (let i = 0; i < section.items.length; i++) {
+        if (section.items[i].transactions?.some(t => t.id === txId)) return `custom-${section.id}-${i}`;
+      }
+    }
+    return "";
+  };
+
   const openEditDialog = (tx: TransactionWithCategory) => {
     setEditingTx(tx);
     setEditMerchant(tx.merchant);
     setEditAmount(String(tx.amount));
+    setEditCategory(findCategoryOptionForTx(tx.id));
     try {
       setEditDate(parseISO(tx.date));
     } catch {
@@ -194,13 +212,50 @@ const TransactionsTab = () => {
   };
 
   const handleSaveEdit = () => {
-    if (!editingTx || !editDate || !editAmount || !editMerchant.trim()) return;
-    updateTransactionById(editingTx.id, () => ({
+    if (!editingTx || !editDate || !editAmount || !editMerchant.trim() || !editCategory) return;
+
+    const originalCatValue = findCategoryOptionForTx(editingTx.id);
+    const newTx: Transaction = {
       id: editingTx.id,
       date: format(editDate, "yyyy-MM-dd"),
       amount: Number(editAmount),
       merchant: editMerchant.trim(),
-    }));
+    };
+
+    if (editCategory === originalCatValue) {
+      // Same category — just update in place
+      updateTransactionById(editingTx.id, () => newTx);
+    } else {
+      // Category changed — remove from old, add to new
+      updateTransactionById(editingTx.id, () => null);
+
+      const opt = categoryOptions.find(o => o.value === editCategory);
+      if (opt) {
+        if (opt.list === "custom" && "sectionId" in opt) {
+          const updated = customSections.map(s => {
+            if (s.id !== opt.sectionId) return s;
+            const items = [...s.items];
+            const item = items[opt.index];
+            items[opt.index] = {
+              ...item,
+              spent: item.spent + newTx.amount,
+              transactions: [...(item.transactions ?? []), newTx],
+            };
+            return { ...s, items };
+          });
+          setCustomSections(updated);
+        } else {
+          const arr = opt.list === "income" ? [...income] : [...expenses];
+          const setter = opt.list === "income" ? setIncome : setExpenses;
+          arr[opt.index] = {
+            ...arr[opt.index],
+            spent: arr[opt.index].spent + newTx.amount,
+            transactions: [...(arr[opt.index].transactions ?? []), newTx],
+          };
+          setter(arr);
+        }
+      }
+    }
     setEditingTx(null);
   };
 
@@ -368,7 +423,16 @@ const TransactionsTab = () => {
           <div className="space-y-3 pt-1">
             <div>
               <Label className="text-xs text-muted-foreground">Category</Label>
-              <Input value={editingTx?.categoryName ?? ""} disabled className="mt-1 h-9 opacity-70" />
+              <Select value={editCategory} onValueChange={setEditCategory}>
+                <SelectTrigger className="mt-1 h-9">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Merchant</Label>
