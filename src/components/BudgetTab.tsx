@@ -22,9 +22,11 @@ const BudgetTab = () => {
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   if (needsSetup) return <MonthSetupPrompt />;
 
-  const totalIncome = income.reduce((s, c) => s + c.spent, 0);
+  const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
+
+  const totalIncome = income.reduce((s, c) => s + txTotal(c), 0);
   const totalBudgetedIncome = income.reduce((s, c) => s + c.budgeted, 0);
-  const totalExpenses = expenses.reduce((s, c) => s + c.spent, 0);
+  const totalExpenses = expenses.reduce((s, c) => s + txTotal(c), 0);
   const totalBudgetedExpenses = expenses.reduce((s, c) => s + c.budgeted, 0);
   const remaining = totalIncome - totalExpenses;
 
@@ -220,7 +222,7 @@ const BudgetTab = () => {
 
       {/* Custom standalone sections */}
       {customSections.map(section => {
-        const sectionTotal = section.items.reduce((s, c) => s + c.spent, 0);
+        const sectionTotal = section.items.reduce((s, c) => s + txTotal(c), 0);
         const sectionBudgeted = section.items.reduce((s, c) => s + c.budgeted, 0);
         return (
           <section key={section.id}>
@@ -351,7 +353,7 @@ const BudgetTab = () => {
 };
 
 function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
-  const spent = isNaN(category.spent) ? 0 : category.spent;
+  const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
   const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
   const barPct = Math.min(pct, 100);
