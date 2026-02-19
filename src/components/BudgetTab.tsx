@@ -174,13 +174,33 @@ const BudgetTab = () => {
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl bg-card p-3 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
-            <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
+              </div>
+              <div className="text-right">
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-green-500" : "text-expense"}`}>
+                  {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-[10px] text-muted-foreground">remaining</p>
+              </div>
+            </div>
           </div>
           <div className="rounded-xl bg-card p-3 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
-            <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
+              </div>
+              <div className="text-right">
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-green-500" : "text-expense"}`}>
+                  {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-[10px] text-muted-foreground">remaining</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
