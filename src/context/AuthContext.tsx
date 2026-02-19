@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
+import { Browser } from "@capacitor/browser";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthState {
@@ -41,6 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (Capacitor.isNativePlatform()) {
       App.addListener("appUrlOpen", async ({ url }) => {
         if (url.includes("access_token") || url.includes("refresh_token") || url.includes("code=")) {
+          // Close the in-app browser
+          await Browser.close();
+          
           // Extract the hash fragment from the deep link URL
           const hashIndex = url.indexOf("#");
           if (hashIndex > -1) {
