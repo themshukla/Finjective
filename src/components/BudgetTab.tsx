@@ -385,7 +385,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           <p className={`text-xs font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
             {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className={`text-[10px] ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>remaining</p>
+          <p className="text-[10px] text-muted-foreground">remaining</p>
         </div>
       </div>
       <div className="flex justify-between items-center">
