@@ -382,7 +382,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             <span className="text-[10px]">Transactions</span>
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
-          <p className={`text-xs font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
+          <p className={`text-[10px] font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
             {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[10px] text-muted-foreground">remaining</p>
