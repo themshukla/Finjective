@@ -359,6 +359,8 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const barPct = Math.min(pct, 100);
   const over = category.spent > category.budgeted;
 
+  const remainingAmt = category.budgeted - category.spent;
+
   return (
     <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
       <div className="flex justify-between items-start mb-0.5">
@@ -371,13 +373,19 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
         </div>
-        <div
-          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-          onClick={(e) => { e.stopPropagation(); onTransactions(); }}
-          role="button"
-        >
-          <span className="text-[10px]">Transactions</span>
-          <ChevronRight className="h-3.5 w-3.5" />
+        <div className="flex flex-col items-end gap-0.5">
+          <div
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+            onClick={(e) => { e.stopPropagation(); onTransactions(); }}
+            role="button"
+          >
+            <span className="text-[10px]">Transactions</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
+          <p className={`text-xs font-semibold tabular-nums ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-[10px] text-muted-foreground">remaining</p>
         </div>
       </div>
       <div className="flex justify-between items-center">
