@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
@@ -13,13 +13,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const BudgetTab = () => {
-  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
+  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection, selectedMonth, importFromPreviousMonth } = useBudget();
   const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
+
+  const isFutureMonth = useMemo(() => {
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const selected = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    return selected > currentMonth;
+  }, [selectedMonth]);
   if (needsSetup) return <MonthSetupPrompt />;
 
   const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
@@ -262,6 +270,34 @@ const BudgetTab = () => {
           </button>
         </div>
       )}
+
+      {/* Reset Budget button for future months */}
+      {isFutureMonth && (
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium px-4 py-2 rounded-full bg-card border border-border"
+          >
+            Reset to last month's budget
+          </button>
+        </div>
+      )}
+
+      {/* Reset Budget Confirm */}
+      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset budget?</AlertDialogTitle>
+            <AlertDialogDescription>This will replace the current month's budget with last month's categories and budgeted amounts. Transactions will be cleared.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { importFromPreviousMonth(); setShowResetConfirm(false); }}>
+              Reset
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
