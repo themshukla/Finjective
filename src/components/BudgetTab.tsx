@@ -102,7 +102,6 @@ const BudgetTab = () => {
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: "" },
           { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-          { key: "spent", label: "Actual", type: "number" as const, value: 0 },
         ],
         onSave: (v: Record<string, string | number>) => handleAdd(editing === "addIncome" ? "income" : "expense", v),
       };
@@ -114,7 +113,6 @@ const BudgetTab = () => {
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: "" },
           { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-          { key: "spent", label: "Actual", type: "number" as const, value: 0 },
         ],
         onSave: (v: Record<string, string | number>) => handleAddCustomItem(editing.sectionId, v),
       };
@@ -128,7 +126,6 @@ const BudgetTab = () => {
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: cat.name },
           { key: "budgeted", label: "Budgeted", type: "number" as const, value: cat.budgeted },
-          { key: "spent", label: "Actual", type: "number" as const, value: cat.spent },
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCustomItem(editing.sectionId, editing.index, v),
         onDelete: () => handleDeleteCustomItem(editing.sectionId, editing.index),
@@ -141,7 +138,6 @@ const BudgetTab = () => {
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: cat.name },
           { key: "budgeted", label: "Budgeted", type: "number" as const, value: cat.budgeted },
-          { key: "spent", label: "Actual", type: "number" as const, value: cat.spent },
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCategory(editing.list as "income" | "expense", editing.index, v),
         onDelete: () => handleDelete(editing.list as "income" | "expense", editing.index),
