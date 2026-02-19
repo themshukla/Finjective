@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthState {
@@ -35,7 +37,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Handle deep link OAuth callback on native platforms
+    if (Capacitor.isNativePlatform()) {
+      App.addListener("appUrlOpen", async ({ url }) => {
+        if (url.includes("access_token") || url.includes("code=")) {
+          // Extract the hash fragment from the deep link URL
+          const hashIndex = url.indexOf("#");
+          if (hashIndex > -1) {
+            const hash = url.substring(hashIndex + 1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get("access_token");
+            const refreshToken = params.get("refresh_token");
+            if (accessToken && refreshToken) {
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+            }
+          }
+        }
+      });
+    }
+
+    return () => {
+      subscription.unsubscribe();
+      if (Capacitor.isNativePlatform()) {
+        App.removeAllListeners();
+      }
+    };
   }, []);
 
   const signOut = async () => {
