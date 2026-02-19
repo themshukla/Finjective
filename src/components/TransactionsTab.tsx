@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useBudget } from "@/context/BudgetContext";
-import { Transaction } from "@/data/budgetData";
+import { Transaction, BudgetCategory, CustomSection } from "@/data/budgetData";
 import { format, parseISO } from "date-fns";
 import { Plus, CalendarIcon, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,6 +35,136 @@ interface CustomCategoryOption {
 
 type AnyOption = CategoryOption | CustomCategoryOption;
 
+const safeSpent = (v: number) => (isNaN(v) ? 0 : v);
+
+// Pure helpers that work on data arrays (no stale closure issues)
+const removeTxFromArrays = (
+  txId: string,
+  incomeArr: BudgetCategory[],
+  expensesArr: BudgetCategory[],
+  customArr: CustomSection[]
+) => {
+  for (let i = 0; i < incomeArr.length; i++) {
+    const txs = incomeArr[i].transactions ?? [];
+    const txIdx = txs.findIndex(t => t.id === txId);
+    if (txIdx !== -1) {
+      const newIncome = [...incomeArr];
+      newIncome[i] = { ...newIncome[i], spent: safeSpent(newIncome[i].spent) - txs[txIdx].amount, transactions: txs.filter(t => t.id !== txId) };
+      return { income: newIncome, expenses: expensesArr, custom: customArr };
+    }
+  }
+  for (let i = 0; i < expensesArr.length; i++) {
+    const txs = expensesArr[i].transactions ?? [];
+    const txIdx = txs.findIndex(t => t.id === txId);
+    if (txIdx !== -1) {
+      const newExpenses = [...expensesArr];
+      newExpenses[i] = { ...newExpenses[i], spent: safeSpent(newExpenses[i].spent) - txs[txIdx].amount, transactions: txs.filter(t => t.id !== txId) };
+      return { income: incomeArr, expenses: newExpenses, custom: customArr };
+    }
+  }
+  for (const section of customArr) {
+    for (let i = 0; i < section.items.length; i++) {
+      const txs = section.items[i].transactions ?? [];
+      const txIdx = txs.findIndex(t => t.id === txId);
+      if (txIdx !== -1) {
+        const newCustom = customArr.map(s => {
+          if (s.id !== section.id) return s;
+          const items = [...s.items];
+          items[i] = { ...items[i], spent: safeSpent(items[i].spent) - txs[txIdx].amount, transactions: txs.filter(t => t.id !== txId) };
+          return { ...s, items };
+        });
+        return { income: incomeArr, expenses: expensesArr, custom: newCustom };
+      }
+    }
+  }
+  return { income: incomeArr, expenses: expensesArr, custom: customArr };
+};
+
+const addTxToTarget = (
+  tx: Transaction,
+  opt: AnyOption,
+  incomeArr: BudgetCategory[],
+  expensesArr: BudgetCategory[],
+  customArr: CustomSection[]
+) => {
+  if (opt.list === "custom" && "sectionId" in opt) {
+    const newCustom = customArr.map(s => {
+      if (s.id !== opt.sectionId) return s;
+      const items = [...s.items];
+      items[opt.index] = {
+        ...items[opt.index],
+        spent: safeSpent(items[opt.index].spent) + tx.amount,
+        transactions: [...(items[opt.index].transactions ?? []), tx],
+      };
+      return { ...s, items };
+    });
+    return { income: incomeArr, expenses: expensesArr, custom: newCustom };
+  }
+  const arr = opt.list === "income" ? [...incomeArr] : [...expensesArr];
+  arr[opt.index] = {
+    ...arr[opt.index],
+    spent: safeSpent(arr[opt.index].spent) + tx.amount,
+    transactions: [...(arr[opt.index].transactions ?? []), tx],
+  };
+  return {
+    income: opt.list === "income" ? arr : incomeArr,
+    expenses: opt.list === "expense" ? arr : expensesArr,
+    custom: customArr,
+  };
+};
+
+const updateTxInArrays = (
+  txId: string,
+  updatedTx: Transaction,
+  incomeArr: BudgetCategory[],
+  expensesArr: BudgetCategory[],
+  customArr: CustomSection[]
+) => {
+  for (let i = 0; i < incomeArr.length; i++) {
+    const txs = incomeArr[i].transactions ?? [];
+    const txIdx = txs.findIndex(t => t.id === txId);
+    if (txIdx !== -1) {
+      const newIncome = [...incomeArr];
+      const oldAmount = txs[txIdx].amount;
+      const newTxs = [...txs];
+      newTxs[txIdx] = updatedTx;
+      newIncome[i] = { ...newIncome[i], spent: safeSpent(newIncome[i].spent) - oldAmount + updatedTx.amount, transactions: newTxs };
+      return { income: newIncome, expenses: expensesArr, custom: customArr };
+    }
+  }
+  for (let i = 0; i < expensesArr.length; i++) {
+    const txs = expensesArr[i].transactions ?? [];
+    const txIdx = txs.findIndex(t => t.id === txId);
+    if (txIdx !== -1) {
+      const newExpenses = [...expensesArr];
+      const oldAmount = txs[txIdx].amount;
+      const newTxs = [...txs];
+      newTxs[txIdx] = updatedTx;
+      newExpenses[i] = { ...newExpenses[i], spent: safeSpent(newExpenses[i].spent) - oldAmount + updatedTx.amount, transactions: newTxs };
+      return { income: incomeArr, expenses: newExpenses, custom: customArr };
+    }
+  }
+  for (const section of customArr) {
+    for (let i = 0; i < section.items.length; i++) {
+      const txs = section.items[i].transactions ?? [];
+      const txIdx = txs.findIndex(t => t.id === txId);
+      if (txIdx !== -1) {
+        const oldAmount = txs[txIdx].amount;
+        const newCustom = customArr.map(s => {
+          if (s.id !== section.id) return s;
+          const items = [...s.items];
+          const newTxs = [...txs];
+          newTxs[txIdx] = updatedTx;
+          items[i] = { ...items[i], spent: safeSpent(items[i].spent) - oldAmount + updatedTx.amount, transactions: newTxs };
+          return { ...s, items };
+        });
+        return { income: incomeArr, expenses: expensesArr, custom: newCustom };
+      }
+    }
+  }
+  return { income: incomeArr, expenses: expensesArr, custom: customArr };
+};
+
 const TransactionsTab = () => {
   const { income, expenses, customSections, setIncome, setExpenses, setCustomSections, needsSetup } = useBudget();
   const [showAdd, setShowAdd] = useState(false);
@@ -44,7 +174,6 @@ const TransactionsTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Edit state
   const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null);
   const [editMerchant, setEditMerchant] = useState("");
   const [editAmount, setEditAmount] = useState("");
@@ -69,75 +198,10 @@ const TransactionsTab = () => {
     section.items.forEach((cat, i) => categoryOptions.push({ label: `${cat.name} (${section.name})`, value: `custom-${section.id}-${i}`, list: "custom", sectionId: section.id, index: i } as CustomCategoryOption));
   });
 
-  // Helper: find and update a transaction by id across all categories
-  const updateTransactionById = (txId: string, updater: (tx: Transaction) => Transaction | null) => {
-    // Check income
-    for (let i = 0; i < income.length; i++) {
-      const txs = income[i].transactions ?? [];
-      const txIdx = txs.findIndex(t => t.id === txId);
-      if (txIdx !== -1) {
-        const arr = [...income];
-        const oldAmount = txs[txIdx].amount;
-        const result = updater(txs[txIdx]);
-        if (result === null) {
-          // Delete
-          const newTxs = txs.filter(t => t.id !== txId);
-          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount, transactions: newTxs };
-        } else {
-          const newTxs = [...txs];
-          newTxs[txIdx] = result;
-          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount + result.amount, transactions: newTxs };
-        }
-        setIncome(arr);
-        return;
-      }
-    }
-    // Check expenses
-    for (let i = 0; i < expenses.length; i++) {
-      const txs = expenses[i].transactions ?? [];
-      const txIdx = txs.findIndex(t => t.id === txId);
-      if (txIdx !== -1) {
-        const arr = [...expenses];
-        const oldAmount = txs[txIdx].amount;
-        const result = updater(txs[txIdx]);
-        if (result === null) {
-          const newTxs = txs.filter(t => t.id !== txId);
-          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount, transactions: newTxs };
-        } else {
-          const newTxs = [...txs];
-          newTxs[txIdx] = result;
-          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount + result.amount, transactions: newTxs };
-        }
-        setExpenses(arr);
-        return;
-      }
-    }
-    // Check custom sections
-    for (const section of customSections) {
-      for (let i = 0; i < section.items.length; i++) {
-        const txs = section.items[i].transactions ?? [];
-        const txIdx = txs.findIndex(t => t.id === txId);
-        if (txIdx !== -1) {
-          const oldAmount = txs[txIdx].amount;
-          const result = updater(txs[txIdx]);
-          const updated = customSections.map(s => {
-            if (s.id !== section.id) return s;
-            const items = [...s.items];
-            if (result === null) {
-              const newTxs = txs.filter(t => t.id !== txId);
-              items[i] = { ...items[i], spent: items[i].spent - oldAmount, transactions: newTxs };
-            } else {
-              const newTxs = [...txs];
-              newTxs[txIdx] = result;
-              items[i] = { ...items[i], spent: items[i].spent - oldAmount + result.amount, transactions: newTxs };
-            }
-            return { ...s, items };
-          });
-          setCustomSections(updated);
-          return;
-        }
-      }
-    }
+  const applyState = (state: { income: BudgetCategory[]; expenses: BudgetCategory[]; custom: CustomSection[] }) => {
+    setIncome(state.income);
+    setExpenses(state.expenses);
+    setCustomSections(state.custom);
   };
 
   const handleAddTransaction = () => {
@@ -152,29 +216,8 @@ const TransactionsTab = () => {
       merchant: merchant.trim(),
     };
 
-    if (opt.list === "custom" && "sectionId" in opt) {
-      const updated = customSections.map(s => {
-        if (s.id !== opt.sectionId) return s;
-        const items = [...s.items];
-        const item = items[opt.index];
-        items[opt.index] = {
-          ...item,
-          spent: item.spent + Number(amount),
-          transactions: [...(item.transactions ?? []), newTx],
-        };
-        return { ...s, items };
-      });
-      setCustomSections(updated);
-    } else {
-      const arr = opt.list === "income" ? [...income] : [...expenses];
-      const setter = opt.list === "income" ? setIncome : setExpenses;
-      arr[opt.index] = {
-        ...arr[opt.index],
-        spent: arr[opt.index].spent + Number(amount),
-        transactions: [...(arr[opt.index].transactions ?? []), newTx],
-      };
-      setter(arr);
-    }
+    const state = addTxToTarget(newTx, opt, income, expenses, customSections);
+    applyState(state);
 
     setShowAdd(false);
     setMerchant("");
@@ -183,7 +226,6 @@ const TransactionsTab = () => {
     setSelectedCategory("");
   };
 
-  // Find the category option value for a transaction
   const findCategoryOptionForTx = (txId: string): string => {
     for (let i = 0; i < income.length; i++) {
       if (income[i].transactions?.some(t => t.id === txId)) return `income-${i}`;
@@ -223,45 +265,25 @@ const TransactionsTab = () => {
     };
 
     if (editCategory === originalCatValue) {
-      // Same category — just update in place
-      updateTransactionById(editingTx.id, () => newTx);
+      // Same category — update in place
+      const state = updateTxInArrays(editingTx.id, newTx, income, expenses, customSections);
+      applyState(state);
     } else {
-      // Category changed — remove from old, add to new
-      updateTransactionById(editingTx.id, () => null);
-
+      // Category changed — remove from old, add to new in one pass
+      let state = removeTxFromArrays(editingTx.id, income, expenses, customSections);
       const opt = categoryOptions.find(o => o.value === editCategory);
       if (opt) {
-        if (opt.list === "custom" && "sectionId" in opt) {
-          const updated = customSections.map(s => {
-            if (s.id !== opt.sectionId) return s;
-            const items = [...s.items];
-            const item = items[opt.index];
-            items[opt.index] = {
-              ...item,
-              spent: item.spent + newTx.amount,
-              transactions: [...(item.transactions ?? []), newTx],
-            };
-            return { ...s, items };
-          });
-          setCustomSections(updated);
-        } else {
-          const arr = opt.list === "income" ? [...income] : [...expenses];
-          const setter = opt.list === "income" ? setIncome : setExpenses;
-          arr[opt.index] = {
-            ...arr[opt.index],
-            spent: arr[opt.index].spent + newTx.amount,
-            transactions: [...(arr[opt.index].transactions ?? []), newTx],
-          };
-          setter(arr);
-        }
+        state = addTxToTarget(newTx, opt, state.income, state.expenses, state.custom);
       }
+      applyState(state);
     }
     setEditingTx(null);
   };
 
   const handleDeleteTx = () => {
     if (!editingTx) return;
-    updateTransactionById(editingTx.id, () => null);
+    const state = removeTxFromArrays(editingTx.id, income, expenses, customSections);
+    applyState(state);
     setEditingTx(null);
     setShowDeleteConfirm(false);
   };
