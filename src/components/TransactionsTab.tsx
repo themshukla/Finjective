@@ -394,7 +394,7 @@ const TransactionsTab = () => {
 
       {/* Add Transaction Dialog */}
       <Dialog open={showAdd} onOpenChange={(o) => !o && setShowAdd(false)}>
-        <DialogContent className="max-w-[calc(100%-2rem)] w-full rounded-2xl">
+        <DialogContent className="max-w-[380px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base">Add Transaction</DialogTitle>
           </DialogHeader>
@@ -447,7 +447,7 @@ const TransactionsTab = () => {
 
       {/* Edit Transaction Dialog */}
       <Dialog open={!!editingTx} onOpenChange={(o) => !o && setEditingTx(null)}>
-        <DialogContent className="max-w-[calc(100%-2rem)] w-full rounded-2xl">
+        <DialogContent className="max-w-[380px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base">Edit Transaction</DialogTitle>
           </DialogHeader>
@@ -502,7 +502,7 @@ const TransactionsTab = () => {
 
       {/* Delete Confirm */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-[calc(100%-2rem)] w-full rounded-2xl">
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
             <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
