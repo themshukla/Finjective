@@ -158,8 +158,11 @@ const BudgetTab = () => {
       <div className="space-y-2">
         <div className="rounded-xl bg-card border border-border p-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
-          <p className={`text-2xl font-bold tabular-nums ${remaining >= 0 ? "text-foreground" : "text-expense"}`}>
-            ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
+            ${Math.abs(totalBudgetedIncome - totalBudgetedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <p className={`text-[10px] tabular-nums ${remaining >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+            ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2">
