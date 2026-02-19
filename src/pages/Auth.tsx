@@ -118,7 +118,7 @@ const Auth = () => {
               const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: "google",
                 options: {
-                  redirectTo: "capacitor://localhost",
+                  redirectTo: "https://finjective.lovable.app",
                   skipBrowserRedirect: true,
                 },
               });
