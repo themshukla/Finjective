@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Handle deep link OAuth callback on native platforms
     if (Capacitor.isNativePlatform()) {
       App.addListener("appUrlOpen", async ({ url }) => {
-        if (url.includes("access_token") || url.includes("code=")) {
+        if (url.includes("access_token") || url.includes("refresh_token") || url.includes("code=")) {
           // Extract the hash fragment from the deep link URL
           const hashIndex = url.indexOf("#");
           if (hashIndex > -1) {
