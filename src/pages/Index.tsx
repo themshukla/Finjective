@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, TrendingUp, PieChart, User } from "lucide-react";
+import { DollarSign, TrendingUp, PieChart, User, List } from "lucide-react";
 import { BudgetProvider } from "@/context/BudgetContext";
 import BudgetTab from "@/components/BudgetTab";
 import CashFlowTab from "@/components/CashFlowTab";
 import NetWorthTab from "@/components/NetWorthTab";
 import ProfileTab from "@/components/ProfileTab";
+import TransactionsTab from "@/components/TransactionsTab";
 import MonthSelector from "@/components/MonthSelector";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -43,6 +44,7 @@ const Index = () => {
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <TabsContent value="budget" className="mt-0"><BudgetTab /></TabsContent>
+                  <TabsContent value="transactions" className="mt-0"><TransactionsTab /></TabsContent>
                   <TabsContent value="cashflow" className="mt-0"><CashFlowTab /></TabsContent>
                   <TabsContent value="networth" className="mt-0"><NetWorthTab /></TabsContent>
                   <TabsContent value="profile" className="mt-0"><ProfileTab /></TabsContent>
@@ -50,10 +52,14 @@ const Index = () => {
 
                 {/* Bottom tab bar */}
                 <div className="border-t border-border bg-background px-2 pb-5 pt-1.5">
-                  <TabsList className="w-full grid grid-cols-4 h-auto bg-transparent gap-0">
+                  <TabsList className="w-full grid grid-cols-5 h-auto bg-transparent gap-0">
                     <TabsTrigger value="budget" className="flex-col gap-0.5 text-[10px] py-1 px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground">
                       <DollarSign className="h-5 w-5" />
                       Budget
+                    </TabsTrigger>
+                    <TabsTrigger value="transactions" className="flex-col gap-0.5 text-[10px] py-1 px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground">
+                      <List className="h-5 w-5" />
+                      Transactions
                     </TabsTrigger>
                     <TabsTrigger value="cashflow" className="flex-col gap-0.5 text-[10px] py-1 px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground">
                       <TrendingUp className="h-5 w-5" />
