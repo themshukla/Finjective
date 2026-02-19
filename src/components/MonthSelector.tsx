@@ -10,17 +10,11 @@ const MonthSelector = () => {
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
 
-  const months = isCurrentMonth
-    ? [
-        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
-        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth },
-        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
-      ]
-    : [
-        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
-        { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now },
-        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
-      ];
+  const months = [
+    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
+    { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth },
+    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
+  ];
 
   return (
     <div className="flex items-center justify-between px-4 py-4 bg-background border-b border-border">
