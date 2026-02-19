@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useBudget } from "@/context/BudgetContext";
 import { Transaction } from "@/data/budgetData";
 import { format, parseISO } from "date-fns";
-import { Plus, CalendarIcon } from "lucide-react";
+import { Plus, CalendarIcon, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 interface TransactionWithCategory extends Transaction {
@@ -43,6 +44,14 @@ const TransactionsTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
+  // Edit state
+  const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null);
+  const [editMerchant, setEditMerchant] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editCalendarOpen, setEditCalendarOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   if (needsSetup) {
     return (
       <div className="text-center py-12 text-muted-foreground text-sm">
@@ -58,6 +67,77 @@ const TransactionsTab = () => {
   customSections.forEach((section) => {
     section.items.forEach((cat, i) => categoryOptions.push({ label: `${cat.name} (${section.name})`, value: `custom-${section.id}-${i}`, list: "custom", sectionId: section.id, index: i } as CustomCategoryOption));
   });
+
+  // Helper: find and update a transaction by id across all categories
+  const updateTransactionById = (txId: string, updater: (tx: Transaction) => Transaction | null) => {
+    // Check income
+    for (let i = 0; i < income.length; i++) {
+      const txs = income[i].transactions ?? [];
+      const txIdx = txs.findIndex(t => t.id === txId);
+      if (txIdx !== -1) {
+        const arr = [...income];
+        const oldAmount = txs[txIdx].amount;
+        const result = updater(txs[txIdx]);
+        if (result === null) {
+          // Delete
+          const newTxs = txs.filter(t => t.id !== txId);
+          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount, transactions: newTxs };
+        } else {
+          const newTxs = [...txs];
+          newTxs[txIdx] = result;
+          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount + result.amount, transactions: newTxs };
+        }
+        setIncome(arr);
+        return;
+      }
+    }
+    // Check expenses
+    for (let i = 0; i < expenses.length; i++) {
+      const txs = expenses[i].transactions ?? [];
+      const txIdx = txs.findIndex(t => t.id === txId);
+      if (txIdx !== -1) {
+        const arr = [...expenses];
+        const oldAmount = txs[txIdx].amount;
+        const result = updater(txs[txIdx]);
+        if (result === null) {
+          const newTxs = txs.filter(t => t.id !== txId);
+          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount, transactions: newTxs };
+        } else {
+          const newTxs = [...txs];
+          newTxs[txIdx] = result;
+          arr[i] = { ...arr[i], spent: arr[i].spent - oldAmount + result.amount, transactions: newTxs };
+        }
+        setExpenses(arr);
+        return;
+      }
+    }
+    // Check custom sections
+    for (const section of customSections) {
+      for (let i = 0; i < section.items.length; i++) {
+        const txs = section.items[i].transactions ?? [];
+        const txIdx = txs.findIndex(t => t.id === txId);
+        if (txIdx !== -1) {
+          const oldAmount = txs[txIdx].amount;
+          const result = updater(txs[txIdx]);
+          const updated = customSections.map(s => {
+            if (s.id !== section.id) return s;
+            const items = [...s.items];
+            if (result === null) {
+              const newTxs = txs.filter(t => t.id !== txId);
+              items[i] = { ...items[i], spent: items[i].spent - oldAmount, transactions: newTxs };
+            } else {
+              const newTxs = [...txs];
+              newTxs[txIdx] = result;
+              items[i] = { ...items[i], spent: items[i].spent - oldAmount + result.amount, transactions: newTxs };
+            }
+            return { ...s, items };
+          });
+          setCustomSections(updated);
+          return;
+        }
+      }
+    }
+  };
 
   const handleAddTransaction = () => {
     if (!date || !amount || !merchant.trim() || !selectedCategory) return;
@@ -100,6 +180,35 @@ const TransactionsTab = () => {
     setAmount("");
     setDate(new Date());
     setSelectedCategory("");
+  };
+
+  const openEditDialog = (tx: TransactionWithCategory) => {
+    setEditingTx(tx);
+    setEditMerchant(tx.merchant);
+    setEditAmount(String(tx.amount));
+    try {
+      setEditDate(parseISO(tx.date));
+    } catch {
+      setEditDate(new Date());
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingTx || !editDate || !editAmount || !editMerchant.trim()) return;
+    updateTransactionById(editingTx.id, () => ({
+      id: editingTx.id,
+      date: format(editDate, "yyyy-MM-dd"),
+      amount: Number(editAmount),
+      merchant: editMerchant.trim(),
+    }));
+    setEditingTx(null);
+  };
+
+  const handleDeleteTx = () => {
+    if (!editingTx) return;
+    updateTransactionById(editingTx.id, () => null);
+    setEditingTx(null);
+    setShowDeleteConfirm(false);
   };
 
   // Collect all transactions
@@ -178,9 +287,10 @@ const TransactionsTab = () => {
             </div>
             <div className="space-y-1.5">
               {txs.map((tx) => (
-                <div
+                <button
                   key={tx.id}
-                  className="rounded-xl bg-card border border-border px-3 py-2 flex justify-between items-center"
+                  onClick={() => openEditDialog(tx)}
+                  className="w-full rounded-xl bg-card border border-border px-3 py-2 flex justify-between items-center text-left active:scale-[0.98] transition-transform"
                 >
                   <div>
                     <p className="text-xs font-medium text-foreground">{tx.merchant}</p>
@@ -189,7 +299,7 @@ const TransactionsTab = () => {
                   <p className={`text-xs font-semibold tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
                     {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           </section>
@@ -248,6 +358,64 @@ const TransactionsTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Transaction Dialog */}
+      <Dialog open={!!editingTx} onOpenChange={(o) => !o && setEditingTx(null)}>
+        <DialogContent className="max-w-[380px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">Edit Transaction</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div>
+              <Label className="text-xs text-muted-foreground">Merchant</Label>
+              <Input value={editMerchant} onChange={e => setEditMerchant(e.target.value)} className="mt-1 h-9" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Amount</Label>
+              <Input type="number" value={editAmount} onChange={e => setEditAmount(e.target.value)} className="mt-1 h-9" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Date</Label>
+              <Popover open={editCalendarOpen} onOpenChange={setEditCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full mt-1 h-9 justify-start text-left font-normal", !editDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                    {editDate ? format(editDate, "MMM d, yyyy") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className="p-3 pointer-events-auto" />
+                  <div className="p-2 pt-0">
+                    <Button size="sm" className="w-full" onClick={() => setEditCalendarOpen(false)}>Done</Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button variant="destructive" size="sm" className="flex-1" onClick={() => setShowDeleteConfirm(true)}>
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
+              </Button>
+              <Button size="sm" className="flex-1" onClick={handleSaveEdit}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleDeleteTx}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
