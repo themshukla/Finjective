@@ -367,6 +367,10 @@ const TransactionsTab = () => {
           </DialogHeader>
           <div className="space-y-3 pt-1">
             <div>
+              <Label className="text-xs text-muted-foreground">Category</Label>
+              <Input value={editingTx?.categoryName ?? ""} disabled className="mt-1 h-9 opacity-70" />
+            </div>
+            <div>
               <Label className="text-xs text-muted-foreground">Merchant</Label>
               <Input value={editMerchant} onChange={e => setEditMerchant(e.target.value)} className="mt-1 h-9" />
             </div>
