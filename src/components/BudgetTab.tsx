@@ -361,7 +361,10 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         <div>
           <p className="text-xs font-medium text-primary">{category.name}</p>
           <p className="text-sm font-bold tabular-nums text-foreground">
-            ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            ${category.budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-[10px] text-muted-foreground tabular-nums">
+            ${category.spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
         </div>
         <div
@@ -375,8 +378,8 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       </div>
       <div className="flex justify-between items-center">
         <Progress value={pct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-xs tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
-          ${category.budgeted.toLocaleString()} budget
+        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
+          {pct.toFixed(0)}% spent
         </span>
       </div>
     </button>
