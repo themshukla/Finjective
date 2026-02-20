@@ -94,6 +94,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                     placeholder="e.g. Starbucks"
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     className="mt-1 h-9"
                   />
                 </div>
@@ -104,6 +105,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                     placeholder="$0.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     className="mt-1 h-9"
                   />
                 </div>
