@@ -448,7 +448,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           >
             <span className="text-xs">Transactions</span>
             {(category.transactions ?? []).length > 0 && (
-              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold">
+              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
                 {(category.transactions ?? []).length}
               </span>
             )}
