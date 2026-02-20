@@ -191,11 +191,11 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     const prevData = monthlyData[prevKey];
     const imported: MonthData = prevData
       ? {
-          income: prevData.income.map(c => ({ ...c, spent: 0 })),
-          expenses: prevData.expenses.map(c => ({ ...c, spent: 0 })),
+          income: prevData.income.map(c => ({ ...c, spent: 0, transactions: [] })),
+          expenses: prevData.expenses.map(c => ({ ...c, spent: 0, transactions: [] })),
           customSections: (prevData.customSections ?? []).map(s => ({
             ...s,
-            items: s.items.map(c => ({ ...c, spent: 0 })),
+            items: s.items.map(c => ({ ...c, spent: 0, transactions: [] })),
           })),
         }
       : { income: [], expenses: [], customSections: [] };
