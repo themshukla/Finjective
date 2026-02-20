@@ -131,8 +131,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Debounced auto-save
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Auto-save immediately on changes
   const prevDataRef = useRef<string>("");
 
   useEffect(() => {
@@ -142,14 +141,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     if (serialized === prevDataRef.current) return;
     prevDataRef.current = serialized;
 
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      saveToDb(monthKey, currentMonthData);
-    }, 1000);
-
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
+    saveToDb(monthKey, currentMonthData);
   }, [currentMonthData, monthKey, saveToDb, loadedMonths]);
 
   const setIncome = useCallback((v: BudgetCategory[]) => {
