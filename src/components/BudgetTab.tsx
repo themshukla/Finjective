@@ -447,6 +447,11 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             role="button"
           >
             <span className="text-xs">Transactions</span>
+            {(category.transactions ?? []).length > 0 && (
+              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold">
+                {(category.transactions ?? []).length}
+              </span>
+            )}
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
           <p className={`text-[10px] font-semibold tabular-nums ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
