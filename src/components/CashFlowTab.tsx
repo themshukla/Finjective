@@ -75,7 +75,14 @@ const CashFlowTab = () => {
       </div>
 
       <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider p-3 pb-1">Monthly</h3>
+        <div className="flex items-center justify-between p-3 pb-1">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Monthly</h3>
+          <div className="flex gap-4 text-[10px] text-muted-foreground tabular-nums">
+            <span>Income</span>
+            <span>Expenses</span>
+            <span>Net</span>
+          </div>
+        </div>
         {chartData.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-4">No data available.</p>
         ) : (
