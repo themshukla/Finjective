@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import EditItemDialog from "./EditItemDialog";
@@ -13,11 +12,6 @@ const NetWorthTab = () => {
   const totalLiabilities = liabilities.reduce((s, l) => s + l.value, 0);
   const netWorth = totalAssets - totalLiabilities;
 
-  const pieData = [
-    { name: "Assets", value: totalAssets },
-    { name: "Liabilities", value: totalLiabilities },
-  ];
-  const COLORS = ["hsl(40 55% 50%)", "hsl(0 62% 50%)"];
 
   const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
     if (list === "asset") {
@@ -68,7 +62,7 @@ const NetWorthTab = () => {
 
   const ed = getEditingData();
 
-  const assetIcons = [TrendingUp, DollarSign, TrendingUp, DollarSign, TrendingUp, DollarSign];
+  const assetIcons = [TrendingUp, DollarSign];
 
   return (
     <div className="space-y-5">
