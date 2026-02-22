@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const BudgetTab = () => {
-  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection, selectedMonth, importFromPreviousMonth } = useBudget();
+  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection, importFromPreviousMonth } = useBudget();
   const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
@@ -22,12 +22,6 @@ const BudgetTab = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
 
-  const isFutureMonth = useMemo(() => {
-    const now = new Date();
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const selected = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-    return selected > currentMonth;
-  }, [selectedMonth]);
   if (needsSetup) return <MonthSetupPrompt />;
 
   const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
