@@ -48,9 +48,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const now = new Date();
   const currentKey = getMonthKey(now);
 
-  const [monthlyData, setMonthlyData] = useState<Record<string, MonthData>>({
-    [currentKey]: { income: defaultIncome, expenses: defaultExpenses, customSections: [] },
-  });
+  const [monthlyData, setMonthlyData] = useState<Record<string, MonthData>>({});
 
   const [selectedMonth, setSelectedMonth] = useState<Date>(now);
   const [cashFlow, setCashFlow] = useState<CashFlowItem[]>(defaultCashFlow);
