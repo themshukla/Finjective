@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, TrendingUp, PieChart, User, List } from "lucide-react";
 import { BudgetProvider } from "@/context/BudgetContext";
@@ -11,6 +11,12 @@ import MonthSelector from "@/components/MonthSelector";
 import PullToRefresh from "@/components/PullToRefresh";
 
 const Index = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    setScrolled(e.currentTarget.scrollTop > 10);
+  }, []);
+
   return (
     <BudgetProvider>
       {/* iPhone device frame */}
@@ -33,13 +39,14 @@ const Index = () => {
             {/* Spacer for status bar */}
 
             {/* Month selector */}
-            <MonthSelector />
+            <MonthSelector collapsed={scrolled} />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
               <Tabs defaultValue="budget" className="w-full h-full flex flex-col">
                 <PullToRefresh
-                  onRefresh={() => new Promise(r => setTimeout(r, 600))}
+onRefresh={() => new Promise(r => setTimeout(r, 600))}
+                  onScroll={handleScroll}
                   className="flex-1 overflow-y-auto px-4 py-3 scrollbar-hide"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >

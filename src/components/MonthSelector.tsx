@@ -2,7 +2,11 @@ import { format, addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 
-const MonthSelector = () => {
+interface MonthSelectorProps {
+  collapsed?: boolean;
+}
+
+const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
   const { selectedMonth, setSelectedMonth } = useBudget();
 
   const prev = subMonths(selectedMonth, 1);
@@ -22,8 +26,20 @@ const MonthSelector = () => {
         { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
       ];
 
+  if (collapsed) {
+    return (
+      <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
+        <div className="text-center py-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            Viewing: {format(selectedMonth, "MMMM yyyy")}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col bg-background border-b border-border">
+    <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
       <div className="flex items-center justify-between px-4 py-4">
         <button
           onClick={() => setSelectedMonth(prev)}

@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react";
 
 interface PullToRefreshProps {
   onRefresh: () => Promise<void> | void;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -10,7 +11,7 @@ interface PullToRefreshProps {
 
 const THRESHOLD = 60;
 
-const PullToRefresh = ({ onRefresh, children, className, style }: PullToRefreshProps) => {
+const PullToRefresh = ({ onRefresh, onScroll, children, className, style }: PullToRefreshProps) => {
   const [pulling, setPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,6 +53,7 @@ const PullToRefresh = ({ onRefresh, children, className, style }: PullToRefreshP
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onScroll={onScroll}
     >
       {/* Pull indicator */}
       <div
