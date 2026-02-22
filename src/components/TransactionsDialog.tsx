@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import {
@@ -129,6 +129,11 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                         initialFocus
                         className={cn("p-3 pointer-events-auto")}
                       />
+                      <div className="border-t border-border p-2">
+                        <PopoverClose asChild>
+                          <Button variant="outline" size="sm" className="w-full">Done</Button>
+                        </PopoverClose>
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
