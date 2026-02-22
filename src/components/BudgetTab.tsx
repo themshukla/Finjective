@@ -323,7 +323,7 @@ const BudgetTab = () => {
   return (
     <div className="space-y-5">
       {/* Balance hero */}
-      <div className="space-y-[5%]">
+      <div className="space-y-px">
         <div className="rounded-xl bg-card border border-border px-4 py-2.5 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">Balance</p>
           <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
@@ -338,7 +338,7 @@ const BudgetTab = () => {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-[5%]">
+        <div className="grid grid-cols-2 gap-px">
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Income</p>
             <div className="flex justify-between items-end">
