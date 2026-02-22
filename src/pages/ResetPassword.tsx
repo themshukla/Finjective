@@ -8,21 +8,26 @@ import { toast } from "sonner";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery event
+    // Listen for PASSWORD_RECOVERY event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         setReady(true);
       }
     });
-    // Also check hash for type=recovery
-    if (window.location.hash.includes("type=recovery")) {
-      setReady(true);
-    }
+
+    // Also try to pick up existing session (user may already be authenticated via recovery link)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setReady(true);
+      }
+    });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -30,6 +35,10 @@ const ResetPassword = () => {
     e.preventDefault();
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
     setLoading(true);
@@ -52,9 +61,12 @@ const ResetPassword = () => {
         </div>
 
         {!ready ? (
-          <p className="text-center text-sm text-muted-foreground">
-            Loading recovery session...
-          </p>
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Loading recovery session...</p>
+            <Button variant="outline" size="sm" onClick={() => navigate("/auth", { replace: true })}>
+              Back to Sign In
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleReset} className="space-y-4">
             <div>
@@ -63,6 +75,18 @@ const ResetPassword = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Confirm Password</Label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 minLength={6}
