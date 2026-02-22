@@ -30,7 +30,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
     return (
       <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
         <div className="text-center py-2">
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-xs font-bold text-primary">
             Viewing: {format(selectedMonth, "MMMM yyyy")}
           </span>
         </div>
@@ -85,7 +85,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
       {!isCurrentMonth && (
         <div className="text-center pb-2">
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-xs font-bold text-primary">
             Viewing: {format(selectedMonth, "MMMM yyyy")}
           </span>
         </div>
