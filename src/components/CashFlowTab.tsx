@@ -61,8 +61,6 @@ const CashFlowTab = () => {
                   formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" />
-                <Bar dataKey="income" name="Income" fill="hsl(40 55% 50%)" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="expenses" name="Expenses" fill="hsl(0 62% 50%)" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="surplus" name="Surplus/Deficit" radius={[3, 3, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell key={index} fill={entry.surplus >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
