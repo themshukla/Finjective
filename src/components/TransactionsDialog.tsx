@@ -95,7 +95,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
             {sorted.length === 0 && !showAdd && (
               <p className="text-xs text-muted-foreground text-center py-6">No transactions yet.</p>
             )}
-            {sorted.map((tx) =>
+            {!showAdd && sorted.map((tx) =>
               editingId === tx.id ? (
                 <div key={tx.id} className="rounded-xl border border-primary/30 bg-card p-3 space-y-2.5">
                   <div>
