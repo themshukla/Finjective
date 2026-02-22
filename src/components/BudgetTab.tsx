@@ -155,8 +155,7 @@ const BudgetTab = () => {
 
   return (
     <div className="space-y-5">
-      {/* Import / Reset options */}
-      <MonthSetupPrompt compact />
+      {/* Balance hero */}
       <div className="space-y-2">
         <div className="rounded-xl bg-card border border-border p-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
@@ -292,7 +291,8 @@ const BudgetTab = () => {
         </div>
       )}
 
-
+      {/* Import / Reset options */}
+      <MonthSetupPrompt compact />
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
