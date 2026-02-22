@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -159,10 +161,21 @@ const Auth = () => {
               variant="outline"
               className="w-full"
               onClick={async () => {
-                const { error } = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
-                });
-                if (error) toast.error(error.message);
+                if (Capacitor.isNativePlatform()) {
+                  const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                      redirectTo: "app.lovable.34b804e51454426d85a094ae034c814b://callback",
+                    },
+                  });
+                  if (error) { toast.error(error.message); return; }
+                  if (data?.url) await Browser.open({ url: data.url });
+                } else {
+                  const { error } = await lovable.auth.signInWithOAuth("google", {
+                    redirect_uri: window.location.origin,
+                  });
+                  if (error) toast.error(error.message);
+                }
               }}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
