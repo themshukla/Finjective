@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -104,7 +105,7 @@ const Auth = () => {
             <div>
               <Label className="text-xs text-muted-foreground">Password</Label>
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -112,6 +113,15 @@ const Auth = () => {
                 minLength={6}
                 className="mt-1"
               />
+              <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                  className="h-3 w-3 rounded border-border accent-primary"
+                />
+                <span className="text-xs text-muted-foreground">Show password</span>
+              </label>
               {mode === "login" && (
                 <button
                   type="button"
