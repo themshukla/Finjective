@@ -324,7 +324,7 @@ const BudgetTab = () => {
     <div className="space-y-5">
       {/* Balance hero */}
       <div className="space-y-px">
-        <div className="rounded-xl bg-card border border-border p-4 text-center">
+        <div className="rounded-xl bg-card border border-border px-4 py-2.5 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">Balance</p>
           <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
             ${Math.abs(totalBudgetedIncome - totalBudgetedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -339,7 +339,7 @@ const BudgetTab = () => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-px">
-          <div className="rounded-xl bg-card p-3 border border-border">
+          <div className="rounded-xl bg-card px-3 py-2 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Income</p>
             <div className="flex justify-between items-end">
               <div>
@@ -354,7 +354,7 @@ const BudgetTab = () => {
               </div>
             </div>
           </div>
-          <div className="rounded-xl bg-card p-3 border border-border">
+          <div className="rounded-xl bg-card px-3 py-2 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Expenses</p>
             <div className="flex justify-between items-end">
               <div>
