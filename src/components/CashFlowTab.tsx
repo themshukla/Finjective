@@ -87,7 +87,7 @@ const CashFlowTab = () => {
           <p className="text-xs text-muted-foreground text-center py-4">No data available.</p>
         ) : (
           <div className="divide-y divide-border">
-            {[...chartData].reverse().map((m) => (
+            {chartData.map((m) => (
               <div key={m.monthKey} className="w-full flex items-center justify-between px-3 py-2.5">
                 <span className="font-medium text-xs text-foreground">{m.month}</span>
                 <div className="flex gap-4 text-xs tabular-nums">
