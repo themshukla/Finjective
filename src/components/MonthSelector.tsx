@@ -40,7 +40,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
   return (
     <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
-      <div className="flex items-center justify-between px-4 py-4">
+      <div className="flex items-center justify-between px-4 py-2.5">
         <button
           onClick={() => setSelectedMonth(prev)}
           className="p-2 rounded-lg active:bg-card transition-colors"
