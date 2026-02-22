@@ -97,6 +97,38 @@ const BudgetTab = () => {
     setShowAddSection(false);
   };
 
+  const allMoveOptions = [
+    { id: "__income__", label: "Income" },
+    { id: "__expenses__", label: "Expenses" },
+    ...customSections.map(s => ({ id: s.id, label: s.name })),
+  ];
+
+  const removeFromSection = (sectionId: string, index: number) => {
+    if (sectionId === "__income__") {
+      const arr = [...income]; arr.splice(index, 1); setIncome(arr);
+    } else if (sectionId === "__expenses__") {
+      const arr = [...expenses]; arr.splice(index, 1); setExpenses(arr);
+    } else {
+      setCustomSections(customSections.map(s => {
+        if (s.id !== sectionId) return s;
+        const items = [...s.items]; items.splice(index, 1); return { ...s, items };
+      }));
+    }
+  };
+
+  const addToSection = (sectionId: string, cat: BudgetCategory) => {
+    if (sectionId === "__income__") {
+      setIncome([...income, cat]);
+    } else if (sectionId === "__expenses__") {
+      setExpenses([...expenses, cat]);
+    } else {
+      setCustomSections(customSections.map(s => {
+        if (s.id !== sectionId) return s;
+        return { ...s, items: [...s.items, cat] };
+      }));
+    }
+  };
+
   const getEditingData = () => {
     if (!editing) return null;
     if (editing === "addIncome" || editing === "addExpense") {
@@ -124,6 +156,7 @@ const BudgetTab = () => {
       const section = customSections.find(s => s.id === editing.sectionId);
       const cat = section?.items[editing.index];
       if (!cat) return null;
+      const currentId = editing.sectionId;
       return {
         title: `Edit ${cat.name}`,
         fields: [
@@ -132,10 +165,17 @@ const BudgetTab = () => {
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCustomItem(editing.sectionId, editing.index, v),
         onDelete: () => handleDeleteCustomItem(editing.sectionId, editing.index),
+        currentSectionId: currentId,
+        moveOptions: allMoveOptions,
+        onMove: (targetId: string) => {
+          removeFromSection(currentId, editing.index);
+          addToSection(targetId, { ...cat, name: String(cat.name), budgeted: cat.budgeted, spent: cat.spent, icon: cat.icon });
+        },
       };
     }
     if (typeof editing === "object" && "list" in editing) {
       const cat = editing.list === "income" ? income[editing.index] : expenses[editing.index];
+      const currentId = editing.list === "income" ? "__income__" : "__expenses__";
       return {
         title: `Edit ${cat.name}`,
         fields: [
@@ -144,6 +184,12 @@ const BudgetTab = () => {
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCategory(editing.list as "income" | "expense", editing.index, v),
         onDelete: () => handleDelete(editing.list as "income" | "expense", editing.index),
+        currentSectionId: currentId,
+        moveOptions: allMoveOptions,
+        onMove: (targetId: string) => {
+          removeFromSection(currentId, editing.index);
+          addToSection(targetId, { ...cat });
+        },
       };
     }
     return null;
