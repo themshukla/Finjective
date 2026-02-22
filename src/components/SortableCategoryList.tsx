@@ -124,7 +124,7 @@ export default function SortableCategoryList({
       modifiers={modifiers}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <div className="space-y-1.5">
+        <div className="space-y-px">
           {items.map((cat, i) => (
             <SortableItem key={ids[i]} id={ids[i]} isActive={activeId === ids[i]}>
               {renderItem(cat, i)}
