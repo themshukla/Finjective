@@ -383,7 +383,7 @@ const BudgetTab = () => {
         {/* Income section */}
         <section>
           <div className="flex justify-between items-center mb-1.5 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-            <h3 className="text-sm font-bold text-foreground">Income</h3>
+            <h3 className="text-sm font-bold text-primary">Income</h3>
             <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium">
               <Plus className="h-3.5 w-3.5" /> Add
             </button>
@@ -402,7 +402,7 @@ const BudgetTab = () => {
         {/* Expenses section */}
         <section className="mt-5">
           <div className="flex justify-between items-center mb-1.5 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-            <h3 className="text-sm font-bold text-foreground">Expenses</h3>
+            <h3 className="text-sm font-bold text-primary">Expenses</h3>
             <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium">
               <Plus className="h-3.5 w-3.5" /> Add
             </button>
@@ -435,7 +435,7 @@ const BudgetTab = () => {
             <section key={section.id} className="mt-5">
               <div className="flex justify-between items-center mb-1.5 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
                 <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
-                  <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
+                  <h3 className="text-sm font-bold text-primary">{section.name}</h3>
                   <span className="text-[10px] text-muted-foreground tabular-nums">
                     ${sectionBudgeted.toLocaleString()} / ${sectionTotal.toLocaleString()} actual
                   </span>
