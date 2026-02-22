@@ -13,13 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const BudgetTab = () => {
-  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection, importFromPreviousMonth } = useBudget();
+  const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
   const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
 
   if (needsSetup) return <MonthSetupPrompt />;
@@ -152,9 +151,12 @@ const BudgetTab = () => {
 
   const ed = getEditingData();
 
+  if (needsSetup) return <MonthSetupPrompt />;
+
   return (
     <div className="space-y-5">
-      {/* Balance hero */}
+      {/* Import / Reset options */}
+      <MonthSetupPrompt compact />
       <div className="space-y-2">
         <div className="rounded-xl bg-card border border-border p-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">Balance</p>
@@ -290,31 +292,7 @@ const BudgetTab = () => {
         </div>
       )}
 
-      {/* Reset Budget button */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => setShowResetConfirm(true)}
-          className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium px-4 py-2 rounded-full bg-card border border-border"
-        >
-          Reset to last month's budget
-        </button>
-      </div>
 
-      {/* Reset Budget Confirm */}
-      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
-        <AlertDialogContent className="max-w-[340px] rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset budget?</AlertDialogTitle>
-            <AlertDialogDescription>This will replace the current month's budget with last month's categories and budgeted amounts. Transactions will be cleared.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { importFromPreviousMonth(); setShowResetConfirm(false); }}>
-              Reset
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
