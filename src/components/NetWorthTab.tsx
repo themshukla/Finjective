@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
@@ -87,7 +88,36 @@ const NetWorthTab = () => {
               ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </p>
           </div>
+      </div>
+
+      {/* Net Worth chart */}
+      <div className="rounded-xl bg-card border border-border p-3">
+        <div className="h-40">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[
+                { name: "Assets", value: totalAssets },
+                { name: "Liabilities", value: -totalLiabilities },
+                { name: "Net Worth", value: netWorth },
+              ]}
+              barGap={4}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+              <Tooltip
+                contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
+                formatter={(value: number) => [`$${Math.abs(value).toLocaleString()}`]}
+              />
+              <Bar dataKey="value" radius={[3, 3, 0, 0]}>
+                <Cell fill="hsl(142 55% 45%)" />
+                <Cell fill="hsl(0 72% 55%)" />
+                <Cell fill={netWorth >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
+      </div>
       </div>
 
       {/* Assets section */}
