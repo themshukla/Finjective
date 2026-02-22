@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Plus, ChevronRight, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
@@ -6,11 +6,60 @@ import { BudgetCategory, Transaction } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
 import TransactionsDialog from "./TransactionsDialog";
 import MonthSetupPrompt from "./MonthSetupPrompt";
-import SortableCategoryList from "./SortableCategoryList";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  TouchSensor,
+  MouseSensor,
+  KeyboardSensor,
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+
+const INCOME_ID = "__income__";
+const EXPENSES_ID = "__expenses__";
+const dndModifiers = [restrictToVerticalAxis];
+
+function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, transition: null });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? undefined,
+    opacity: isDragging ? 0.3 : 1,
+    zIndex: isDragging ? 50 : "auto",
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
+function DroppableSection({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={`space-y-1.5 min-h-[20px] rounded-lg transition-colors ${isOver ? "bg-primary/5" : ""}`}>
+      {children}
+    </div>
+  );
+}
 
 const BudgetTab = () => {
   const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
@@ -20,6 +69,126 @@ const BudgetTab = () => {
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
+  const [activeItemData, setActiveItemData] = useState<{ category: BudgetCategory; variant: "income" | "expense" } | null>(null);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // Generate stable item IDs
+  const makeId = (containerId: string, index: number) => `${containerId}::${index}`;
+  const parseId = (id: string) => {
+    const sep = id.lastIndexOf("::");
+    if (sep === -1) return null;
+    return { containerId: id.substring(0, sep), index: parseInt(id.substring(sep + 2)) };
+  };
+
+  const incomeIds = useMemo(() => income.map((_, i) => makeId(INCOME_ID, i)), [income]);
+  const expenseIds = useMemo(() => expenses.map((_, i) => makeId(EXPENSES_ID, i)), [expenses]);
+  const customIds = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    customSections.forEach(s => { map[s.id] = s.items.map((_, i) => makeId(s.id, i)); });
+    return map;
+  }, [customSections]);
+
+  const allIds = useMemo(() => [...incomeIds, ...expenseIds, ...Object.values(customIds).flat()], [incomeIds, expenseIds, customIds]);
+
+  const getContainerItems = useCallback((containerId: string): BudgetCategory[] => {
+    if (containerId === INCOME_ID) return income;
+    if (containerId === EXPENSES_ID) return expenses;
+    return customSections.find(s => s.id === containerId)?.items ?? [];
+  }, [income, expenses, customSections]);
+
+  const setContainerItems = useCallback((containerId: string, items: BudgetCategory[]) => {
+    if (containerId === INCOME_ID) { setIncome(items); return; }
+    if (containerId === EXPENSES_ID) { setExpenses(items); return; }
+    setCustomSections(customSections.map(s => s.id === containerId ? { ...s, items } : s));
+  }, [setIncome, setExpenses, customSections, setCustomSections]);
+
+  const findContainerOfItem = useCallback((itemId: string): string | null => {
+    const parsed = parseId(itemId);
+    if (parsed) return parsed.containerId;
+    // Check if it's a container ID itself (droppable)
+    if (itemId === INCOME_ID || itemId === EXPENSES_ID) return itemId;
+    if (customSections.some(s => s.id === itemId)) return itemId;
+    return null;
+  }, [customSections]);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const parsed = parseId(String(event.active.id));
+    if (!parsed) return;
+    const items = getContainerItems(parsed.containerId);
+    const cat = items[parsed.index];
+    if (cat) {
+      const variant = parsed.containerId === INCOME_ID ? "income" : "expense";
+      setActiveItemData({ category: cat, variant: variant as "income" | "expense" });
+    }
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(30);
+    }
+  }, [getContainerItems]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setActiveItemData(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    const activeParsed = parseId(activeId);
+    if (!activeParsed) return;
+
+    const sourceContainer = activeParsed.containerId;
+    // Determine target container: could be an item ID or a droppable container ID
+    const overParsed = parseId(overId);
+    const targetContainer = overParsed ? overParsed.containerId : findContainerOfItem(overId);
+    if (!targetContainer) return;
+
+    if (sourceContainer === targetContainer) {
+      // Reorder within same container
+      if (!overParsed) return;
+      const items = getContainerItems(sourceContainer);
+      const oldIndex = activeParsed.index;
+      const newIndex = overParsed.index;
+      if (oldIndex === newIndex) return;
+      setContainerItems(sourceContainer, arrayMove([...items], oldIndex, newIndex));
+    } else {
+      // Cross-container move
+      const sourceItems = [...getContainerItems(sourceContainer)];
+      const targetItems = [...getContainerItems(targetContainer)];
+      const [movedItem] = sourceItems.splice(activeParsed.index, 1);
+      const insertIndex = overParsed ? overParsed.index : targetItems.length;
+      targetItems.splice(insertIndex, 0, movedItem);
+
+      // Update source
+      if (sourceContainer === INCOME_ID) setIncome(sourceItems);
+      else if (sourceContainer === EXPENSES_ID) setExpenses(sourceItems);
+
+      // Update target
+      if (targetContainer === INCOME_ID) setIncome(targetItems);
+      else if (targetContainer === EXPENSES_ID) setExpenses(targetItems);
+
+      // Handle custom sections (both source and target may be custom)
+      const sourceIsCustom = sourceContainer !== INCOME_ID && sourceContainer !== EXPENSES_ID;
+      const targetIsCustom = targetContainer !== INCOME_ID && targetContainer !== EXPENSES_ID;
+      if (sourceIsCustom || targetIsCustom) {
+        const updated = customSections.map(s => {
+          if (s.id === sourceContainer) return { ...s, items: sourceItems };
+          if (s.id === targetContainer) return { ...s, items: targetItems };
+          return s;
+        });
+        setCustomSections(updated);
+      }
+    }
+  }, [getContainerItems, findContainerOfItem, setContainerItems, setIncome, setExpenses, setCustomSections]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveItemData(null);
+  }, []);
 
   if (needsSetup) return <MonthSetupPrompt />;
 
@@ -97,38 +266,6 @@ const BudgetTab = () => {
     setShowAddSection(false);
   };
 
-  const allMoveOptions = [
-    { id: "__income__", label: "Income" },
-    { id: "__expenses__", label: "Expenses" },
-    ...customSections.map(s => ({ id: s.id, label: s.name })),
-  ];
-
-  const removeFromSection = (sectionId: string, index: number) => {
-    if (sectionId === "__income__") {
-      const arr = [...income]; arr.splice(index, 1); setIncome(arr);
-    } else if (sectionId === "__expenses__") {
-      const arr = [...expenses]; arr.splice(index, 1); setExpenses(arr);
-    } else {
-      setCustomSections(customSections.map(s => {
-        if (s.id !== sectionId) return s;
-        const items = [...s.items]; items.splice(index, 1); return { ...s, items };
-      }));
-    }
-  };
-
-  const addToSection = (sectionId: string, cat: BudgetCategory) => {
-    if (sectionId === "__income__") {
-      setIncome([...income, cat]);
-    } else if (sectionId === "__expenses__") {
-      setExpenses([...expenses, cat]);
-    } else {
-      setCustomSections(customSections.map(s => {
-        if (s.id !== sectionId) return s;
-        return { ...s, items: [...s.items, cat] };
-      }));
-    }
-  };
-
   const getEditingData = () => {
     if (!editing) return null;
     if (editing === "addIncome" || editing === "addExpense") {
@@ -156,7 +293,6 @@ const BudgetTab = () => {
       const section = customSections.find(s => s.id === editing.sectionId);
       const cat = section?.items[editing.index];
       if (!cat) return null;
-      const currentId = editing.sectionId;
       return {
         title: `Edit ${cat.name}`,
         fields: [
@@ -165,17 +301,10 @@ const BudgetTab = () => {
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCustomItem(editing.sectionId, editing.index, v),
         onDelete: () => handleDeleteCustomItem(editing.sectionId, editing.index),
-        currentSectionId: currentId,
-        moveOptions: allMoveOptions,
-        onMove: (targetId: string) => {
-          removeFromSection(currentId, editing.index);
-          addToSection(targetId, { ...cat, name: String(cat.name), budgeted: cat.budgeted, spent: cat.spent, icon: cat.icon });
-        },
       };
     }
     if (typeof editing === "object" && "list" in editing) {
       const cat = editing.list === "income" ? income[editing.index] : expenses[editing.index];
-      const currentId = editing.list === "income" ? "__income__" : "__expenses__";
       return {
         title: `Edit ${cat.name}`,
         fields: [
@@ -184,20 +313,12 @@ const BudgetTab = () => {
         ],
         onSave: (v: Record<string, string | number>) => handleSaveCategory(editing.list as "income" | "expense", editing.index, v),
         onDelete: () => handleDelete(editing.list as "income" | "expense", editing.index),
-        currentSectionId: currentId,
-        moveOptions: allMoveOptions,
-        onMove: (targetId: string) => {
-          removeFromSection(currentId, editing.index);
-          addToSection(targetId, { ...cat });
-        },
       };
     }
     return null;
   };
 
   const ed = getEditingData();
-
-  if (needsSetup) return <MonthSetupPrompt />;
 
   return (
     <div className="space-y-5">
@@ -251,91 +372,115 @@ const BudgetTab = () => {
         </div>
       </div>
 
-      {/* Income section */}
-      <section>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Income</h3>
-          <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-        <SortableCategoryList
-          items={income}
-          onReorder={setIncome}
-          containerId="income"
-          renderItem={(cat, i) => (
-            <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
-          )}
-        />
-      </section>
-
-      {/* Expenses section */}
-      <section>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Expenses</h3>
-          <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-        <SortableCategoryList
-          items={expenses}
-          onReorder={setExpenses}
-          containerId="expenses"
-          renderItem={(cat, i) => (
-            <CategoryCard category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
-          )}
-        />
-      </section>
-
-      {customSections.length === 0 && (
-        <div className="flex justify-center">
-          <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
-            <Plus className="h-3.5 w-3.5" /> Add Section
-          </button>
-        </div>
-      )}
-
-      {/* Custom standalone sections */}
-      {customSections.map(section => {
-        const sectionTotal = section.items.reduce((s, c) => s + txTotal(c), 0);
-        const sectionBudgeted = section.items.reduce((s, c) => s + c.budgeted, 0);
-        return (
-          <section key={section.id}>
-            <div className="flex justify-between items-center mb-3">
-              <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
-                <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
-                <span className="text-[10px] text-muted-foreground tabular-nums">
-                  ${sectionBudgeted.toLocaleString()} / ${sectionTotal.toLocaleString()} actual
-                </span>
-              </button>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-                  <Plus className="h-3.5 w-3.5" /> Add
-                </button>
-                <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-            <div className="space-y-2.5">
-              {section.items.map((cat, i) => (
-                <CategoryCard key={i} category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+        modifiers={dndModifiers}
+      >
+        {/* Income section */}
+        <section>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-bold text-foreground">Income</h3>
+            <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+              <Plus className="h-3.5 w-3.5" /> Add
+            </button>
+          </div>
+          <DroppableSection id={INCOME_ID}>
+            <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
+              {income.map((cat, i) => (
+                <SortableItem key={incomeIds[i]} id={incomeIds[i]}>
+                  <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+                </SortableItem>
               ))}
-              {section.items.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap "Add" to get started.</p>
-              )}
-            </div>
-          </section>
-        );
-      })}
+            </SortableContext>
+          </DroppableSection>
+        </section>
 
-      {customSections.length > 0 && (
-        <div className="flex justify-center">
-          <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
-            <Plus className="h-3.5 w-3.5" /> Add Section
-          </button>
-        </div>
-      )}
+        {/* Expenses section */}
+        <section className="mt-5">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-bold text-foreground">Expenses</h3>
+            <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+              <Plus className="h-3.5 w-3.5" /> Add
+            </button>
+          </div>
+          <DroppableSection id={EXPENSES_ID}>
+            <SortableContext items={expenseIds} strategy={verticalListSortingStrategy}>
+              {expenses.map((cat, i) => (
+                <SortableItem key={expenseIds[i]} id={expenseIds[i]}>
+                  <CategoryCard category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
+                </SortableItem>
+              ))}
+            </SortableContext>
+          </DroppableSection>
+        </section>
+
+        {customSections.length === 0 && (
+          <div className="flex justify-center mt-5">
+            <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+              <Plus className="h-3.5 w-3.5" /> Add Section
+            </button>
+          </div>
+        )}
+
+        {/* Custom standalone sections */}
+        {customSections.map(section => {
+          const sectionTotal = section.items.reduce((s, c) => s + txTotal(c), 0);
+          const sectionBudgeted = section.items.reduce((s, c) => s + c.budgeted, 0);
+          const sectionItemIds = customIds[section.id] ?? [];
+          return (
+            <section key={section.id} className="mt-5">
+              <div className="flex justify-between items-center mb-3">
+                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
+                  <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    ${sectionBudgeted.toLocaleString()} / ${sectionTotal.toLocaleString()} actual
+                  </span>
+                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+                    <Plus className="h-3.5 w-3.5" /> Add
+                  </button>
+                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+              <DroppableSection id={section.id}>
+                <SortableContext items={sectionItemIds} strategy={verticalListSortingStrategy}>
+                  {section.items.map((cat, i) => (
+                    <SortableItem key={sectionItemIds[i]} id={sectionItemIds[i]}>
+                      <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
+                    </SortableItem>
+                  ))}
+                  {section.items.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap "Add" or drag items here.</p>
+                  )}
+                </SortableContext>
+              </DroppableSection>
+            </section>
+          );
+        })}
+
+        {customSections.length > 0 && (
+          <div className="flex justify-center mt-5">
+            <button onClick={() => setShowAddSection(true)} className="flex items-center gap-1.5 text-primary text-xs font-medium px-4 py-2 rounded-full bg-card border border-border border-dashed">
+              <Plus className="h-3.5 w-3.5" /> Add Section
+            </button>
+          </div>
+        )}
+
+        <DragOverlay dropAnimation={null}>
+          {activeItemData ? (
+            <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20">
+              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} onTap={() => {}} onTransactions={() => {}} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Import / Reset options */}
       <MonthSetupPrompt compact />

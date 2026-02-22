@@ -4,12 +4,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-export interface MoveOption {
-  id: string;
-  label: string;
-}
 
 interface EditItemDialogProps {
   open: boolean;
@@ -18,12 +12,9 @@ interface EditItemDialogProps {
   fields: { key: string; label: string; type: "text" | "number"; value: string | number }[];
   onSave: (values: Record<string, string | number>) => void;
   onDelete?: () => void;
-  currentSectionId?: string;
-  moveOptions?: MoveOption[];
-  onMove?: (targetSectionId: string) => void;
 }
 
-const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete, currentSectionId, moveOptions, onMove }: EditItemDialogProps) => {
+const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete }: EditItemDialogProps) => {
   const [values, setValues] = useState<Record<string, string | number>>(
     Object.fromEntries(fields.map((f) => [f.key, f.type === "number" && f.value === 0 ? "" : f.value]))
   );
@@ -33,16 +24,6 @@ const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete, curren
     onSave(values);
     onClose();
   };
-
-  const handleMove = (targetId: string) => {
-    if (targetId && targetId !== currentSectionId) {
-      onSave(values);
-      onMove?.(targetId);
-      onClose();
-    }
-  };
-
-  const availableMoveOptions = moveOptions?.filter(o => o.id !== currentSectionId);
 
   return (
     <>
@@ -67,21 +48,6 @@ const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete, curren
               />
               </div>
             ))}
-            {availableMoveOptions && availableMoveOptions.length > 0 && (
-              <div>
-                <Label className="text-xs text-muted-foreground">Move to</Label>
-                <Select onValueChange={handleMove}>
-                  <SelectTrigger className="mt-1 h-10">
-                    <SelectValue placeholder="Select section…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableMoveOptions.map(o => (
-                      <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
             <div className="flex gap-2 pt-2">
               {onDelete && (
                 <Button variant="destructive" size="sm" className="flex-1" onClick={() => setShowDeleteConfirm(true)}>
