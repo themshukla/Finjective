@@ -1,60 +1,33 @@
-import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Plus } from "lucide-react";
+import { useMemo } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
-import EditItemDialog from "./EditItemDialog";
+import { BudgetCategory } from "@/data/budgetData";
+import { format, parse } from "date-fns";
+
+const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
 
 const CashFlowTab = () => {
-  const { cashFlow, setCashFlow } = useBudget();
-  const [editing, setEditing] = useState<number | "add" | null>(null);
+  const { monthlyData } = useBudget();
 
-  const totalIncome = cashFlow.reduce((s, d) => s + d.income, 0);
-  const totalExpenses = cashFlow.reduce((s, d) => s + d.expenses, 0);
+  const chartData = useMemo(() => {
+    const keys = Object.keys(monthlyData).sort();
+    return keys.map((key) => {
+      const md = monthlyData[key];
+      const income = md.income.reduce((s, c) => s + txTotal(c), 0);
+      const allExpenseItems = [
+        ...md.expenses,
+        ...md.customSections.flatMap((s) => s.items),
+      ];
+      const expenses = allExpenseItems.reduce((s, c) => s + txTotal(c), 0);
+      const surplus = income - expenses;
+      const label = format(parse(key, "yyyy-MM", new Date()), "MMM");
+      return { month: label, monthKey: key, income, expenses, surplus };
+    });
+  }, [monthlyData]);
+
+  const totalIncome = chartData.reduce((s, d) => s + d.income, 0);
+  const totalExpenses = chartData.reduce((s, d) => s + d.expenses, 0);
   const netCashFlow = totalIncome - totalExpenses;
-
-  const handleSave = (index: number, values: Record<string, string | number>) => {
-    const arr = [...cashFlow];
-    arr[index] = { month: String(values.month), income: Number(values.income), expenses: Number(values.expenses) };
-    setCashFlow(arr);
-  };
-
-  const handleAdd = (values: Record<string, string | number>) => {
-    setCashFlow([...cashFlow, { month: String(values.month), income: Number(values.income), expenses: Number(values.expenses) }]);
-  };
-
-  const handleDelete = (index: number) => {
-    const arr = [...cashFlow];
-    arr.splice(index, 1);
-    setCashFlow(arr);
-  };
-
-  const getEditingData = () => {
-    if (editing === null) return null;
-    if (editing === "add") {
-      return {
-        title: "Add Month",
-        fields: [
-          { key: "month", label: "Month", type: "text" as const, value: "" },
-          { key: "income", label: "Income", type: "number" as const, value: 0 },
-          { key: "expenses", label: "Expenses", type: "number" as const, value: 0 },
-        ],
-        onSave: handleAdd,
-      };
-    }
-    const m = cashFlow[editing];
-    return {
-      title: `Edit ${m.month}`,
-      fields: [
-        { key: "month", label: "Month", type: "text" as const, value: m.month },
-        { key: "income", label: "Income", type: "number" as const, value: m.income },
-        { key: "expenses", label: "Expenses", type: "number" as const, value: m.expenses },
-      ],
-      onSave: (v: Record<string, string | number>) => handleSave(editing, v),
-      onDelete: () => handleDelete(editing),
-    };
-  };
-
-  const ed = getEditingData();
 
   return (
     <div className="space-y-5">
@@ -74,47 +47,54 @@ const CashFlowTab = () => {
       </div>
 
       <div className="rounded-xl bg-card border border-border p-3">
-        <div className="h-52">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={cashFlow} barGap={2}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 5% 18%)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(40 6% 50%)" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(40 6% 50%)" }} axisLine={false} tickLine={false} width={35} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(30 5% 18%)", fontSize: 12, backgroundColor: "hsl(30 5% 10%)", color: "hsl(40 10% 90%)" }} formatter={(value: number) => [`$${value.toLocaleString()}`]} />
-              <Bar dataKey="income" name="Income" fill="hsl(40 55% 50%)" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" name="Expenses" fill="hsl(0 62% 50%)" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {chartData.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-10">No monthly data yet. Add transactions in the Budget tab to see cash flow.</p>
+        ) : (
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} barGap={2}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={35} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
+                  formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
+                />
+                <ReferenceLine y={0} stroke="hsl(var(--border))" />
+                <Bar dataKey="income" name="Income" fill="hsl(40 55% 50%)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="expenses" name="Expenses" fill="hsl(0 62% 50%)" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="surplus" name="Surplus/Deficit" radius={[3, 3, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={entry.surplus >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="flex justify-between items-center p-3 pb-1">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Monthly</h3>
-          <button onClick={() => setEditing("add")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1 rounded-full bg-secondary border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
-        </div>
-        <div className="divide-y divide-border">
-          {[...cashFlow].reverse().map((m, ri) => {
-            const actualIndex = cashFlow.length - 1 - ri;
-            return (
-              <button key={m.month} onClick={() => setEditing(actualIndex)} className="w-full flex items-center justify-between px-3 py-2.5 text-left active:bg-card/50 transition-colors">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider p-3 pb-1">Monthly</h3>
+        {chartData.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-4">No data available.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {[...chartData].reverse().map((m) => (
+              <div key={m.monthKey} className="w-full flex items-center justify-between px-3 py-2.5">
                 <span className="font-medium text-xs text-foreground">{m.month}</span>
                 <div className="flex gap-4 text-xs tabular-nums">
                   <span className="text-income">+${m.income.toLocaleString()}</span>
                   <span className="text-expense">-${m.expenses.toLocaleString()}</span>
-                  <span className={`font-semibold ${m.income - m.expenses >= 0 ? "text-income" : "text-expense"}`}>
-                    ${(m.income - m.expenses).toLocaleString()}
+                  <span className={`font-semibold ${m.surplus >= 0 ? "text-income" : "text-expense"}`}>
+                    {m.surplus < 0 ? "-" : ""}${Math.abs(m.surplus).toLocaleString()}
                   </span>
                 </div>
-              </button>
-            );
-          })}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {ed && <EditItemDialog open={editing !== null} onClose={() => setEditing(null)} {...ed} />}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { format, subMonths } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface MonthData {
+export interface MonthData {
   income: BudgetCategory[];
   expenses: BudgetCategory[];
   customSections: CustomSection[];
@@ -33,6 +33,7 @@ interface BudgetState {
   createEmptyMonth: () => void;
   needsSetup: boolean;
   saving: boolean;
+  monthlyData: Record<string, MonthData>;
 }
 
 const BudgetContext = createContext<BudgetState | null>(null);
@@ -210,6 +211,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       selectedMonth, setSelectedMonth, monthKey,
       hasMonthData, importFromPreviousMonth, createEmptyMonth, needsSetup, saving,
       latestMonthKey: getLatestMonthKey(),
+      monthlyData,
     }}>
       {children}
     </BudgetContext.Provider>
