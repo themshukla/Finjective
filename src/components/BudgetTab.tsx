@@ -55,7 +55,7 @@ function SortableItem({ id, children }: { id: string; children: React.ReactNode 
 function DroppableSection({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={`space-y-1.5 min-h-[20px] rounded-lg transition-colors ${isOver ? "bg-primary/5" : ""}`}>
+    <div ref={setNodeRef} className={`space-y-px min-h-[20px] rounded-lg transition-colors ${isOver ? "bg-primary/5" : ""}`}>
       {children}
     </div>
   );
