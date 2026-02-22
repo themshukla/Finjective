@@ -40,7 +40,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
   return (
     <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-4">
         <button
           onClick={() => setSelectedMonth(prev)}
           className="p-2 rounded-lg active:bg-card transition-colors"
@@ -56,13 +56,13 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                className={`flex flex-col items-center px-5 py-1.5 rounded-xl transition-colors ${
+                className={`flex flex-col items-center px-5 py-2.5 rounded-xl transition-colors ${
                   isCenter
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground active:bg-card"
                 }`}
               >
-                <span className="text-sm font-bold">{m.label}</span>
+                <span className="text-base font-bold">{m.label}</span>
                 <span className={`text-xs ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
                   {isCurrent && !isCenter && " •"}
