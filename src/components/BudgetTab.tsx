@@ -382,9 +382,9 @@ const BudgetTab = () => {
       >
         {/* Income section */}
         <section>
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-1.5 rounded-xl bg-card border border-border px-3 py-1.5 -mx-0.5">
             <h3 className="text-sm font-bold text-foreground">Income</h3>
-            <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+            <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium">
               <Plus className="h-3.5 w-3.5" /> Add
             </button>
           </div>
@@ -401,9 +401,9 @@ const BudgetTab = () => {
 
         {/* Expenses section */}
         <section className="mt-5">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-1.5 rounded-xl bg-card border border-border px-3 py-1.5 -mx-0.5">
             <h3 className="text-sm font-bold text-foreground">Expenses</h3>
-            <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+            <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium">
               <Plus className="h-3.5 w-3.5" /> Add
             </button>
           </div>
@@ -433,7 +433,7 @@ const BudgetTab = () => {
           const sectionItemIds = customIds[section.id] ?? [];
           return (
             <section key={section.id} className="mt-5">
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex justify-between items-center mb-1.5 rounded-xl bg-card border border-border px-3 py-1.5 -mx-0.5">
                 <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
                   <h3 className="text-sm font-bold text-foreground">{section.name}</h3>
                   <span className="text-[10px] text-muted-foreground tabular-nums">
@@ -441,10 +441,10 @@ const BudgetTab = () => {
                   </span>
                 </button>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
+                  <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium">
                     <Plus className="h-3.5 w-3.5" /> Add
                   </button>
-                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1.5 rounded-full transition-colors">
+                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
