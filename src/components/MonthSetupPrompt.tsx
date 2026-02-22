@@ -2,12 +2,41 @@ import { format, subMonths } from "date-fns";
 import { useBudget } from "@/context/BudgetContext";
 import { Copy, FilePlus } from "lucide-react";
 
-const MonthSetupPrompt = () => {
+const MonthSetupPrompt = ({ compact }: { compact?: boolean }) => {
   const { selectedMonth, importFromPreviousMonth, createEmptyMonth, hasMonthData } = useBudget();
 
   const prevMonth = subMonths(selectedMonth, 1);
   const prevKey = format(prevMonth, "yyyy-MM");
   const hasPrev = hasMonthData(prevKey);
+
+  if (compact) {
+    return (
+      <div className="flex gap-2">
+        {hasPrev && (
+          <button
+            onClick={importFromPreviousMonth}
+            className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
+          >
+            <Copy className="h-4 w-4 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-[11px] font-medium">Import {format(prevMonth, "MMM")}</p>
+              <p className="text-[9px] text-muted-foreground">Reset actuals to $0</p>
+            </div>
+          </button>
+        )}
+        <button
+          onClick={createEmptyMonth}
+          className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
+        >
+          <FilePlus className="h-4 w-4 text-primary flex-shrink-0" />
+          <div>
+            <p className="text-[11px] font-medium">Start fresh</p>
+            <p className="text-[9px] text-muted-foreground">Blank budget</p>
+          </div>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center space-y-4">
