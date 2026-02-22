@@ -29,6 +29,7 @@ interface BudgetState {
   monthKey: string;
   hasMonthData: (key: string) => boolean;
   importFromPreviousMonth: () => void;
+  latestMonthKey: string | null;
   createEmptyMonth: () => void;
   needsSetup: boolean;
   saving: boolean;
@@ -176,21 +177,26 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
 
   const hasMonthData = useCallback((key: string) => !!monthlyData[key], [monthlyData]);
 
+  const getLatestMonthKey = useCallback((): string | null => {
+    const keys = Object.keys(monthlyData).filter(k => k < monthKey).sort();
+    return keys.length > 0 ? keys[keys.length - 1] : null;
+  }, [monthlyData, monthKey]);
+
   const importFromPreviousMonth = useCallback(() => {
-    const prevKey = getMonthKey(subMonths(selectedMonth, 1));
-    const prevData = monthlyData[prevKey];
-    const imported: MonthData = prevData
+    const sourceKey = getLatestMonthKey();
+    const sourceData = sourceKey ? monthlyData[sourceKey] : null;
+    const imported: MonthData = sourceData
       ? {
-          income: prevData.income.map(c => ({ ...c, spent: 0, transactions: [] })),
-          expenses: prevData.expenses.map(c => ({ ...c, spent: 0, transactions: [] })),
-          customSections: (prevData.customSections ?? []).map(s => ({
+          income: sourceData.income.map(c => ({ ...c, spent: 0, transactions: [] })),
+          expenses: sourceData.expenses.map(c => ({ ...c, spent: 0, transactions: [] })),
+          customSections: (sourceData.customSections ?? []).map(s => ({
             ...s,
             items: s.items.map(c => ({ ...c, spent: 0, transactions: [] })),
           })),
         }
       : { income: [], expenses: [], customSections: [] };
     setMonthlyData(prev => ({ ...prev, [monthKey]: imported }));
-  }, [selectedMonth, monthlyData, monthKey]);
+  }, [monthlyData, monthKey, getLatestMonthKey]);
 
   const createEmptyMonth = useCallback(() => {
     setMonthlyData(prev => ({ ...prev, [monthKey]: { income: [], expenses: [], customSections: [] } }));
@@ -203,6 +209,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       setIncome, setExpenses, setCashFlow, setAssets, setLiabilities,
       selectedMonth, setSelectedMonth, monthKey,
       hasMonthData, importFromPreviousMonth, createEmptyMonth, needsSetup, saving,
+      latestMonthKey: getLatestMonthKey(),
     }}>
       {children}
     </BudgetContext.Provider>
