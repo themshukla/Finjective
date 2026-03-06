@@ -592,18 +592,17 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
-      <div className="flex justify-between items-start">
-        <div className="leading-tight">
-          <p className="text-xs font-medium text-foreground">{category.name}</p>
+    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
+      <div className="flex items-start justify-between gap-2">
+        {/* Left: name + budgeted */}
+        <div className="leading-tight min-w-0">
+          <p className="text-sm font-bold text-foreground leading-none">{category.name}</p>
           <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
-            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-          </p>
         </div>
-        <div className="flex flex-col items-end">
+        {/* Right: transactions + actual + remaining */}
+        <div className="flex flex-col items-end shrink-0">
           <div
             className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
             onClick={(e) => { e.stopPropagation(); onTransactions(); }}
@@ -617,13 +616,15 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             )}
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
-          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
-            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
+            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
-          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">remaining</p>
+          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
+          </p>
         </div>
       </div>
-      <div className="flex justify-between items-center mt-0.5">
+      <div className="flex justify-between items-center mt-1">
         <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
         <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           {pct.toFixed(0)}% spent
