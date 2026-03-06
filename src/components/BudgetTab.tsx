@@ -340,7 +340,7 @@ const BudgetTab = () => {
         </div>
         <div className="grid grid-cols-2 gap-[1%]">
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
-            <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Income</p>
+            <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Income</p>
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
@@ -355,7 +355,7 @@ const BudgetTab = () => {
             </div>
           </div>
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
-            <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Expenses</p>
+            <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Expenses</p>
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
