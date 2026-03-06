@@ -584,53 +584,52 @@ const BudgetTab = () => {
 };
 
 function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
+  const txCount = (category.transactions ?? []).length;
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
-  const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
+  const pct = budgeted > 0 ? Math.round((spent / budgeted) * 100) : 0;
   const barPct = Math.min(pct, 100);
   const over = spent > budgeted;
   const remainingAmt = budgeted - spent;
 
+
   return (
-    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
+    <div className="mt-1 rounded-xl bg-card border border-border px-3 py-2.5 cursor-pointer active:opacity-80 transition-opacity" onClick={onTap}>
+      {/* Category name */}
+      <p className="text-sm font-bold text-foreground mb-2">{category.name}</p>
+
+      {/* Budgeted left | Actual+Remaining right */}
       <div className="flex justify-between items-start">
-        <div className="leading-tight">
-          <p className="text-xs font-medium text-foreground">{category.name}</p>
-          <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
+        <div>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Budgeted</p>
+          <p className="text-sm font-bold tabular-nums text-foreground">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
-            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-          </p>
         </div>
-        <div className="flex flex-col items-end">
-          <div
-            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-            onClick={(e) => { e.stopPropagation(); onTransactions(); }}
-            role="button"
-          >
-            <span className="text-xs">Transactions</span>
-            {(category.transactions ?? []).length > 0 && (
-              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
-                {(category.transactions ?? []).length}
-              </span>
-            )}
-            <ChevronRight className="h-3.5 w-3.5" />
-          </div>
-          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
-            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        <button
+          onClick={(e) => { e.stopPropagation(); onTransactions(); }}
+          className="text-right active:opacity-70 transition-opacity"
+        >
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">
+            Actual{txCount > 0 && <span className="ml-1 bg-primary/20 text-primary rounded-full px-1 text-[9px]">{txCount}</span>}
           </p>
-          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">remaining</p>
-        </div>
+          <p className="text-sm font-bold tabular-nums text-foreground">
+            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <p className={`text-[10px] font-semibold tabular-nums mt-0.5 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
+          </p>
+        </button>
       </div>
-      <div className="flex justify-between items-center mt-0.5">
-        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
-          {pct.toFixed(0)}% spent
-        </span>
+
+      {/* Progress bar */}
+      <div className="flex justify-between items-center mt-2">
+        <Progress value={barPct} className={`h-1 flex-1 mr-2 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+        <span className={`text-[9px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>{pct}%</span>
       </div>
-    </button>
+    </div>
   );
 }
 
 export default BudgetTab;
+
