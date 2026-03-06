@@ -592,36 +592,37 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <div className="w-full rounded-xl bg-card border border-border px-3 py-1 transition-transform">
-      {/* Row 1: name (tappable → edit) | chevron/badge (tappable → transactions) */}
+    {/* Entire card opens transactions; name & budget stop propagation to open edit instead */}
+    <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
+      {/* Row 1: name (→ edit) | chevron/badge */}
       <div className="flex items-center justify-between">
-        <button onClick={onTap} className="flex-1 min-w-0 text-left active:opacity-70 transition-opacity py-0.5">
+        <span onClick={e => { e.stopPropagation(); onTap(); }} className="flex-1 min-w-0 text-left py-0.5">
           <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
-        </button>
-        <button onClick={onTransactions} className="flex items-center gap-1 text-muted-foreground flex-shrink-0 active:opacity-70 transition-opacity pl-3 py-0.5">
+        </span>
+        <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 pl-3 py-0.5">
           {(category.transactions ?? []).length > 0 && (
             <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
               {(category.transactions ?? []).length}
             </span>
           )}
           <ChevronRight className="h-3.5 w-3.5" />
-        </button>
+        </span>
       </div>
-      {/* Row 2: budgeted amount (tappable → edit) | actual spent (tappable → transactions) */}
+      {/* Row 2: budgeted (→ edit) | actual */}
       <div className="flex items-baseline justify-between mt-0.5">
-        <button onClick={onTap} className="flex-1 min-w-0 text-left active:opacity-70 transition-opacity py-0.5">
+        <span onClick={e => { e.stopPropagation(); onTap(); }} className="flex-1 min-w-0 text-left py-0.5">
           <p className="text-xs font-medium tabular-nums text-foreground leading-none">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-        </button>
-        <button onClick={onTransactions} className="flex-shrink-0 active:opacity-70 transition-opacity pl-3 py-0.5">
+        </span>
+        <span className="flex-shrink-0 pl-3 py-0.5">
           <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
             ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
-        </button>
+        </span>
       </div>
-      {/* Row 3: full row tappable → transactions (progress bar, %, remaining) */}
-      <button onClick={onTransactions} className="w-full flex items-center justify-between gap-2 mt-0.5 active:opacity-70 transition-opacity py-0.5">
+      {/* Row 3: progress bar + % | remaining */}
+      <div className="w-full flex items-center justify-between gap-2 mt-0.5 py-0.5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
           <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
@@ -631,8 +632,8 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         <p className={`text-[10px] font-semibold tabular-nums leading-none flex-shrink-0 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
           {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
         </p>
-      </button>
-    </div>
+      </div>
+    </button>
   );
 }
 
