@@ -596,7 +596,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       <div className="flex justify-between items-start">
         <div className="leading-tight">
           <p className="text-xs font-medium text-primary">{category.name}</p>
-          <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
+          <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-1.5">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
