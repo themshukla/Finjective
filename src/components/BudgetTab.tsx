@@ -629,7 +629,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             {pct.toFixed(0)}%
           </span>
         </div>
-        <p className={`text-[10px] font-semibold tabular-nums leading-none flex-shrink-0 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+        <p className={`text-[10px] tabular-nums leading-none flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
           {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
         </p>
       </div>
