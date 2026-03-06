@@ -610,7 +610,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       {/* Row 2: budgeted (left) | actual (right) */}
       <div className="flex items-baseline justify-between mt-0.5">
         <button onClick={onTap} className="flex-1 min-w-0 text-left">
-          <p className="text-sm font-bold tabular-nums text-foreground leading-none">
+          <p className="text-xs font-medium tabular-nums text-foreground leading-none">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </button>
