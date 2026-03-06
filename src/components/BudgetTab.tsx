@@ -596,10 +596,10 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
       {/* Row 1: name (→ edit) | chevron/badge */}
       <div className="flex items-center justify-between">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="flex-1 min-w-0 text-left py-0.5">
+        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
           <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
         </span>
-        <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 pl-3 py-0.5">
+        <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-auto py-0.5">
           {(category.transactions ?? []).length > 0 && (
             <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
               {(category.transactions ?? []).length}
@@ -610,12 +610,12 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       </div>
       {/* Row 2: budgeted (→ edit) | actual */}
       <div className="flex items-baseline justify-between mt-0.5">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="flex-1 min-w-0 text-left py-0.5">
+        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
           <p className="text-xs font-medium tabular-nums text-foreground leading-none">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
         </span>
-        <span className="flex-shrink-0 pl-3 py-0.5">
+        <span className="flex-shrink-0 ml-auto py-0.5">
           <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
             ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
