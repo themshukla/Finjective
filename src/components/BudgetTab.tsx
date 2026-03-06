@@ -333,21 +333,21 @@ const BudgetTab = () => {
             <p className={`text-[10px] tabular-nums ${remaining >= 0 ? "text-muted-foreground" : "text-expense"}`}>
               ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
             </p>
-            <p className={`text-[10px] font-semibold tabular-nums ${((totalBudgetedIncome - totalBudgetedExpenses) - remaining) >= 0 ? "text-green-500" : "text-expense"}`}>
+            <p className={`text-[10px] font-semibold tabular-nums ${((totalBudgetedIncome - totalBudgetedExpenses) - remaining) >= 0 ? "text-foreground" : "text-expense"}`}>
               {((totalBudgetedIncome - totalBudgetedExpenses) - remaining) < 0 ? "-" : ""}${Math.abs((totalBudgetedIncome - totalBudgetedExpenses) - remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-[1%]">
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
-            <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Income</p>
+            <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Income</p>
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
                 <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
               </div>
               <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-green-500" : "text-expense"}`}>
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-foreground" : "text-expense"}`}>
                   {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[10px] text-muted-foreground">remaining</p>
@@ -355,14 +355,14 @@ const BudgetTab = () => {
             </div>
           </div>
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
-            <p className="text-[10px] text-primary uppercase tracking-wider font-bold">Expenses</p>
+            <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Expenses</p>
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
                 <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
               </div>
               <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-green-500" : "text-expense"}`}>
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
                   {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[10px] text-muted-foreground">remaining</p>
@@ -592,44 +592,49 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
-      <div className="flex justify-between items-start">
-        <div className="leading-tight">
-          <p className="text-xs font-medium text-primary">{category.name}</p>
-          <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-1.5">
+    <div className="w-full rounded-xl bg-card border border-border px-3 py-1 active:scale-[0.98] transition-transform">
+      {/* Row 1: name (left) | chevron/badge (right) */}
+      <div className="flex items-center justify-between">
+        <button onClick={onTap} className="flex-1 min-w-0 text-left">
+          <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
+        </button>
+        <button onClick={onTransactions} className="flex items-center gap-1 text-muted-foreground flex-shrink-0 active:opacity-70 transition-opacity">
+          {(category.transactions ?? []).length > 0 && (
+            <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
+              {(category.transactions ?? []).length}
+            </span>
+          )}
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {/* Row 2: budgeted (left) | actual (right) */}
+      <div className="flex items-baseline justify-between mt-0.5">
+        <button onClick={onTap} className="flex-1 min-w-0 text-left">
+          <p className="text-xs font-medium tabular-nums text-foreground leading-none">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
+        </button>
+        <button onClick={onTransactions} className="flex-shrink-0 active:opacity-70 transition-opacity">
+          <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
             ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
-        </div>
-        <div className="flex flex-col items-end">
-          <div
-            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-            onClick={(e) => { e.stopPropagation(); onTransactions(); }}
-            role="button"
-          >
-            <span className="text-xs">Transactions</span>
-            {(category.transactions ?? []).length > 0 && (
-              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
-                {(category.transactions ?? []).length}
-              </span>
-            )}
-            <ChevronRight className="h-3.5 w-3.5" />
-          </div>
-          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
-            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </button>
+      </div>
+      {/* Row 3: progress + % (left) | remaining (right) — same row */}
+      <div className="flex items-center justify-between gap-2 mt-0.5">
+        <button onClick={onTap} className="flex items-center gap-2 flex-1 min-w-0 text-left">
+          <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+          <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
+            {pct.toFixed(0)}%
+          </span>
+        </button>
+        <button onClick={onTransactions} className="flex-shrink-0 active:opacity-70 transition-opacity">
+          <p className={`text-[10px] font-semibold tabular-nums leading-none ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
           </p>
-          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">remaining</p>
-        </div>
+        </button>
       </div>
-      <div className="flex justify-between items-center mt-0.5">
-        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-green-500"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-green-500"}`}>
-          {pct.toFixed(0)}% spent
-        </span>
-      </div>
-    </button>
+    </div>
   );
 }
 
