@@ -322,8 +322,8 @@ const BudgetTab = () => {
 
   return (
     <div className="space-y-5">
-      {/* Balance hero - sticky under month selector */}
-      <div className="sticky top-0 z-10 bg-background pt-0 pb-1 space-y-[1%]">
+      {/* Balance hero */}
+      <div className="space-y-[1%]">
         <div className="rounded-xl bg-card border border-border px-4 py-2.5 text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">Balance</p>
           <p className={`text-2xl font-bold tabular-nums ${(totalBudgetedIncome - totalBudgetedExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
