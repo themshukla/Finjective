@@ -616,7 +616,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           </p>
         </span>
         <span className="flex-shrink-0 ml-auto py-0.5">
-          <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
+          <p className="text-xs text-muted-foreground tabular-nums leading-none">
             ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
           </p>
         </span>
