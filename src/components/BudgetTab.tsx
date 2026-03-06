@@ -608,7 +608,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         </button>
       </div>
       {/* Row 2: budgeted (left) | actual (right) */}
-      <div className="flex items-baseline justify-between mt-0.5">
+      <div className="flex items-baseline justify-between mt-0">
         <button onClick={onTap} className="flex-1 min-w-0 text-left">
           <p className="text-xs font-medium tabular-nums text-foreground leading-none">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -621,7 +621,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
         </button>
       </div>
       {/* Row 3: progress + % (left) | remaining (right) — same row */}
-      <div className="flex items-center justify-between gap-2 mt-0.5">
+      <div className="flex items-center justify-between gap-2 mt-1.5">
         <button onClick={onTap} className="flex items-center gap-2 flex-1 min-w-0 text-left">
           <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
           <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
