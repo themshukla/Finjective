@@ -40,15 +40,15 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
   return (
     <div className="flex flex-col bg-background border-b border-border transition-all duration-200">
-      <div className="flex items-center justify-between px-3 py-1.5">
+      <div className="flex items-center justify-between px-4 py-0.5">
         <button
           onClick={() => setSelectedMonth(prev)}
-          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
+          className="p-2 rounded-lg active:bg-card transition-colors"
         >
-          <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+          <ChevronLeft className="h-5 w-5 text-muted-foreground" />
         </button>
 
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           {months.map((m, i) => {
             const isCenter = i === 1;
             const isCurrent = format(m.date, "yyyy-MM") === format(now, "yyyy-MM");
@@ -56,17 +56,20 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                className={`flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
+                className={`flex flex-col items-center px-5 py-2.5 rounded-xl transition-colors ${
                   isCenter
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground active:opacity-60"
+                    : "text-muted-foreground active:bg-card"
                 }`}
               >
-                <span className={`text-sm font-semibold ${isCenter ? "text-primary-foreground" : "text-foreground"}`}>{m.label}</span>
-                <span className={`text-[10px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                <span className="text-base font-bold">{m.label}</span>
+                <span className={`text-xs ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
-                  {isCurrent && !isCenter && " ·"}
+                  {isCurrent && !isCenter && " •"}
                 </span>
+                {isCurrent && isCenter && (
+                  <div className="w-1 h-1 rounded-full bg-primary-foreground mt-0.5" />
+                )}
               </button>
             );
           })}
@@ -74,14 +77,14 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
         <button
           onClick={() => setSelectedMonth(next)}
-          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
+          className="p-2 rounded-lg active:bg-card transition-colors"
         >
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
 
       {!isCurrentMonth && (
-        <div className="text-center pb-1.5">
+        <div className="text-center pb-2">
           <span className="text-xs font-bold text-primary">
             Viewing: {format(selectedMonth, "MMMM yyyy")}
           </span>
