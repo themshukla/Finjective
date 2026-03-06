@@ -592,27 +592,15 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <div className="w-full rounded-xl bg-card border border-border overflow-hidden flex active:scale-[0.98] transition-transform">
-      {/* Left zone: tap to edit */}
-      <button onClick={onTap} className="flex-1 min-w-0 px-3 py-1 text-left">
-        {/* Row 1: name */}
+    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
+      {/* Row 1: name (left) | chevron/badge (right) */}
+      <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
-        {/* Row 2: budgeted */}
-        <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
-          ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </p>
-        {/* Row 3: progress + pct% */}
-        <div className="flex items-center gap-2 mt-0.5">
-          <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-          <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
-            {pct.toFixed(0)}%
-          </span>
-        </div>
-      </button>
-      {/* Right zone: tap to open transactions */}
-      <button onClick={onTransactions} className="flex flex-col items-end justify-center px-3 py-1 flex-shrink-0 border-l border-border text-right gap-0.5">
-        {/* Row 1: badge + chevron */}
-        <div className="flex items-center gap-1 text-muted-foreground">
+        <div
+          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+          onClick={(e) => { e.stopPropagation(); onTransactions(); }}
+          role="button"
+        >
           {(category.transactions ?? []).length > 0 && (
             <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
               {(category.transactions ?? []).length}
@@ -620,16 +608,29 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
           )}
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
-        {/* Row 2: actual */}
-        <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
+      </div>
+      {/* Row 2: budgeted (left) | actual (right) */}
+      <div className="flex items-baseline justify-between gap-2 mt-0.5">
+        <p className="text-sm font-bold tabular-nums text-foreground leading-none">
+          ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </p>
+        <p className="text-[10px] text-muted-foreground tabular-nums leading-none flex-shrink-0">
           ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
         </p>
-        {/* Row 3: remaining */}
-        <p className={`text-[10px] font-semibold tabular-nums leading-none ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+      </div>
+      {/* Row 3: progress + pct% (left) | remaining (right) */}
+      <div className="flex items-center justify-between gap-2 mt-0.5">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+          <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
+            {pct.toFixed(0)}%
+          </span>
+        </div>
+        <p className={`text-[10px] font-semibold tabular-nums leading-none flex-shrink-0 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
           {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
         </p>
-      </button>
-    </div>
+      </div>
+    </button>
   );
 }
 
