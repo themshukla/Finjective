@@ -333,7 +333,7 @@ const BudgetTab = () => {
             <p className={`text-[10px] tabular-nums ${remaining >= 0 ? "text-muted-foreground" : "text-expense"}`}>
               ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
             </p>
-            <p className={`text-[10px] font-semibold tabular-nums ${((totalBudgetedIncome - totalBudgetedExpenses) - remaining) >= 0 ? "text-green-500" : "text-expense"}`}>
+            <p className={`text-[10px] font-semibold tabular-nums ${((totalBudgetedIncome - totalBudgetedExpenses) - remaining) >= 0 ? "text-foreground" : "text-expense"}`}>
               {((totalBudgetedIncome - totalBudgetedExpenses) - remaining) < 0 ? "-" : ""}${Math.abs((totalBudgetedIncome - totalBudgetedExpenses) - remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
             </p>
           </div>
@@ -347,7 +347,7 @@ const BudgetTab = () => {
                 <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
               </div>
               <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-green-500" : "text-expense"}`}>
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-foreground" : "text-expense"}`}>
                   {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[10px] text-muted-foreground">remaining</p>
@@ -362,7 +362,7 @@ const BudgetTab = () => {
                 <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
               </div>
               <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-green-500" : "text-expense"}`}>
+                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
                   {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[10px] text-muted-foreground">remaining</p>
@@ -617,15 +617,15 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             )}
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
-          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-green-500" : "text-expense"}`}>
+          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
             {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[10px] text-muted-foreground leading-none mt-0.5">remaining</p>
         </div>
       </div>
       <div className="flex justify-between items-center mt-0.5">
-        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-green-500"}`} />
-        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-green-500"}`}>
+        <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+        <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           {pct.toFixed(0)}% spent
         </span>
       </div>
