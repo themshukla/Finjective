@@ -613,7 +613,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       {/* Right: tappable for transactions */}
       <button
         onClick={onTransactions}
-        className="flex flex-col items-end justify-between flex-shrink-0 pl-2 border-l border-border/50 text-left active:opacity-70 transition-opacity"
+        className="flex flex-col items-end justify-between flex-shrink-0 pl-2 text-left active:opacity-70 transition-opacity"
       >
         {/* Row 1: badge + chevron */}
         <div className="flex items-center gap-1 text-muted-foreground">
