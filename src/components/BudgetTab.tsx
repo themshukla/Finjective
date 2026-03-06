@@ -591,8 +591,8 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const over = spent > budgeted;
   const remainingAmt = budgeted - spent;
 
+  // Entire card opens transactions; name & budget stop propagation to open edit instead
   return (
-    {/* Entire card opens transactions; name & budget stop propagation to open edit instead */}
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
       {/* Row 1: name (→ edit) | chevron/badge */}
       <div className="flex items-center justify-between">
