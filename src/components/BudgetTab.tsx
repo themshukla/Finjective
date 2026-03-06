@@ -592,40 +592,42 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
-      {/* Row 1: name (left) + transactions (right) */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-foreground">{category.name}</p>
-        <div
-          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-          onClick={(e) => { e.stopPropagation(); onTransactions(); }}
-          role="button"
-        >
-          {(category.transactions ?? []).length > 0 && (
-            <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
-              {(category.transactions ?? []).length}
-            </span>
-          )}
-          <ChevronRight className="h-3.5 w-3.5" />
+    <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
+      <div className="flex items-start justify-between gap-2">
+        {/* Left: name + budgeted */}
+        <div className="leading-tight min-w-0">
+          <p className="text-xs font-medium text-foreground">{category.name}</p>
+          <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
+            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        {/* Right: transactions link | actual (top) + remaining (bottom) */}
+        <div className="flex items-start gap-3 flex-shrink-0">
+          {/* Actual + remaining stacked */}
+          <div className="text-right leading-tight">
+            <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
+              ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+            </p>
+            <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
+            </p>
+          </div>
+          {/* Transactions button */}
+          <div
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors pt-0.5"
+            onClick={(e) => { e.stopPropagation(); onTransactions(); }}
+            role="button"
+          >
+            {(category.transactions ?? []).length > 0 && (
+              <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
+                {(category.transactions ?? []).length}
+              </span>
+            )}
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
         </div>
       </div>
-      {/* Row 2: budgeted (left) + actual (right) */}
-      <div className="flex items-baseline justify-between mt-0.5">
-        <p className="text-sm font-bold tabular-nums text-foreground leading-none">
-          ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </p>
-        <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
-          ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-        </p>
-      </div>
-      {/* Row 3: empty (left) + remaining (right) */}
-      <div className="flex items-baseline justify-end mt-0.5">
-        <p className={`text-[10px] font-semibold tabular-nums leading-none ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
-          {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
-        </p>
-      </div>
-      {/* Progress bar */}
-      <div className="flex justify-between items-center mt-1">
+      <div className="flex justify-between items-center mt-0.5">
         <Progress value={barPct} className={`h-1 flex-1 mr-3 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
         <span className={`text-[10px] tabular-nums ${over ? "text-expense" : "text-muted-foreground"}`}>
           {pct.toFixed(0)}% spent
