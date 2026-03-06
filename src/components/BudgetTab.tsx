@@ -593,23 +593,31 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
 
   return (
     <button onClick={onTap} className="w-full rounded-xl bg-card border border-border px-3 py-1 text-left active:scale-[0.98] transition-transform">
-      <div className="flex justify-between items-start">
-        <div className="leading-tight">
+      <div className="flex items-start justify-between gap-2">
+        {/* Left: name + budgeted */}
+        <div className="leading-tight min-w-0">
           <p className="text-xs font-medium text-foreground">{category.name}</p>
           <p className="text-sm font-bold tabular-nums text-foreground leading-none mt-0.5">
             ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-[10px] text-muted-foreground tabular-nums leading-none mt-0.5">
-            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-          </p>
         </div>
-        <div className="flex flex-col items-end">
+        {/* Right: transactions link | actual (top) + remaining (bottom) */}
+        <div className="flex items-start gap-3 flex-shrink-0">
+          {/* Actual + remaining stacked */}
+          <div className="text-right leading-tight">
+            <p className="text-[10px] text-muted-foreground tabular-nums leading-none">
+              ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+            </p>
+            <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
+              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} remaining
+            </p>
+          </div>
+          {/* Transactions button */}
           <div
-            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors pt-0.5"
             onClick={(e) => { e.stopPropagation(); onTransactions(); }}
             role="button"
           >
-            <span className="text-xs">Transactions</span>
             {(category.transactions ?? []).length > 0 && (
               <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
                 {(category.transactions ?? []).length}
@@ -617,10 +625,6 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
             )}
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
-          <p className={`text-[10px] font-semibold tabular-nums leading-none mt-0.5 ${remainingAmt >= 0 ? "text-foreground" : "text-expense"}`}>
-            {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">remaining</p>
         </div>
       </div>
       <div className="flex justify-between items-center mt-0.5">
