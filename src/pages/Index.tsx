@@ -47,14 +47,14 @@ const Index = () => {
                 <PullToRefresh
 onRefresh={() => new Promise(r => setTimeout(r, 600))}
                   onScroll={handleScroll}
-                  className="flex-1 overflow-y-auto px-4 py-3 scrollbar-hide"
+                  className="flex-1 overflow-y-auto px-4 pb-3 scrollbar-hide"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  <TabsContent value="budget" className="mt-0"><BudgetTab /></TabsContent>
-                  <TabsContent value="transactions" className="mt-0"><TransactionsTab /></TabsContent>
-                  <TabsContent value="cashflow" className="mt-0"><CashFlowTab /></TabsContent>
-                  <TabsContent value="networth" className="mt-0"><NetWorthTab /></TabsContent>
-                  <TabsContent value="profile" className="mt-0"><ProfileTab /></TabsContent>
+                  <TabsContent value="budget" className="mt-0 pt-3"><BudgetTab /></TabsContent>
+                  <TabsContent value="transactions" className="mt-0 pt-3"><TransactionsTab /></TabsContent>
+                  <TabsContent value="cashflow" className="mt-0 pt-3"><CashFlowTab /></TabsContent>
+                  <TabsContent value="networth" className="mt-0 pt-3"><NetWorthTab /></TabsContent>
+                  <TabsContent value="profile" className="mt-0 pt-3"><ProfileTab /></TabsContent>
                 </PullToRefresh>
 
                 {/* Bottom tab bar */}
