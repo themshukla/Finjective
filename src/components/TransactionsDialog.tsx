@@ -161,7 +161,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                   onClick={() => startEditing(tx)}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-primary truncate">{tx.merchant}</p>
+                    <p className="text-xs font-medium text-foreground truncate">{tx.merchant}</p>
                     <p className="text-[10px] text-muted-foreground">{format(new Date(tx.date + "T00:00:00"), "MMM d, yyyy")}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-2">
