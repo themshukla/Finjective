@@ -592,7 +592,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const remainingAmt = budgeted - spent;
 
   return (
-    <div className="w-full rounded-xl bg-card border border-border px-3 py-1 flex items-stretch gap-2 active:scale-[0.98] transition-transform">
+    <div className="w-full rounded-xl bg-card border border-border px-3 py-1 flex items-stretch gap-0 active:scale-[0.98] transition-transform">
       {/* Left: tappable for edit */}
       <button onClick={onTap} className="flex-1 min-w-0 text-left">
         {/* Row 1: name */}
@@ -613,7 +613,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       {/* Right: tappable for transactions */}
       <button
         onClick={onTransactions}
-        className="flex flex-col items-end justify-between flex-shrink-0 pl-2 text-left active:opacity-70 transition-opacity"
+        className="flex flex-col items-end justify-between flex-shrink-0 text-left active:opacity-70 transition-opacity"
       >
         {/* Row 1: badge + chevron */}
         <div className="flex items-center gap-1 text-muted-foreground">
