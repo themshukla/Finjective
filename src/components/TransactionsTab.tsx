@@ -377,13 +377,6 @@ const TransactionsTab = () => {
         );
       })}
 
-      {allTransactions.length > 0 && (
-        <div className="flex justify-center">
-          <button onClick={() => setShowAdd(true)} className="flex items-center gap-1 text-primary text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border">
-            <Plus className="h-3.5 w-3.5" /> Add Transaction
-          </button>
-        </div>
-      )}
 
       {/* Add Transaction Dialog */}
       <Dialog open={showAdd} onOpenChange={(o) => !o && setShowAdd(false)}>
