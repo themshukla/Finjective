@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Plus, Trash2, CalendarIcon, Pencil, Check, X } from "lucide-react";
 import { Transaction } from "@/data/budgetData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +37,15 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
   const [editMerchant, setEditMerchant] = useState("");
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [open]);
 
   const startEditing = (tx: Transaction) => {
     setEditingId(tx.id);
@@ -46,9 +54,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     setEditDate(new Date(tx.date + "T00:00:00"));
   };
 
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
+  const cancelEditing = () => setEditingId(null);
 
   const saveEditing = () => {
     if (!editingId || !editDate || !editAmount || !editMerchant.trim()) return;
@@ -81,20 +87,49 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     setDeletingId(null);
   };
 
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(onClose, 300);
+  };
+
   const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
+
+  if (!open) return null;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="max-w-[380px] rounded-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-primary">{categoryName} Transactions</DialogTitle>
-          </DialogHeader>
+      <div className="absolute inset-0 z-50 flex flex-col justify-end overflow-hidden rounded-[40px]">
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/50 transition-opacity duration-300"
+          style={{ opacity: visible ? 1 : 0 }}
+          onClick={handleClose}
+        />
 
-          <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+        {/* Sheet panel */}
+        <div
+          className="relative z-10 bg-card rounded-t-2xl transition-transform duration-300 ease-out max-h-[80%] flex flex-col"
+          style={{ transform: visible ? "translateY(0)" : "translateY(100%)" }}
+        >
+          {/* Handle bar */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
+            <h2 className="text-base font-bold text-primary">{categoryName}</h2>
+            <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 min-h-0">
             {sorted.length === 0 && !showAdd && (
               <p className="text-xs text-muted-foreground text-center py-6">No transactions yet.</p>
             )}
+
             {!showAdd && sorted.map((tx) =>
               editingId === tx.id ? (
                 <div key={tx.id} className="rounded-xl border border-primary/30 bg-card p-3 space-y-2.5">
@@ -130,13 +165,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={editDate}
-                          onSelect={setEditDate}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
+                        <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className={cn("p-3 pointer-events-auto")} />
                         <div className="border-t border-border p-2">
                           <PopoverClose asChild>
                             <Button variant="outline" size="sm" className="w-full">Done</Button>
@@ -189,6 +218,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                     onChange={(e) => setMerchant(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     className="mt-1 h-9"
+                    autoFocus
                   />
                 </div>
                 <div>
@@ -215,13 +245,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus className={cn("p-3 pointer-events-auto")} />
                       <div className="border-t border-border p-2">
                         <PopoverClose asChild>
                           <Button variant="outline" size="sm" className="w-full">Done</Button>
@@ -231,25 +255,25 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                   </Popover>
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowAdd(false)}>
-                    Cancel
-                  </Button>
-                  <Button size="sm" className="flex-1" onClick={handleAdd}>
-                    Add
-                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowAdd(false)}>Cancel</Button>
+                  <Button size="sm" className="flex-1" onClick={handleAdd}>Add</Button>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Footer add button */}
           {!showAdd && (
-            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setShowAdd(true)}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add Transaction
-            </Button>
+            <div className="px-4 pb-4 pt-2 border-t border-border shrink-0">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAdd(true)}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Add Transaction
+              </Button>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
 
+      {/* Delete confirmation — stays as portal/centered dialog */}
       <AlertDialog open={!!deletingId} onOpenChange={(o) => !o && setDeletingId(null)}>
         <AlertDialogContent className="max-w-[340px] rounded-2xl">
           <AlertDialogHeader>
