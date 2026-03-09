@@ -291,7 +291,7 @@ const NetWorthTab = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <p className="text-[12px] font-bold tabular-nums text-foreground">
+                    <p className="text-[12px] tabular-nums text-foreground">
                       ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
