@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
-import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus } from "lucide-react";
+import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus, Pencil } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
-import { BudgetCategory } from "@/data/budgetData";
+import { BudgetCategory, NetWorthEntry } from "@/data/budgetData";
 import { format, parse, subMonths } from "date-fns";
 import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
+import NetWorthItemsDialog from "./NetWorthItemsDialog";
 
 const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
 
@@ -20,13 +21,19 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
   { label: "ALL", value: "ALL" },
 ];
 
+const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
+  entries && entries.length > 0
+    ? entries.reduce((s, e) => s + e.amount, 0)
+    : (fallback ?? 0);
+
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, monthlyData, selectedMonth } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
+  const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
 
-  const totalAssets = assets.reduce((s, a) => s + a.value, 0);
-  const totalLiabilities = liabilities.reduce((s, l) => s + l.value, 0);
+  const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
+  const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
   const netWorth = totalAssets - totalLiabilities;
 
   // Build all cumulative net worth data from monthly budget surplus
@@ -82,26 +89,39 @@ const NetWorthTab = () => {
 
   const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
 
+  // Edit (rename only)
   const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
     if (list === "asset") {
       const arr = [...assets];
-      arr[index] = { name: String(values.name), value: Number(values.value) };
+      arr[index] = { ...arr[index], name: String(values.name) };
       setAssets(arr);
     } else {
       const arr = [...liabilities];
-      arr[index] = { name: String(values.name), value: Number(values.value) };
+      arr[index] = { ...arr[index], name: String(values.name) };
       setLiabilities(arr);
     }
   };
 
   const handleAdd = (list: "asset" | "liability", values: Record<string, string | number>) => {
-    if (list === "asset") setAssets([...assets, { name: String(values.name), value: Number(values.value) }]);
-    else setLiabilities([...liabilities, { name: String(values.name), value: Number(values.value) }]);
+    if (list === "asset") setAssets([...assets, { name: String(values.name), value: 0, entries: [] }]);
+    else setLiabilities([...liabilities, { name: String(values.name), value: 0, entries: [] }]);
   };
 
   const handleDelete = (list: "asset" | "liability", index: number) => {
     if (list === "asset") { const a = [...assets]; a.splice(index, 1); setAssets(a); }
     else { const a = [...liabilities]; a.splice(index, 1); setLiabilities(a); }
+  };
+
+  const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
+    if (list === "asset") {
+      const arr = [...assets];
+      arr[index] = { ...arr[index], entries };
+      setAssets(arr);
+    } else {
+      const arr = [...liabilities];
+      arr[index] = { ...arr[index], entries };
+      setLiabilities(arr);
+    }
   };
 
   const getEditingData = () => {
@@ -113,15 +133,14 @@ const NetWorthTab = () => {
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: "" },
         ],
-        onSave: (v: Record<string, string | number>) => handleAdd(list, { ...v, value: 0 }),
+        onSave: (v: Record<string, string | number>) => handleAdd(list, v),
       };
     }
     const item = editing.list === "asset" ? assets[editing.index] : liabilities[editing.index];
     return {
-      title: `Edit ${item.name}`,
+      title: `Rename`,
       fields: [
         { key: "name", label: "Name", type: "text" as const, value: item.name },
-        { key: "value", label: "Value", type: "number" as const, value: item.value },
       ],
       onSave: (v: Record<string, string | number>) => handleSave(editing.list, editing.index, v),
       onDelete: () => handleDelete(editing.list, editing.index),
@@ -130,6 +149,13 @@ const NetWorthTab = () => {
 
   const ed = getEditingData();
   const assetIcons = [TrendingUp, DollarSign];
+
+  // Items dialog data
+  const itemsDialogData = viewingItems
+    ? viewingItems.list === "asset"
+      ? { item: assets[viewingItems.index], list: "asset" as const, index: viewingItems.index }
+      : { item: liabilities[viewingItems.index], list: "liability" as const, index: viewingItems.index }
+    : null;
 
   return (
     <div className="space-y-5">
@@ -201,7 +227,7 @@ const NetWorthTab = () => {
           </div>
         )}
 
-        {/* Filter buttons — full width like reference */}
+        {/* Filter buttons */}
         <div className="flex items-center justify-between mt-3 border-t border-border pt-3">
           {FILTERS.map((f) => (
             <button
@@ -244,25 +270,37 @@ const NetWorthTab = () => {
           </button>
         </div>
         <SortableCategoryList
-          items={assets.map((a, i) => ({ name: a.name, budgeted: 0, spent: 0, icon: "", _value: a.value, _iconIndex: i } as any))}
-          onReorder={(reordered) => setAssets(reordered.map((r: any) => ({ name: r.name, value: r._value ?? r.value ?? 0 })))}
+          items={assets.map((a, i) => ({ name: a.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(a.entries, a.value), _iconIndex: i, _entries: a.entries ?? [] } as any))}
+          onReorder={(reordered) => setAssets(reordered.map((r: any, i: number) => ({ ...assets[i], name: r.name, value: r._value ?? 0, entries: r._entries ?? [] })))}
           containerId="assets"
           renderItem={(cat: any, i) => {
+            const cardValue = getCardValue(assets[i]?.entries, assets[i]?.value);
             const Icon = assetIcons[i % assetIcons.length];
             return (
-              <button onClick={() => setEditing({ list: "asset", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-primary">{cat.name}</p>
-                    <p className="text-sm font-bold tabular-nums text-foreground">
-                      ${(cat._value ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </p>
+              <button
+                onClick={() => setViewingItems({ list: "asset", index: i })}
+                className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Icon className="h-4 w-4 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-primary truncate">{cat.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {(assets[i]?.entries?.length ?? 0)} item{(assets[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                      View <ChevronRight className="h-3 w-3" />
-                    </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <p className="text-sm font-bold tabular-nums text-foreground">
+                      ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditing({ list: "asset", index: i }); }}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               </button>
@@ -280,31 +318,58 @@ const NetWorthTab = () => {
           </button>
         </div>
         <SortableCategoryList
-          items={liabilities.map((l) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: l.value } as any))}
-          onReorder={(reordered) => setLiabilities(reordered.map((r: any) => ({ name: r.name, value: r._value ?? r.value ?? 0 })))}
+          items={liabilities.map((l, i) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(l.entries, l.value), _entries: l.entries ?? [] } as any))}
+          onReorder={(reordered) => setLiabilities(reordered.map((r: any, i: number) => ({ ...liabilities[i], name: r.name, value: r._value ?? 0, entries: r._entries ?? [] })))}
           containerId="liabilities"
-          renderItem={(cat: any, i) => (
-            <button onClick={() => setEditing({ list: "liability", index: i })} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs font-medium text-primary">{cat.name}</p>
-                  <p className="text-sm font-bold tabular-nums text-liability">
-                    ${(cat._value ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </p>
+          renderItem={(cat: any, i) => {
+            const cardValue = getCardValue(liabilities[i]?.entries, liabilities[i]?.value);
+            return (
+              <button
+                onClick={() => setViewingItems({ list: "liability", index: i })}
+                className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-primary truncate">{cat.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {(liabilities[i]?.entries?.length ?? 0)} item{(liabilities[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <p className="text-sm font-bold tabular-nums text-expense">
+                      ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditing({ list: "liability", index: i }); }}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <CreditCard className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                    View <ChevronRight className="h-3 w-3" />
-                  </span>
-                </div>
-              </div>
-            </button>
-          )}
+              </button>
+            );
+          }}
         />
       </section>
 
+      {/* Edit/rename dialog */}
       {ed && <EditItemDialog open={editing !== null} onClose={() => setEditing(null)} {...ed} />}
+
+      {/* Items sheet */}
+      {itemsDialogData && (
+        <NetWorthItemsDialog
+          open={viewingItems !== null}
+          onClose={() => setViewingItems(null)}
+          title={itemsDialogData.item.name}
+          entries={itemsDialogData.item.entries ?? []}
+          onEntriesChange={(entries) => handleEntriesChange(itemsDialogData.list, itemsDialogData.index, entries)}
+          accentClass={itemsDialogData.list === "asset" ? "text-income" : "text-expense"}
+        />
+      )}
     </div>
   );
 };
