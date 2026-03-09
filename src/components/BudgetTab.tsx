@@ -341,33 +341,11 @@ const BudgetTab = () => {
         <div className="grid grid-cols-2 gap-[1%]">
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Income</p>
-            <div className="flex justify-between items-end">
-              <div>
-                <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedIncome.toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground">${totalIncome.toLocaleString()} actual</p>
-              </div>
-              <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-foreground" : "text-expense"}`}>
-                  {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-[10px] text-muted-foreground">remaining</p>
-              </div>
-            </div>
+            <p className="text-lg font-bold tabular-nums text-foreground text-center">${totalBudgetedIncome.toLocaleString()}</p>
           </div>
           <div className="rounded-xl bg-card px-3 py-2 border border-border">
             <p className="text-[10px] text-primary uppercase tracking-wider font-bold text-center">Expenses</p>
-            <div className="flex justify-between items-end">
-              <div>
-                <p className="text-lg font-bold tabular-nums text-foreground">${totalBudgetedExpenses.toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground">${totalExpenses.toLocaleString()} actual</p>
-              </div>
-              <div className="text-right">
-                <p className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
-                  {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-[10px] text-muted-foreground">remaining</p>
-              </div>
-            </div>
+            <p className="text-lg font-bold tabular-nums text-foreground text-center">${totalBudgetedExpenses.toLocaleString()}</p>
           </div>
         </div>
       </div>
