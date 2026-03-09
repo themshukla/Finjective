@@ -199,7 +199,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                     <p className="text-[10px] text-muted-foreground">{format(new Date(tx.date + "T00:00:00"), "MMM d, yyyy")}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-2">
-                    <span className="text-lg font-bold tabular-nums text-foreground">
+                    <span className="text-[12px] font-bold tabular-nums text-foreground">
                       ${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </span>
                     <button
