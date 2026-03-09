@@ -264,7 +264,7 @@ const NetWorthTab = () => {
       {/* Assets section */}
       <section>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Assets</h3>
+          <h3 className="text-sm font-bold text-primary">Assets</h3>
           <button onClick={() => setEditing("addAsset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
