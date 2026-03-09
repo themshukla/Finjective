@@ -2,16 +2,25 @@ import { useState, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
-import { format, parse } from "date-fns";
+import { format, parse, subMonths, subWeeks } from "date-fns";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
 
-type TimeFilter = "ytd" | "yearly" | "all";
+type TimeFilter = "1W" | "1M" | "6M" | "YTD" | "1Y" | "ALL";
+
+const FILTERS: { label: string; value: TimeFilter }[] = [
+  { label: "1W", value: "1W" },
+  { label: "1M", value: "1M" },
+  { label: "6M", value: "6M" },
+  { label: "YTD", value: "YTD" },
+  { label: "1Y", value: "1Y" },
+  { label: "ALL", value: "ALL" },
+];
 
 const CashFlowTab = () => {
   const { monthlyData, selectedMonth } = useBudget();
-  const [filter, setFilter] = useState<TimeFilter>("ytd");
+  const [filter, setFilter] = useState<TimeFilter>("YTD");
 
   const allData = useMemo(() => {
     const keys = Object.keys(monthlyData).sort();
@@ -24,21 +33,35 @@ const CashFlowTab = () => {
       ];
       const expenses = allExpenseItems.reduce((s, c) => s + txTotal(c), 0);
       const surplus = income - expenses;
-      const label = format(parse(key, "yyyy-MM", new Date()), "MMM");
+      const label = format(parse(key, "yyyy-MM", new Date()), "MMM yy");
       return { month: label, monthKey: key, income, expenses, surplus };
     });
   }, [monthlyData]);
 
   const chartData = useMemo(() => {
-    const currentYear = format(selectedMonth, "yyyy");
-    if (filter === "ytd") {
-      const currentMonthKey = format(selectedMonth, "yyyy-MM");
-      return allData.filter((d) => d.monthKey.startsWith(currentYear) && d.monthKey <= currentMonthKey);
+    const now = selectedMonth;
+    const currentMonthKey = format(now, "yyyy-MM");
+    const currentYear = format(now, "yyyy");
+
+    switch (filter) {
+      case "1W":
+      case "1M":
+        // No weekly data — show last 1 month
+        return allData.filter((d) => d.monthKey === currentMonthKey);
+      case "6M": {
+        const cutoff = format(subMonths(now, 5), "yyyy-MM");
+        return allData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
+      case "YTD":
+        return allData.filter((d) => d.monthKey.startsWith(currentYear) && d.monthKey <= currentMonthKey);
+      case "1Y": {
+        const cutoff = format(subMonths(now, 11), "yyyy-MM");
+        return allData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
+      case "ALL":
+      default:
+        return allData;
     }
-    if (filter === "yearly") {
-      return allData.filter((d) => d.monthKey.startsWith(currentYear));
-    }
-    return allData;
   }, [allData, filter, selectedMonth]);
 
   const totalIncome = chartData.reduce((s, d) => s + d.income, 0);
@@ -52,12 +75,6 @@ const CashFlowTab = () => {
     : isNegative
     ? "hsl(0 72% 55%)"
     : "hsl(var(--muted-foreground))";
-
-  const filters: { label: string; value: TimeFilter }[] = [
-    { label: "YTD", value: "ytd" },
-    { label: "Yearly", value: "yearly" },
-    { label: "All", value: "all" },
-  ];
 
   const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
 
@@ -84,7 +101,7 @@ const CashFlowTab = () => {
       </div>
 
       {/* Line chart card */}
-      <div className="rounded-xl bg-card border border-border p-3 pb-2">
+      <div className="rounded-xl bg-card border border-border p-3 pb-3">
         {chartData.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-10">No data for this period.</p>
         ) : (
@@ -131,13 +148,13 @@ const CashFlowTab = () => {
           </div>
         )}
 
-        {/* Filter buttons at bottom */}
-        <div className="flex justify-center gap-1 mt-2">
-          {filters.map((f) => (
+        {/* Filter buttons — full width like reference */}
+        <div className="flex items-center justify-between mt-3 border-t border-border pt-3">
+          {FILTERS.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`px-4 py-1.5 text-[11px] font-medium rounded-full transition-colors ${
+              className={`flex-1 py-1.5 text-[11px] font-semibold rounded-full transition-all ${
                 filter === f.value
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground"
