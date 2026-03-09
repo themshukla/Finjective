@@ -112,9 +112,8 @@ const NetWorthTab = () => {
         title: `Add ${list === "asset" ? "Asset" : "Liability"}`,
         fields: [
           { key: "name", label: "Name", type: "text" as const, value: "" },
-          { key: "value", label: "Value", type: "number" as const, value: 0 },
         ],
-        onSave: (v: Record<string, string | number>) => handleAdd(list, v),
+        onSave: (v: Record<string, string | number>) => handleAdd(list, { ...v, value: 0 }),
       };
     }
     const item = editing.list === "asset" ? assets[editing.index] : liabilities[editing.index];
