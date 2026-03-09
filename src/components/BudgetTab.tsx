@@ -392,7 +392,7 @@ const BudgetTab = () => {
             <div className="flex gap-3 mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedIncome.toLocaleString()} budgeted</span>
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalIncome.toLocaleString()} actual</span>
-              <span className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-foreground" : "text-expense"}`}>
+              <span className="text-[10px] text-muted-foreground tabular-nums">
                 {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString()} remaining
               </span>
             </div>
@@ -420,7 +420,7 @@ const BudgetTab = () => {
             <div className="flex gap-3 mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalExpenses.toLocaleString()} actual</span>
-              <span className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
+              <span className="text-[10px] text-muted-foreground tabular-nums">
                 {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString()} remaining
               </span>
             </div>
@@ -468,7 +468,7 @@ const BudgetTab = () => {
                 <div className="flex gap-3 mt-0.5">
                   <span className="text-[10px] text-muted-foreground tabular-nums">${sectionBudgeted.toLocaleString()} budgeted</span>
                   <span className="text-[10px] text-muted-foreground tabular-nums">${sectionTotal.toLocaleString()} actual</span>
-                  <span className={`text-[10px] font-semibold tabular-nums ${(sectionBudgeted - sectionTotal) >= 0 ? "text-foreground" : "text-expense"}`}>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
                     {(sectionBudgeted - sectionTotal) < 0 ? "-" : ""}${Math.abs(sectionBudgeted - sectionTotal).toLocaleString()} remaining
                   </span>
                 </div>
