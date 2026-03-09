@@ -1,18 +1,49 @@
-import { useState } from "react";
-import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { useState, useMemo } from "react";
+import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
+import { BudgetCategory } from "@/data/budgetData";
+import { format, parse } from "date-fns";
 import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
 
+const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
+
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, monthlyData } = useBudget();
   const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
 
   const totalAssets = assets.reduce((s, a) => s + a.value, 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + l.value, 0);
   const netWorth = totalAssets - totalLiabilities;
 
+  // Build cumulative net worth line from monthly budget surplus
+  const chartData = useMemo(() => {
+    const keys = Object.keys(monthlyData).sort();
+    let cumulative = 0;
+    return keys.map((key) => {
+      const md = monthlyData[key];
+      const income = md.income.reduce((s, c) => s + txTotal(c), 0);
+      const allExpenseItems = [
+        ...md.expenses,
+        ...md.customSections.flatMap((s) => s.items),
+      ];
+      const expenses = allExpenseItems.reduce((s, c) => s + txTotal(c), 0);
+      cumulative += income - expenses;
+      const label = format(parse(key, "yyyy-MM", new Date()), "MMM");
+      return { month: label, monthKey: key, netWorth: cumulative };
+    });
+  }, [monthlyData]);
+
+  const isPositive = netWorth > 0;
+  const isNegative = netWorth < 0;
+  const lineColor = isPositive
+    ? "hsl(142 55% 45%)"
+    : isNegative
+    ? "hsl(0 72% 55%)"
+    : "hsl(var(--muted-foreground))";
+
+  const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
 
   const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
     if (list === "asset") {
@@ -62,62 +93,93 @@ const NetWorthTab = () => {
   };
 
   const ed = getEditingData();
-
   const assetIcons = [TrendingUp, DollarSign];
 
   return (
     <div className="space-y-5">
-      {/* Net Worth summary card */}
-      <div className="space-y-2">
-        <div className="rounded-xl bg-card border border-border p-4 text-center">
-          <p className="text-[10px] text-primary uppercase tracking-wider mb-1">Net Worth</p>
-          <p className="text-2xl font-bold tabular-nums text-foreground">
-            ${netWorth.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
+      {/* Hero summary */}
+      <div className="text-center pt-2 pb-1">
+        <p className="text-[10px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
+          Net Worth
+        </p>
+        <p
+          className={`text-4xl font-bold tabular-nums ${
+            isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
+          }`}
+        >
+          {isNegative ? "-" : ""}${Math.abs(netWorth).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </p>
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted-foreground">
+          <TrendIcon className="h-3.5 w-3.5" />
+          <span>${totalAssets.toLocaleString()} assets</span>
+          <span className="opacity-40">·</span>
+          <span>${totalLiabilities.toLocaleString()} liabilities</span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-card border border-border p-3">
-            <p className="text-[10px] text-primary uppercase tracking-wider">Total Assets</p>
-            <p className="text-lg font-bold tabular-nums text-foreground">
-              ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-          <div className="rounded-xl bg-card border border-border p-3">
-            <p className="text-[10px] text-primary uppercase tracking-wider">Total Liabilities</p>
-            <p className="text-lg font-bold tabular-nums text-destructive">
-              ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </p>
-          </div>
       </div>
 
-      {/* Net Worth chart */}
-      <div className="rounded-xl bg-card border border-border p-3">
-        <div className="h-40">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={[
-                { name: "Assets", value: totalAssets },
-                { name: "Liabilities", value: -totalLiabilities },
-                { name: "Net Worth", value: netWorth },
-              ]}
-              barGap={4}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip
-                contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
-                formatter={(value: number) => [`$${Math.abs(value).toLocaleString()}`]}
-              />
-              <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-                <Cell fill="hsl(142 55% 45%)" />
-                <Cell fill="hsl(0 72% 55%)" />
-                <Cell fill={netWorth >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Line chart */}
+      <div className="rounded-xl bg-card border border-border p-3 pb-2">
+        {chartData.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-10">No monthly data yet.</p>
+        ) : (
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid
+                  strokeDasharray="0"
+                  stroke="hsl(var(--border) / 0.25)"
+                  vertical={true}
+                  horizontal={false}
+                />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid hsl(var(--border))",
+                    fontSize: 12,
+                    backgroundColor: "hsl(var(--card))",
+                    color: "hsl(var(--foreground))",
+                  }}
+                  formatter={(value: number) => [
+                    `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`,
+                    "Cumulative Net",
+                  ]}
+                />
+                <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+                <Line
+                  type="monotone"
+                  dataKey="netWorth"
+                  stroke={lineColor}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
+
+      {/* Assets & Liabilities summary */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-xl bg-card border border-border p-3">
+          <p className="text-[10px] text-primary uppercase tracking-wider">Total Assets</p>
+          <p className="text-lg font-bold tabular-nums text-foreground">
+            ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="rounded-xl bg-card border border-border p-3">
+          <p className="text-[10px] text-primary uppercase tracking-wider">Total Liabilities</p>
+          <p className="text-lg font-bold tabular-nums text-expense">
+            ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
       </div>
 
       {/* Assets section */}
