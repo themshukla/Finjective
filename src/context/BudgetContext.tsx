@@ -42,6 +42,11 @@ interface BudgetState {
   saving: boolean;
   monthlyData: Record<string, MonthData>;
   netWorthSnapshots: NetWorthSnapshot[];
+  netWorthNeedsSetup: boolean;
+  latestNetWorthSnapshotKey: string | null;
+  importNetWorthFromPrevious: () => void;
+  createEmptyNetWorth: () => void;
+  snapshotsLoaded: boolean;
 }
 
 const BudgetContext = createContext<BudgetState | null>(null);
