@@ -25,10 +25,8 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
   { label: "ALL", value: "ALL" },
 ];
 
-const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
-  entries && entries.length > 0
-    ? entries.reduce((s, e) => s + e.amount, 0)
-    : (fallback ?? 0);
+
+
 
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots } = useBudget();
