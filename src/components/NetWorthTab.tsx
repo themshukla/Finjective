@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus, Pencil } from "lucide-react";
+import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory, NetWorthEntry } from "@/data/budgetData";
