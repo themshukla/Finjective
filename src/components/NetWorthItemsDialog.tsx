@@ -46,19 +46,18 @@ const NetWorthItemsDialog = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto pb-safe">
-        <SheetHeader className="pb-3 border-b border-border">
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-[340px] rounded-2xl max-h-[70vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-4 pt-4 pb-3 border-b border-border shrink-0">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-base font-bold">{title}</SheetTitle>
+            <DialogTitle className="text-base font-bold">{title}</DialogTitle>
             <span className={`text-lg font-bold tabular-nums ${accentClass}`}>
               ${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
           </div>
-        </SheetHeader>
+        </DialogHeader>
 
-        <div className="pt-4 space-y-3">
-          {/* Entry list */}
+        <div className="overflow-y-auto flex-1 px-4 py-4 space-y-3">
           {entries.length === 0 && !showForm && (
             <p className="text-xs text-muted-foreground text-center py-6">
               No items yet. Tap + Add Item to get started.
@@ -85,7 +84,6 @@ const NetWorthItemsDialog = ({
             </div>
           ))}
 
-          {/* Add form */}
           {showForm && (
             <div className="rounded-xl bg-card border border-border p-3 space-y-2">
               <Input
@@ -129,8 +127,8 @@ const NetWorthItemsDialog = ({
             </button>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };
 
