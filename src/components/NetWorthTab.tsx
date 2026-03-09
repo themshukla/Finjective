@@ -165,14 +165,14 @@ const NetWorthTab = () => {
           Net Worth
         </p>
         <p
-          className={`text-4xl font-bold tabular-nums ${
+          className={`font-bold tabular-nums ${
             isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
           }`}
+          style={{ fontSize: "30px" }}
         >
           {isNegative ? "-" : ""}${Math.abs(netWorth).toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
-        <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted-foreground">
-          <TrendIcon className="h-3.5 w-3.5" />
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-muted-foreground" style={{ fontSize: "14px" }}>
           <span>${totalAssets.toLocaleString()} assets</span>
           <span className="opacity-40">·</span>
           <span>${totalLiabilities.toLocaleString()} liabilities</span>
