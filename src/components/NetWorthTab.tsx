@@ -30,7 +30,7 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
