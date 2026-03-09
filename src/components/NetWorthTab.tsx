@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
-import { Plus, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus } from "lucide-react";
+import { Plus, TrendingUp, DollarSign, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
-import { BudgetCategory, NetWorthEntry } from "@/data/budgetData";
+import { NetWorthEntry } from "@/data/budgetData";
 import { format, parse, subMonths } from "date-fns";
 import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
+import NetWorthSetupPrompt from "./NetWorthSetupPrompt";
 
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
@@ -29,7 +30,7 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
@@ -149,6 +150,8 @@ const NetWorthTab = () => {
       ? { item: assets[viewingItems.index], list: "asset" as const, index: viewingItems.index }
       : { item: liabilities[viewingItems.index], list: "liability" as const, index: viewingItems.index }
     : null;
+
+  if (netWorthNeedsSetup) return <NetWorthSetupPrompt />;
 
   return (
     <div className="space-y-5">

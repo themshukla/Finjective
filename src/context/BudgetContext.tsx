@@ -42,6 +42,11 @@ interface BudgetState {
   saving: boolean;
   monthlyData: Record<string, MonthData>;
   netWorthSnapshots: NetWorthSnapshot[];
+  netWorthNeedsSetup: boolean;
+  latestNetWorthSnapshotKey: string | null;
+  importNetWorthFromPrevious: () => void;
+  createEmptyNetWorth: () => void;
+  snapshotsLoaded: boolean;
 }
 
 const BudgetContext = createContext<BudgetState | null>(null);
@@ -108,15 +113,40 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     loadSnapshots();
   }, []);
 
+  // Derived net worth setup state
+  const netWorthNeedsSetup = snapshotsLoaded && !netWorthSnapshots.find(s => s.month_key === monthKey);
+
+  const getLatestNetWorthSnapshotKey = useCallback((): string | null => {
+    const keys = netWorthSnapshots.map(s => s.month_key).filter(k => k < monthKey).sort();
+    return keys.length > 0 ? keys[keys.length - 1] : null;
+  }, [netWorthSnapshots, monthKey]);
+
+  const importNetWorthFromPrevious = useCallback(() => {
+    const sourceKey = getLatestNetWorthSnapshotKey();
+    const source = sourceKey ? netWorthSnapshots.find(s => s.month_key === sourceKey) : null;
+    if (source) {
+      setAssets(source.assets);
+      setLiabilities(source.liabilities);
+    } else {
+      setAssets([]);
+      setLiabilities([]);
+    }
+  }, [netWorthSnapshots, getLatestNetWorthSnapshotKey]);
+
+  const createEmptyNetWorth = useCallback(() => {
+    setAssets([]);
+    setLiabilities([]);
+  }, []);
+
   // Load assets/liabilities for the selected month from snapshots
   useEffect(() => {
     if (!snapshotsLoaded) return;
     const snapshot = netWorthSnapshots.find(s => s.month_key === monthKey);
     if (snapshot) {
-      setAssets(snapshot.assets?.length ? snapshot.assets : defaultAssets);
-      setLiabilities(snapshot.liabilities?.length ? snapshot.liabilities : defaultLiabilities);
+      setAssets(snapshot.assets?.length ? snapshot.assets : []);
+      setLiabilities(snapshot.liabilities?.length ? snapshot.liabilities : []);
     }
-    // If no snapshot for this month, keep current values (they'll be saved on first change)
+    // If no snapshot for this month, don't prefill — wait for user to choose
   }, [monthKey, snapshotsLoaded]);
 
   // Save net worth snapshot when assets or liabilities change
@@ -124,6 +154,9 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!snapshotsLoaded) return;
+    // Don't auto-save if no snapshot exists for this month yet — wait for user to choose setup
+    const hasExistingSnapshot = netWorthSnapshots.some(s => s.month_key === monthKey);
+    if (!hasExistingSnapshot) return;
 
     const totalAssets = assets.reduce((s, a) => {
       const val = a.entries && a.entries.length > 0 ? a.entries.reduce((sum, e) => sum + e.amount, 0) : (a.value ?? 0);
@@ -320,6 +353,11 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       latestMonthKey: getLatestMonthKey(),
       monthlyData,
       netWorthSnapshots,
+      netWorthNeedsSetup,
+      latestNetWorthSnapshotKey: getLatestNetWorthSnapshotKey(),
+      importNetWorthFromPrevious,
+      createEmptyNetWorth,
+      snapshotsLoaded,
     }}>
       {children}
     </BudgetContext.Provider>
