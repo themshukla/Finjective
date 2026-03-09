@@ -350,6 +350,11 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       latestMonthKey: getLatestMonthKey(),
       monthlyData,
       netWorthSnapshots,
+      netWorthNeedsSetup,
+      latestNetWorthSnapshotKey: getLatestNetWorthSnapshotKey(),
+      importNetWorthFromPrevious,
+      createEmptyNetWorth,
+      snapshotsLoaded,
     }}>
       {children}
     </BudgetContext.Provider>
