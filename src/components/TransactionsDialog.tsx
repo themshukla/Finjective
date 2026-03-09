@@ -120,7 +120,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
           <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
             <h2 className="text-base font-bold text-primary">{categoryName}</h2>
             <div className="flex items-center gap-3">
-              <span className="text-base font-bold tabular-nums text-foreground">
+              <span className="text-base font-bold tabular-nums text-primary">
                 ${transactions.reduce((s, t) => s + t.amount, 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
               <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
