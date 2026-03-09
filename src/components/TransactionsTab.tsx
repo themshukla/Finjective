@@ -360,7 +360,7 @@ const TransactionsTab = () => {
                 ${dayTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-0">
               {txs.map((tx) => (
                 <button
                   key={tx.id}
