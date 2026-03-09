@@ -389,7 +389,7 @@ const BudgetTab = () => {
                 <Plus className="h-3.5 w-3.5" /> Add
               </button>
             </div>
-            <div className="flex gap-3 mt-0.5">
+            <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedIncome.toLocaleString()} budgeted</span>
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalIncome.toLocaleString()} actual</span>
               <span className="text-[10px] text-muted-foreground tabular-nums">
