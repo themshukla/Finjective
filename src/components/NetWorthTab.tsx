@@ -151,6 +151,8 @@ const NetWorthTab = () => {
       : { item: liabilities[viewingItems.index], list: "liability" as const, index: viewingItems.index }
     : null;
 
+  if (netWorthNeedsSetup) return <NetWorthSetupPrompt />;
+
   return (
     <div className="space-y-5">
       {/* Hero summary */}
