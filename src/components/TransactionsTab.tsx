@@ -364,10 +364,10 @@ const TransactionsTab = () => {
                   className="w-full rounded-xl bg-card border border-border px-3 py-2 flex justify-between items-center text-left active:scale-[0.98] transition-transform"
                 >
                   <div>
-                    <p className="text-xs font-medium text-foreground">{tx.merchant}</p>
+                    <p className="text-xs text-foreground">{tx.merchant}</p>
                     <p className="text-[10px] text-primary">{tx.categoryName}</p>
                   </div>
-                  <p className={`text-xs font-semibold tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
+                  <p className={`text-xs tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
                     {tx.type === "income" ? "+" : ""}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </button>
