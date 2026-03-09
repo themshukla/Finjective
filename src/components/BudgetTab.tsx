@@ -420,7 +420,7 @@ const BudgetTab = () => {
             <div className="flex gap-3 mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalExpenses.toLocaleString()} actual</span>
-              <span className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
+              <span className="text-[10px] text-muted-foreground tabular-nums">
                 {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString()} remaining
               </span>
             </div>
