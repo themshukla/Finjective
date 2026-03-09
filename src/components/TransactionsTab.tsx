@@ -321,7 +321,7 @@ const TransactionsTab = () => {
   return (
     <div className="space-y-4">
       <div className="rounded-xl bg-card border border-border p-4 text-center">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">
+        <p className="text-xs uppercase tracking-[0.2em] text-primary font-medium mb-1">
           Total Transactions
         </p>
         <p className="text-2xl font-bold tabular-nums text-foreground mb-3">
