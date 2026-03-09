@@ -327,9 +327,6 @@ const TransactionsTab = () => {
         <p className="text-2xl font-bold tabular-nums text-foreground">
           {allTransactions.length}
         </p>
-        <p className="text-sm font-semibold tabular-nums text-muted-foreground">
-          ${allTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString("en-US", { minimumFractionDigits: 2 })} total amount
-        </p>
       </div>
 
       {allTransactions.length === 0 && (
