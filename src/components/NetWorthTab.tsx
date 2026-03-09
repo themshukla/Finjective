@@ -165,7 +165,7 @@ const NetWorthTab = () => {
           Net Worth
         </p>
         <p
-          className={`text-4xl font-bold tabular-nums ${
+          className={`text-[16px] font-bold tabular-nums ${
             isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
           }`}
         >
