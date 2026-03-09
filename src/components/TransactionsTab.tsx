@@ -372,7 +372,7 @@ const TransactionsTab = () => {
                     <p className="text-[10px] text-primary">{tx.categoryName}</p>
                   </div>
                   <p className={`text-xs font-semibold tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
-                    {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {tx.type === "income" ? "+" : ""}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </button>
               ))}
