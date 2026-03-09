@@ -90,19 +90,26 @@ const CashFlowTab = () => {
         ) : (
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} barGap={2}>
+              <BarChart
+                data={[
+                  { name: "Income", value: totalIncome },
+                  { name: "Expenses", value: totalExpenses },
+                  { name: "Net", value: netCashFlow },
+                ]}
+                barGap={4}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={35} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
-                  formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
+                  formatter={(value: number) => [`$${Math.abs(value).toLocaleString()}`]}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" />
-                <Bar dataKey="surplus" name="Net" radius={[3, 3, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={index} fill={entry.surplus >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
-                  ))}
+                <Bar dataKey="value" radius={[3, 3, 0, 0]}>
+                  <Cell fill="hsl(142 55% 45%)" />
+                  <Cell fill="hsl(0 72% 55%)" />
+                  <Cell fill={netCashFlow >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
