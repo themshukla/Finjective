@@ -468,8 +468,31 @@ const TransactionsTab = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  {income.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Income</SelectLabel>
+                      {income.map((cat, i) => (
+                        <SelectItem key={`income-${i}`} value={`income-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {expenses.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Expenses</SelectLabel>
+                      {expenses.map((cat, i) => (
+                        <SelectItem key={`expense-${i}`} value={`expense-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {customSections.map((section) => (
+                    section.items.length > 0 && (
+                      <SelectGroup key={section.id}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">{section.name}</SelectLabel>
+                        {section.items.map((cat, i) => (
+                          <SelectItem key={`custom-${section.id}-${i}`} value={`custom-${section.id}-${i}`}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )
                   ))}
                 </SelectContent>
               </Select>
