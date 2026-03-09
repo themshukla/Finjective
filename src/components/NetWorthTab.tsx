@@ -305,7 +305,7 @@ const NetWorthTab = () => {
       {/* Liabilities section */}
       <section>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-foreground">Liabilities</h3>
+          <h3 className="text-sm font-bold text-primary">Liabilities</h3>
           <button onClick={() => setEditing("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
