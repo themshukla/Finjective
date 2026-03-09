@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -351,8 +351,8 @@ const TransactionsTab = () => {
         return (
           <section key={dateKey}>
             <div className="flex justify-between items-center mb-2 px-1">
-              <h3 className="text-xs text-muted-foreground">{formattedDate}</h3>
-              <span className="text-[10px] text-muted-foreground tabular-nums">
+              <h3 className="text-xs font-bold text-muted-foreground">{formattedDate}</h3>
+              <span className="text-xs font-bold text-muted-foreground tabular-nums">
                 ${dayTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -364,10 +364,10 @@ const TransactionsTab = () => {
                   className="w-full rounded-xl bg-card border border-border px-3 py-2 flex justify-between items-center text-left active:scale-[0.98] transition-transform"
                 >
                   <div>
-                    <p className="text-xs font-medium text-foreground">{tx.merchant}</p>
+                    <p className="text-xs text-foreground">{tx.merchant}</p>
                     <p className="text-[10px] text-primary">{tx.categoryName}</p>
                   </div>
-                  <p className={`text-xs font-semibold tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
+                  <p className={`text-xs tabular-nums ${tx.type === "income" ? "text-green-500" : "text-foreground"}`}>
                     {tx.type === "income" ? "+" : ""}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </button>
@@ -392,8 +392,31 @@ const TransactionsTab = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  {income.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Income</SelectLabel>
+                      {income.map((cat, i) => (
+                        <SelectItem key={`income-${i}`} value={`income-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {expenses.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Expenses</SelectLabel>
+                      {expenses.map((cat, i) => (
+                        <SelectItem key={`expense-${i}`} value={`expense-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {customSections.map((section) => (
+                    section.items.length > 0 && (
+                      <SelectGroup key={section.id}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">{section.name}</SelectLabel>
+                        {section.items.map((cat, i) => (
+                          <SelectItem key={`custom-${section.id}-${i}`} value={`custom-${section.id}-${i}`}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )
                   ))}
                 </SelectContent>
               </Select>
@@ -445,8 +468,31 @@ const TransactionsTab = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  {income.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Income</SelectLabel>
+                      {income.map((cat, i) => (
+                        <SelectItem key={`income-${i}`} value={`income-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {expenses.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Expenses</SelectLabel>
+                      {expenses.map((cat, i) => (
+                        <SelectItem key={`expense-${i}`} value={`expense-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {customSections.map((section) => (
+                    section.items.length > 0 && (
+                      <SelectGroup key={section.id}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">{section.name}</SelectLabel>
+                        {section.items.map((cat, i) => (
+                          <SelectItem key={`custom-${section.id}-${i}`} value={`custom-${section.id}-${i}`}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )
                   ))}
                 </SelectContent>
               </Select>
