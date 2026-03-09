@@ -25,7 +25,7 @@ const Index = () => {
           {/* Notch */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-foreground/5 rounded-b-2xl z-20" />
           {/* Screen */}
-          <div className="w-full h-full bg-background rounded-[42px] overflow-hidden flex flex-col">
+          <div className="relative w-full h-full bg-background rounded-[42px] overflow-hidden flex flex-col">
             {/* Status bar */}
             <div className="h-12 flex items-end justify-between px-8 pb-1">
               <span className="text-[11px] font-semibold text-foreground">9:41</span>
