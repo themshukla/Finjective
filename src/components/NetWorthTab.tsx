@@ -161,7 +161,7 @@ const NetWorthTab = () => {
     <div className="space-y-5">
       {/* Hero summary */}
       <div className="text-center pt-2 pb-1">
-        <p className="text-[10px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
+        <p className="text-[14px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
           Net Worth
         </p>
         <p
