@@ -321,7 +321,7 @@ const TransactionsTab = () => {
   return (
     <div className="space-y-4">
       <div className="rounded-xl bg-card border border-border p-4 text-center">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-medium mb-1">
+        <p className="text-xs uppercase tracking-[0.2em] text-primary font-medium mb-1">
           Total Transactions
         </p>
         <p className="text-2xl font-bold tabular-nums text-foreground mb-3">
@@ -351,7 +351,7 @@ const TransactionsTab = () => {
         return (
           <section key={dateKey}>
             <div className="flex justify-between items-center mb-2 px-1">
-              <h3 className="text-xs font-bold text-foreground">{formattedDate}</h3>
+              <h3 className="text-xs font-bold text-muted-foreground">{formattedDate}</h3>
               <span className="text-[10px] text-muted-foreground tabular-nums">
                 ${dayTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
