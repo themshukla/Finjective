@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -392,8 +392,31 @@ const TransactionsTab = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  {income.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Income</SelectLabel>
+                      {income.map((cat, i) => (
+                        <SelectItem key={`income-${i}`} value={`income-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {expenses.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Expenses</SelectLabel>
+                      {expenses.map((cat, i) => (
+                        <SelectItem key={`expense-${i}`} value={`expense-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {customSections.map((section) => (
+                    section.items.length > 0 && (
+                      <SelectGroup key={section.id}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">{section.name}</SelectLabel>
+                        {section.items.map((cat, i) => (
+                          <SelectItem key={`custom-${section.id}-${i}`} value={`custom-${section.id}-${i}`}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )
                   ))}
                 </SelectContent>
               </Select>
@@ -445,8 +468,31 @@ const TransactionsTab = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  {income.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Income</SelectLabel>
+                      {income.map((cat, i) => (
+                        <SelectItem key={`income-${i}`} value={`income-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {expenses.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">Expenses</SelectLabel>
+                      {expenses.map((cat, i) => (
+                        <SelectItem key={`expense-${i}`} value={`expense-${i}`}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {customSections.map((section) => (
+                    section.items.length > 0 && (
+                      <SelectGroup key={section.id}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">{section.name}</SelectLabel>
+                        {section.items.map((cat, i) => (
+                          <SelectItem key={`custom-${section.id}-${i}`} value={`custom-${section.id}-${i}`}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )
                   ))}
                 </SelectContent>
               </Select>
