@@ -172,8 +172,8 @@ const NetWorthTab = () => {
 
       {/* Line chart */}
       <div className="rounded-xl bg-card border border-border p-3 pb-3">
-        {chartData.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-10">No monthly data yet.</p>
+        {chartData.length < 2 ? (
+          <p className="text-xs text-muted-foreground text-center py-10">No history yet. Data will appear once you have more than one month recorded.</p>
         ) : (
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
