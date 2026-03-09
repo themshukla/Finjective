@@ -246,20 +246,6 @@ const NetWorthTab = () => {
       </div>
 
       {/* Assets & Liabilities summary */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-card border border-border p-3">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Total Assets</p>
-          <p className="text-lg font-bold tabular-nums text-foreground">
-            ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="rounded-xl bg-card border border-border p-3">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Total Liabilities</p>
-          <p className="text-lg font-bold tabular-nums text-expense">
-            ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-      </div>
 
       {/* Assets section */}
       <section>
