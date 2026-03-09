@@ -82,18 +82,18 @@ const CashFlowTab = () => {
     <div className="space-y-5">
       {/* Hero summary */}
       <div className="text-center pt-2 pb-1">
-        <p className="text-[10px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
+        <p className="text-[14px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
           Net Cash Flow
         </p>
         <p
-          className={`text-4xl font-bold tabular-nums ${
+          className={`font-bold tabular-nums ${
             isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
           }`}
+          style={{ fontSize: "30px" }}
         >
           {isNegative ? "-" : ""}${Math.abs(netCashFlow).toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
-        <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted-foreground">
-          <TrendIcon className="h-3.5 w-3.5" />
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-muted-foreground" style={{ fontSize: "14px" }}>
           <span>${totalIncome.toLocaleString()} income</span>
           <span className="opacity-40">·</span>
           <span>${totalExpenses.toLocaleString()} expenses</span>
