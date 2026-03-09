@@ -8,7 +8,11 @@ import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
 
-const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
+
+const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
+  entries && entries.length > 0
+    ? entries.reduce((s, e) => s + e.amount, 0)
+    : (fallback ?? 0);
 
 type TimeFilter = "1W" | "1M" | "6M" | "YTD" | "1Y" | "ALL";
 
