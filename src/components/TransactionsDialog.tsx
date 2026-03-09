@@ -130,7 +130,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 min-h-0">
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-0 min-h-0 divide-y divide-border">
             {sorted.length === 0 && !showAdd && (
               <p className="text-xs text-muted-foreground text-center py-6">No transactions yet.</p>
             )}
