@@ -382,11 +382,20 @@ const BudgetTab = () => {
       >
         {/* Income section */}
         <section>
-          <div className="sticky top-0 z-10 flex justify-between items-center rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-            <h3 className="text-sm font-bold text-primary">Income</h3>
-            <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium">
-              <Plus className="h-3.5 w-3.5" /> Add
-            </button>
+          <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-primary">Income</h3>
+              <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium">
+                <Plus className="h-3.5 w-3.5" /> Add
+              </button>
+            </div>
+            <div className="flex gap-3 mt-0.5">
+              <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedIncome.toLocaleString()} budgeted</span>
+              <span className="text-[10px] text-muted-foreground tabular-nums">${totalIncome.toLocaleString()} actual</span>
+              <span className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-foreground" : "text-expense"}`}>
+                {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString()} remaining
+              </span>
+            </div>
           </div>
           <DroppableSection id={INCOME_ID}>
             <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
@@ -401,11 +410,20 @@ const BudgetTab = () => {
 
         {/* Expenses section */}
         <section className="mt-5">
-          <div className="sticky top-0 z-10 flex justify-between items-center rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-            <h3 className="text-sm font-bold text-primary">Expenses</h3>
-            <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium">
-              <Plus className="h-3.5 w-3.5" /> Add
-            </button>
+          <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-primary">Expenses</h3>
+              <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium">
+                <Plus className="h-3.5 w-3.5" /> Add
+              </button>
+            </div>
+            <div className="flex gap-3 mt-0.5">
+              <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
+              <span className="text-[10px] text-muted-foreground tabular-nums">${totalExpenses.toLocaleString()} actual</span>
+              <span className={`text-[10px] font-semibold tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-foreground" : "text-expense"}`}>
+                {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString()} remaining
+              </span>
+            </div>
           </div>
           <DroppableSection id={EXPENSES_ID}>
             <SortableContext items={expenseIds} strategy={verticalListSortingStrategy}>
@@ -433,20 +451,26 @@ const BudgetTab = () => {
           const sectionItemIds = customIds[section.id] ?? [];
           return (
             <section key={section.id} className="mt-5">
-              <div className="sticky top-0 z-10 flex justify-between items-center rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="flex items-center gap-2 active:opacity-70 transition-opacity">
-                  <h3 className="text-sm font-bold text-primary">{section.name}</h3>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">
-                    ${sectionBudgeted.toLocaleString()} / ${sectionTotal.toLocaleString()} actual
+              <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
+                <div className="flex justify-between items-center">
+                  <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
+                    <h3 className="text-sm font-bold text-primary">{section.name}</h3>
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium">
+                      <Plus className="h-3.5 w-3.5" /> Add
+                    </button>
+                    <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-0.5">
+                  <span className="text-[10px] text-muted-foreground tabular-nums">${sectionBudgeted.toLocaleString()} budgeted</span>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">${sectionTotal.toLocaleString()} actual</span>
+                  <span className={`text-[10px] font-semibold tabular-nums ${(sectionBudgeted - sectionTotal) >= 0 ? "text-foreground" : "text-expense"}`}>
+                    {(sectionBudgeted - sectionTotal) < 0 ? "-" : ""}${Math.abs(sectionBudgeted - sectionTotal).toLocaleString()} remaining
                   </span>
-                </button>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium">
-                    <Plus className="h-3.5 w-3.5" /> Add
-                  </button>
-                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
                 </div>
               </div>
               <DroppableSection id={section.id}>
