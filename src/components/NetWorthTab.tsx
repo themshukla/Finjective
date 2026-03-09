@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus, Pencil } from "lucide-react";
+import { Plus, ChevronRight, TrendingUp, DollarSign, CreditCard, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory, NetWorthEntry } from "@/data/budgetData";
@@ -283,24 +283,17 @@ const NetWorthTab = () => {
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Icon className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-primary truncate">{cat.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
                       <p className="text-[10px] text-muted-foreground">
                         {(assets[i]?.entries?.length ?? 0)} item{(assets[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <p className="text-sm font-bold tabular-nums text-foreground">
+                    <p className="text-[12px] font-bold tabular-nums text-foreground">
                       ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </p>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setEditing({ list: "asset", index: i }); }}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 </div>
               </button>
@@ -330,24 +323,17 @@ const NetWorthTab = () => {
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-primary truncate">{cat.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
                       <p className="text-[10px] text-muted-foreground">
                         {(liabilities[i]?.entries?.length ?? 0)} item{(liabilities[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <p className="text-sm font-bold tabular-nums text-expense">
+                    <p className="text-[12px] font-bold tabular-nums text-foreground">
                       ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </p>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setEditing({ list: "liability", index: i }); }}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 </div>
               </button>
