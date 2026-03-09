@@ -27,7 +27,7 @@ const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
     : (fallback ?? 0);
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, monthlyData, selectedMonth } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
@@ -36,23 +36,14 @@ const NetWorthTab = () => {
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
   const netWorth = totalAssets - totalLiabilities;
 
-  // Build all cumulative net worth data from monthly budget surplus
+  // Build chart data from persisted net worth snapshots
   const allChartData = useMemo(() => {
-    const keys = Object.keys(monthlyData).sort();
-    let cumulative = 0;
-    return keys.map((key) => {
-      const md = monthlyData[key];
-      const income = md.income.reduce((s, c) => s + txTotal(c), 0);
-      const allExpenseItems = [
-        ...md.expenses,
-        ...md.customSections.flatMap((s) => s.items),
-      ];
-      const expenses = allExpenseItems.reduce((s, c) => s + txTotal(c), 0);
-      cumulative += income - expenses;
-      const label = format(parse(key, "yyyy-MM", new Date()), "MMM yy");
-      return { month: label, monthKey: key, netWorth: cumulative };
-    });
-  }, [monthlyData]);
+    return netWorthSnapshots.map((snap) => ({
+      month: format(parse(snap.month_key, "yyyy-MM", new Date()), "MMM yy"),
+      monthKey: snap.month_key,
+      netWorth: snap.net_worth,
+    }));
+  }, [netWorthSnapshots]);
 
   const chartData = useMemo(() => {
     const now = selectedMonth;
