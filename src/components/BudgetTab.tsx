@@ -321,7 +321,7 @@ const BudgetTab = () => {
   const ed = getEditingData();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 relative">
       {/* Balance hero */}
       <div className="space-y-[1%]">
         <div className="rounded-xl bg-card border border-border px-4 py-2.5 text-center">
