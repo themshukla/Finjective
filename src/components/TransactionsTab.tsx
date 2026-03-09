@@ -352,7 +352,7 @@ const TransactionsTab = () => {
           <section key={dateKey}>
             <div className="flex justify-between items-center mb-2 px-1">
               <h3 className="text-xs font-bold text-muted-foreground">{formattedDate}</h3>
-              <span className="text-[10px] text-muted-foreground tabular-nums">
+              <span className="text-xs font-bold text-muted-foreground tabular-nums">
                 ${dayTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
             </div>
