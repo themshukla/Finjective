@@ -19,22 +19,14 @@ export interface CashFlowItem {
   expenses: number;
 }
 
-export interface NetWorthEntry {
-  id: string;
-  name: string;
-  amount: number;
-}
-
 export interface AssetItem {
   name: string;
   value: number;
-  entries?: NetWorthEntry[];
 }
 
 export interface LiabilityItem {
   name: string;
   value: number;
-  entries?: NetWorthEntry[];
 }
 
 export interface CustomSection {
