@@ -154,6 +154,9 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!snapshotsLoaded) return;
+    // Don't auto-save if no snapshot exists for this month yet — wait for user to choose setup
+    const hasExistingSnapshot = netWorthSnapshots.some(s => s.month_key === monthKey);
+    if (!hasExistingSnapshot) return;
 
     const totalAssets = assets.reduce((s, a) => {
       const val = a.entries && a.entries.length > 0 ? a.entries.reduce((sum, e) => sum + e.amount, 0) : (a.value ?? 0);
