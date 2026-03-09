@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      net_worth_snapshots: {
+        Row: {
+          assets: Json
+          id: string
+          liabilities: Json
+          month_key: string
+          net_worth: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assets?: Json
+          id?: string
+          liabilities?: Json
+          month_key: string
+          net_worth?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assets?: Json
+          id?: string
+          liabilities?: Json
+          month_key?: string
+          net_worth?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

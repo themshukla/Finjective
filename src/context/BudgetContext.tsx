@@ -10,6 +10,13 @@ export interface MonthData {
   customSections: CustomSection[];
 }
 
+export interface NetWorthSnapshot {
+  month_key: string;
+  net_worth: number;
+  assets: AssetItem[];
+  liabilities: LiabilityItem[];
+}
+
 interface BudgetState {
   income: BudgetCategory[];
   expenses: BudgetCategory[];
@@ -34,6 +41,7 @@ interface BudgetState {
   needsSetup: boolean;
   saving: boolean;
   monthlyData: Record<string, MonthData>;
+  netWorthSnapshots: NetWorthSnapshot[];
 }
 
 const BudgetContext = createContext<BudgetState | null>(null);
@@ -51,6 +59,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const currentKey = getMonthKey(now);
 
   const [monthlyData, setMonthlyData] = useState<Record<string, MonthData>>({});
+  const [netWorthSnapshots, setNetWorthSnapshots] = useState<NetWorthSnapshot[]>([]);
 
   const [selectedMonth, setSelectedMonth] = useState<Date>(now);
   const [cashFlow, setCashFlow] = useState<CashFlowItem[]>(defaultCashFlow);
@@ -58,6 +67,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const [liabilities, setLiabilities] = useState<LiabilityItem[]>(defaultLiabilities);
   const [saving, setSaving] = useState(false);
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
+  const [snapshotsLoaded, setSnapshotsLoaded] = useState(false);
 
   const monthKey = getMonthKey(selectedMonth);
   const currentMonthData = monthlyData[monthKey];
@@ -66,6 +76,103 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
   const income = currentMonthData?.income ?? [];
   const expenses = currentMonthData?.expenses ?? [];
   const customSections = currentMonthData?.customSections ?? [];
+
+  // Load all net worth snapshots once on mount
+  useEffect(() => {
+    const loadSnapshots = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await (supabase
+        .from('net_worth_snapshots') as any)
+        .select('month_key, net_worth, assets, liabilities')
+        .eq('user_id', user.id)
+        .order('month_key', { ascending: true });
+
+      if (error) {
+        console.error('Error loading net worth snapshots:', error);
+        return;
+      }
+
+      if (data) {
+        setNetWorthSnapshots(data.map((d: any) => ({
+          month_key: d.month_key,
+          net_worth: d.net_worth,
+          assets: d.assets as AssetItem[],
+          liabilities: d.liabilities as LiabilityItem[],
+        })));
+      }
+      setSnapshotsLoaded(true);
+    };
+
+    loadSnapshots();
+  }, []);
+
+  // Load assets/liabilities for the selected month from snapshots
+  useEffect(() => {
+    if (!snapshotsLoaded) return;
+    const snapshot = netWorthSnapshots.find(s => s.month_key === monthKey);
+    if (snapshot) {
+      setAssets(snapshot.assets?.length ? snapshot.assets : defaultAssets);
+      setLiabilities(snapshot.liabilities?.length ? snapshot.liabilities : defaultLiabilities);
+    }
+    // If no snapshot for this month, keep current values (they'll be saved on first change)
+  }, [monthKey, snapshotsLoaded]);
+
+  // Save net worth snapshot when assets or liabilities change
+  const prevNetWorthRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!snapshotsLoaded) return;
+
+    const totalAssets = assets.reduce((s, a) => {
+      const val = a.entries && a.entries.length > 0 ? a.entries.reduce((sum, e) => sum + e.amount, 0) : (a.value ?? 0);
+      return s + val;
+    }, 0);
+    const totalLiabilities = liabilities.reduce((s, l) => {
+      const val = l.entries && l.entries.length > 0 ? l.entries.reduce((sum, e) => sum + e.amount, 0) : (l.value ?? 0);
+      return s + val;
+    }, 0);
+    const netWorth = totalAssets - totalLiabilities;
+
+    const serialized = JSON.stringify({ assets, liabilities, netWorth, monthKey });
+    if (serialized === prevNetWorthRef.current) return;
+    prevNetWorthRef.current = serialized;
+
+    const saveSnapshot = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await (supabase
+        .from('net_worth_snapshots') as any)
+        .upsert({
+          user_id: user.id,
+          month_key: monthKey,
+          net_worth: netWorth,
+          assets: assets as unknown as Record<string, unknown>[],
+          liabilities: liabilities as unknown as Record<string, unknown>[],
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,month_key' });
+
+      if (error) {
+        console.error('Error saving net worth snapshot:', error);
+      } else {
+        // Update local snapshots state
+        setNetWorthSnapshots(prev => {
+          const existing = prev.findIndex(s => s.month_key === monthKey);
+          const updated = { month_key: monthKey, net_worth: netWorth, assets, liabilities };
+          if (existing >= 0) {
+            const arr = [...prev];
+            arr[existing] = updated;
+            return arr;
+          }
+          return [...prev, updated].sort((a, b) => a.month_key.localeCompare(b.month_key));
+        });
+      }
+    };
+
+    saveSnapshot();
+  }, [assets, liabilities, monthKey, snapshotsLoaded]);
 
   // Load month data from database
   useEffect(() => {
@@ -212,6 +319,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       hasMonthData, importFromPreviousMonth, createEmptyMonth, needsSetup, saving,
       latestMonthKey: getLatestMonthKey(),
       monthlyData,
+      netWorthSnapshots,
     }}>
       {children}
     </BudgetContext.Provider>
