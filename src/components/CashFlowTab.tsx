@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory } from "@/data/budgetData";
 import { format, parse } from "date-fns";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const txTotal = (c: BudgetCategory) => (c.transactions ?? []).reduce((s, t) => s + t.amount, 0);
 
@@ -44,79 +45,111 @@ const CashFlowTab = () => {
   const totalExpenses = chartData.reduce((s, d) => s + d.expenses, 0);
   const netCashFlow = totalIncome - totalExpenses;
 
+  const isPositive = netCashFlow > 0;
+  const isNegative = netCashFlow < 0;
+  const lineColor = isPositive
+    ? "hsl(142 55% 45%)"
+    : isNegative
+    ? "hsl(0 72% 55%)"
+    : "hsl(var(--muted-foreground))";
+
   const filters: { label: string; value: TimeFilter }[] = [
     { label: "YTD", value: "ytd" },
     { label: "Yearly", value: "yearly" },
     { label: "All", value: "all" },
   ];
 
+  const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
+
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Income</p>
-          <p className="text-lg font-bold text-foreground tabular-nums">${totalIncome.toLocaleString()}</p>
-        </div>
-        <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Expenses</p>
-          <p className="text-lg font-bold text-foreground tabular-nums">${totalExpenses.toLocaleString()}</p>
-        </div>
-        <div className="rounded-xl bg-card p-3 border border-border">
-          <p className="text-[10px] text-primary uppercase tracking-wider">Net</p>
-          <p className={`text-lg font-bold tabular-nums ${netCashFlow >= 0 ? "text-income" : "text-expense"}`}>${netCashFlow.toLocaleString()}</p>
+      {/* Hero summary */}
+      <div className="text-center pt-2 pb-1">
+        <p className="text-[10px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
+          Net Cash Flow
+        </p>
+        <p
+          className={`text-4xl font-bold tabular-nums ${
+            isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
+          }`}
+        >
+          {isNegative ? "-" : ""}${Math.abs(netCashFlow).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </p>
+        <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted-foreground">
+          <TrendIcon className="h-3.5 w-3.5" />
+          <span>${totalIncome.toLocaleString()} income</span>
+          <span className="opacity-40">·</span>
+          <span>${totalExpenses.toLocaleString()} expenses</span>
         </div>
       </div>
 
-      <div className="rounded-xl bg-card border border-border p-3">
-        <div className="flex justify-end mb-2">
-          <div className="inline-flex rounded-lg bg-secondary border border-border p-0.5 gap-0.5">
-            {filters.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={`px-3 py-1 text-[10px] font-medium rounded-md transition-colors ${
-                  filter === f.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Line chart card */}
+      <div className="rounded-xl bg-card border border-border p-3 pb-2">
         {chartData.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-10">No data for this period.</p>
         ) : (
-          <div className="h-52">
+          <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={[
-                  { name: "Income", value: totalIncome },
-                  { name: "Expenses", value: totalExpenses },
-                  { name: "Net", value: netCashFlow },
-                ]}
-                barGap={4}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
-                  formatter={(value: number) => [`$${Math.abs(value).toLocaleString()}`]}
+              <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid
+                  strokeDasharray="0"
+                  stroke="hsl(var(--border) / 0.25)"
+                  vertical={true}
+                  horizontal={false}
                 />
-                <ReferenceLine y={0} stroke="hsl(var(--border))" />
-                <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-                  <Cell fill="hsl(142 55% 45%)" />
-                  <Cell fill="hsl(0 72% 55%)" />
-                  <Cell fill={netCashFlow >= 0 ? "hsl(142 55% 45%)" : "hsl(0 72% 55%)"} />
-                </Bar>
-              </BarChart>
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid hsl(var(--border))",
+                    fontSize: 12,
+                    backgroundColor: "hsl(var(--card))",
+                    color: "hsl(var(--foreground))",
+                  }}
+                  formatter={(value: number) => [
+                    `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`,
+                    "Net",
+                  ]}
+                />
+                <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+                <Line
+                  type="monotone"
+                  dataKey="surplus"
+                  stroke={lineColor}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         )}
+
+        {/* Filter buttons at bottom */}
+        <div className="flex justify-center gap-1 mt-2">
+          {filters.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={`px-4 py-1.5 text-[11px] font-medium rounded-full transition-colors ${
+                filter === f.value
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Monthly breakdown list */}
       <div className="rounded-xl bg-card border border-border overflow-hidden">
         <div className="flex items-center justify-between p-3 pb-1">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Monthly</h3>
