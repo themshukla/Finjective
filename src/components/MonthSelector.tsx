@@ -113,10 +113,10 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
                     : "text-muted-foreground active:opacity-60"
                 }`}
               >
-                <span className={`text-sm font-semibold ${isFilledToday ? "text-primary-foreground" : isSelectedNonToday ? "text-primary" : "text-foreground"}`}>
+                <span className={`text-sm font-semibold ${isFilledToday ? "text-primary-foreground" : "text-foreground"}`}>
                   {m.label}
                 </span>
-                <span className={`text-[10px] ${isFilledToday ? "text-primary-foreground/70" : isSelectedNonToday ? "text-primary/70" : "text-muted-foreground"}`}>
+                <span className={`text-[10px] ${isFilledToday ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
                 </span>
               </button>
