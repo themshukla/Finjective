@@ -143,29 +143,27 @@ const NetWorthTab = () => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
     return (
-      <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
-        {/* Left: name + item count → opens items sheet */}
-        <button
-          className="flex-1 min-w-0 text-left"
-          onClick={() => setViewingItems({ list, index: i })}
+      {/* Outer card: entire right side (empty space + value + chevron) opens items sheet */}
+      <button
+        className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
+        onClick={() => setViewingItems({ list, index: i })}
+      >
+        {/* Name — stops propagation and opens edit/delete */}
+        <span
+          className="flex-1 min-w-0"
+          onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
         >
           <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
           <p className="text-[10px] text-muted-foreground">
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
-        </button>
+        </span>
 
-        {/* Right: value + chevron → edit/delete dialog */}
-        <button
-          className="flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity"
-          onClick={() => setEditTarget({ list, index: i })}
-        >
-          <span className="text-[12px] tabular-nums text-foreground">
-            ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </span>
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-      </div>
+        <span className="text-[12px] tabular-nums text-foreground shrink-0">
+          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </span>
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      </button>
     );
   };
 
