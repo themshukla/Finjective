@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, X, Trash2 } from "lucide-react";
 import { NetWorthEntry } from "@/data/budgetData";
 import { formatAmountInput, parseAmountInput } from "@/lib/utils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // ── Swipeable row ─────────────────────────────────────────────────────────────
 interface SwipeableRowProps {
