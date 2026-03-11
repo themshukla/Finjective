@@ -139,7 +139,7 @@ const NetWorthTab = () => {
     }
   };
 
-  // ── EditItemDialog data ──────────────────────────────────────────────────────
+  // ── EditItemDialog — only for Add ───────────────────────────────────────────
 
   const getEditingData = () => {
     if (!editTarget) return null;
@@ -151,13 +151,7 @@ const NetWorthTab = () => {
         onSave: (v: Record<string, string | number>) => handleAdd(list, v),
       };
     }
-    const item = editTarget.list === "asset" ? assets[editTarget.index] : liabilities[editTarget.index];
-    return {
-      title: `Edit ${item.name}`,
-      fields: [{ key: "name", label: "Name", type: "text" as const, value: item.name }],
-      onSave: (v: Record<string, string | number>) => handleSave(editTarget.list, editTarget.index, v),
-      onDelete: () => handleDelete(editTarget.list, editTarget.index),
-    };
+    return null;
   };
 
   const ed = getEditingData();
