@@ -168,7 +168,7 @@ const NetWorthTab = () => {
     const cardValue = getCardValue(item?.entries, item?.value);
     return (
       <button
-        className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
+        className="w-full rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
         onClick={() => setViewingItems({ list, index: i })}
       >
         {/* Name — shrinks to content width only; tap opens edit/delete */}
@@ -261,7 +261,7 @@ const NetWorthTab = () => {
         />
         <button
           onClick={() => setEditTarget("addAsset")}
-          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-1.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Plus className="h-3.5 w-3.5" /> Add Asset
         </button>
@@ -283,7 +283,7 @@ const NetWorthTab = () => {
         />
         <button
           onClick={() => setEditTarget("addLiability")}
-          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-1.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
         >
           <Plus className="h-3.5 w-3.5" /> Add Liability
         </button>
