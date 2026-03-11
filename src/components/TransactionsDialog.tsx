@@ -101,7 +101,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
       <div className="absolute inset-0 z-50 flex flex-col justify-end overflow-hidden rounded-[40px]">
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/50 transition-opacity duration-300"
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
           style={{ opacity: visible ? 1 : 0 }}
           onClick={handleClose}
         />
@@ -191,7 +191,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
               ) : (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                  className={`flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-all duration-200 ${editingId ? "opacity-30 pointer-events-none" : ""}`}
                   onClick={() => startEditing(tx)}
                 >
                   <div className="min-w-0 flex-1">
