@@ -33,27 +33,34 @@ type EditTarget = { list: "asset" | "liability"; index: number } | null;
 type AddTarget = "asset" | "liability" | null;
 
 // ── Long-press hook ────────────────────────────────────────────────────────────
+// Fires onLongPress on release (pointerUp) if held long enough, otherwise onClick.
 const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const didLongPress = useRef(false);
+  const isLongRef = useRef(false);
 
   const start = useCallback(() => {
-    didLongPress.current = false;
+    isLongRef.current = false;
     timerRef.current = setTimeout(() => {
-      didLongPress.current = true;
-      onLongPress();
+      isLongRef.current = true;
     }, delay);
-  }, [onLongPress, delay]);
+  }, [delay]);
+
+  const release = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (isLongRef.current) {
+      isLongRef.current = false;
+      onLongPress();
+    } else {
+      onClick();
+    }
+  }, [onLongPress, onClick]);
 
   const cancel = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    isLongRef.current = false;
   }, []);
 
-  const handleClick = useCallback(() => {
-    if (!didLongPress.current) onClick();
-  }, [onClick]);
-
-  return { onPointerDown: start, onPointerUp: cancel, onPointerLeave: cancel, onClick: handleClick };
+  return { onPointerDown: start, onPointerUp: release, onPointerLeave: cancel, onClick: () => {} };
 };
 
 // ── Card component (needs its own hooks) ──────────────────────────────────────
