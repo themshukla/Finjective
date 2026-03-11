@@ -135,6 +135,13 @@ const NetWorthTab = () => {
     setInlineEdit(null);
   };
 
+  const commitInlineAdd = () => {
+    const trimmed = inlineAddVal.trim();
+    if (trimmed && inlineAdding) handleAdd(inlineAdding, { name: trimmed });
+    setInlineAdding(null);
+    setInlineAddVal("");
+  };
+
   const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
     if (list === "asset") {
       const arr = [...assets]; arr[index] = { ...arr[index], entries }; setAssets(arr);
