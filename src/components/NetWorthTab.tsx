@@ -1,13 +1,18 @@
 import { useState, useMemo } from "react";
-import { Plus, TrendingUp, DollarSign, TrendingDown, Minus } from "lucide-react";
+import { Plus, TrendingUp, DollarSign, TrendingDown, Minus, Pencil, Trash2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { NetWorthEntry } from "@/data/budgetData";
 import { format, parse, subMonths } from "date-fns";
-import EditItemDialog from "./EditItemDialog";
 import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
 import NetWorthSetupPrompt from "./NetWorthSetupPrompt";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
