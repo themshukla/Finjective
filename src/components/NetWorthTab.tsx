@@ -145,7 +145,7 @@ const NetWorthTab = () => {
     const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
       <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
-        {/* Tap card body → edit dialog */}
+        {/* Left: name + item count → edit dialog */}
         <button
           className="flex-1 min-w-0 text-left"
           onClick={() => setEditTarget({ list, index: i })}
@@ -156,20 +156,15 @@ const NetWorthTab = () => {
           </p>
         </button>
 
-        {/* Value — also opens edit */}
+        {/* Right: value + chevron → opens items sheet to add/manage items */}
         <button
-          className={`text-[12px] tabular-nums shrink-0 ${accentClass}`}
-          onClick={() => setEditTarget({ list, index: i })}
+          className={`flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity`}
+          onClick={() => setViewingItems({ list, index: i })}
         >
-          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </button>
-
-        {/* Chevron → opens items sheet */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setViewingItems({ list, index: i }); }}
-          className="text-muted-foreground shrink-0 p-0.5 active:scale-90 transition-transform"
-        >
-          <ChevronRight className="h-3.5 w-3.5" />
+          <span className={`text-[12px] tabular-nums ${accentClass}`}>
+            ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </div>
     );
