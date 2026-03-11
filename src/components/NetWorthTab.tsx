@@ -106,15 +106,11 @@ const NetWorthTab = () => {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
+  const handleSaveName = (list: "asset" | "liability", index: number, name: string) => {
     if (list === "asset") {
-      const arr = [...assets];
-      arr[index] = { ...arr[index], name: String(values.name) };
-      setAssets(arr);
+      const arr = [...assets]; arr[index] = { ...arr[index], name }; setAssets(arr);
     } else {
-      const arr = [...liabilities];
-      arr[index] = { ...arr[index], name: String(values.name) };
-      setLiabilities(arr);
+      const arr = [...liabilities]; arr[index] = { ...arr[index], name }; setLiabilities(arr);
     }
   };
 
@@ -126,6 +122,13 @@ const NetWorthTab = () => {
   const handleAdd = (list: "asset" | "liability", values: Record<string, string | number>) => {
     if (list === "asset") setAssets([...assets, { name: String(values.name), value: 0, entries: [] }]);
     else setLiabilities([...liabilities, { name: String(values.name), value: 0, entries: [] }]);
+  };
+
+  const commitInlineEdit = () => {
+    if (!inlineEdit) return;
+    const trimmed = inlineVal.trim();
+    if (trimmed) handleSaveName(inlineEdit.list, inlineEdit.index, trimmed);
+    setInlineEdit(null);
   };
 
   const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
