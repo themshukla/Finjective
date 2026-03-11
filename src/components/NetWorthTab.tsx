@@ -298,9 +298,10 @@ const NetWorthTab = () => {
         />
         <button
           onClick={() => setEditTarget("addAsset")}
-          className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-1.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
         >
-          <Plus className="h-3.5 w-3.5" /> Add Asset
+          <Plus className="h-3.5 w-3.5 shrink-0" />
+          <span className="text-[15px] font-medium">Add Asset</span>
         </button>
       </section>
 
@@ -320,11 +321,13 @@ const NetWorthTab = () => {
         />
         <button
           onClick={() => setEditTarget("addLiability")}
-          className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-1.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
         >
-          <Plus className="h-3.5 w-3.5" /> Add Liability
+          <Plus className="h-3.5 w-3.5 shrink-0" />
+          <span className="text-[15px] font-medium">Add Liability</span>
         </button>
       </section>
+
 
       {/* Items sheet */}
       {itemsDialogData && (
