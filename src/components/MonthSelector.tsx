@@ -4,9 +4,10 @@ import { useBudget } from "@/context/BudgetContext";
 
 interface MonthSelectorProps {
   collapsed?: boolean;
+  activeTab?: string;
 }
 
-const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
+const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelectorProps) => {
   const { selectedMonth, setSelectedMonth, hasMonthData, netWorthSnapshots } = useBudget();
 
   const prev = subMonths(selectedMonth, 1);
