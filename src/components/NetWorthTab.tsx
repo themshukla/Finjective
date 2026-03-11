@@ -30,7 +30,7 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, clearNetWorth, latestNetWorthSnapshotKey } = useBudget();
   const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
 
   const latestLabel = latestNetWorthSnapshotKey
