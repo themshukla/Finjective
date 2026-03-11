@@ -176,7 +176,7 @@ const NetWorthTab = () => {
           className="shrink-0 max-w-[55%] min-w-0"
           onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
         >
-          <p className="text-base font-medium text-foreground truncate">{cat.name}</p>
+          <p className="text-[15px] font-medium text-foreground truncate">{cat.name}</p>
           <p className="text-[13px] text-muted-foreground">
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
@@ -185,7 +185,7 @@ const NetWorthTab = () => {
         {/* Spacer — flex-1 gap, tapping here opens items sheet via outer button */}
         <span className="flex-1" />
 
-        <span className="text-base font-medium text-foreground tabular-nums shrink-0">
+        <span className="text-[15px] font-medium text-foreground tabular-nums shrink-0">
           ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </span>
         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -248,8 +248,8 @@ const NetWorthTab = () => {
       {/* Assets section */}
       <section>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-primary">Assets</h3>
-          <span className="text-sm font-bold text-primary tabular-nums">
+          <h3 className="text-[17px] font-normal text-primary">Assets</h3>
+          <span className="text-[17px] font-normal text-primary tabular-nums">
             ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -270,8 +270,8 @@ const NetWorthTab = () => {
       {/* Liabilities section */}
       <section>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <span className="text-sm font-bold text-primary tabular-nums">
+          <h3 className="text-[17px] font-normal text-primary">Liabilities</h3>
+          <span className="text-[17px] font-normal text-primary tabular-nums">
             ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </div>
