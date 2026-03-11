@@ -28,6 +28,7 @@ const NetWorthItemsDialog = ({
 
   // editingId = id of entry being edited, null = adding new
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
