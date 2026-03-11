@@ -89,31 +89,34 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
         </button>
 
         <div className="flex gap-1">
-          {months.map((m, i) => {
+        {months.map((m, i) => {
             const hasMonthDataForPill = hasData(m.action);
+            // Today pill = filled blue; selected (non-today) pill = solid blue border; others = dashed or no border
+            const isFilledToday = m.isToday;
+            const isSelectedNonToday = m.isSelected && !m.isToday;
             return (
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
                 style={
-                  m.isSelected
+                  isFilledToday
                     ? {}
-                    : m.isToday
+                    : isSelectedNonToday
                     ? { border: "2px solid hsl(var(--primary))" }
                     : hasMonthDataForPill
                     ? {}
                     : { border: "1.5px dashed hsl(var(--muted-foreground) / 0.4)" }
                 }
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
-                  m.isSelected
+                  isFilledToday
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground active:opacity-60"
                 }`}
               >
-                <span className={`text-sm font-semibold ${m.isSelected ? "text-primary-foreground" : "text-foreground"}`}>
+                <span className={`text-sm font-semibold ${isFilledToday ? "text-primary-foreground" : isSelectedNonToday ? "text-primary" : "text-foreground"}`}>
                   {m.label}
                 </span>
-                <span className={`text-[10px] ${m.isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                <span className={`text-[10px] ${isFilledToday ? "text-primary-foreground/70" : isSelectedNonToday ? "text-primary/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
                 </span>
               </button>
