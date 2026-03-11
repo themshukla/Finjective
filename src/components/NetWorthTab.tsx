@@ -160,7 +160,7 @@ const NetWorthTab = () => {
           className="flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity"
           onClick={() => setEditTarget({ list, index: i })}
         >
-          <span className={`text-[12px] tabular-nums ${accentClass}`}>
+          <span className="text-[12px] tabular-nums text-foreground">
             ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
