@@ -7,7 +7,7 @@ interface MonthSelectorProps {
 }
 
 const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
-  const { selectedMonth, setSelectedMonth } = useBudget();
+  const { selectedMonth, setSelectedMonth, hasMonthData, netWorthSnapshots } = useBudget();
 
   const prev = subMonths(selectedMonth, 1);
   const next = addMonths(selectedMonth, 1);
@@ -25,6 +25,13 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
         { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now },
         { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
       ];
+
+  const hasData = (date: Date) => {
+    const key = format(date, "yyyy-MM");
+    const hasBudget = hasMonthData(key);
+    const hasNetWorth = netWorthSnapshots.some(s => s.month_key === key);
+    return hasBudget || hasNetWorth;
+  };
 
   if (collapsed) {
     return (
@@ -52,11 +59,13 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
           {months.map((m, i) => {
             const isCenter = i === 1;
             const isCurrent = format(m.date, "yyyy-MM") === format(now, "yyyy-MM");
+            const isEmpty = !hasData(m.action);
             return (
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                className={`flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
+                style={isEmpty ? { outline: "1.5px dashed hsl(var(--muted-foreground) / 0.45)", outlineOffset: "2px" } : undefined}
+                className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   isCenter
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground active:opacity-60"
@@ -92,3 +101,4 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 };
 
 export default MonthSelector;
+
