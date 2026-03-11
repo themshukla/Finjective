@@ -86,6 +86,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
         <div className="flex gap-1">
           {months.map((m, i) => {
+            const hasMonthDataForPill = hasData(m.action);
             return (
               <button
                 key={i}
@@ -95,7 +96,9 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
                     ? {}
                     : m.isToday
                     ? { border: "2px solid hsl(var(--primary))" }
-                    : { border: "1.5px dashed hsl(var(--muted-foreground) / 0.5)" }
+                    : hasMonthDataForPill
+                    ? { border: "1.5px solid hsl(var(--muted-foreground) / 0.4)" }
+                    : { border: "1.5px dashed hsl(var(--muted-foreground) / 0.4)" }
                 }
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   m.isSelected
