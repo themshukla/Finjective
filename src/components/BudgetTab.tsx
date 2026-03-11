@@ -383,7 +383,7 @@ const BudgetTab = () => {
           </DroppableSection>
           <button
             onClick={() => setEditing("addIncome")}
-            className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+            className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
           >
             <Plus className="h-3.5 w-3.5" /> Add Income
           </button>
