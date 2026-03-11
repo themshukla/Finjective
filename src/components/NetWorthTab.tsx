@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight, Copy, FilePlus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { NetWorthEntry } from "@/data/budgetData";
@@ -8,6 +8,7 @@ import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
 import NetWorthSetupPrompt from "./NetWorthSetupPrompt";
 import EditItemDialog from "./EditItemDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
   entries && entries.length > 0
@@ -28,7 +29,20 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey } = useBudget();
+  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
+
+  const latestLabel = latestNetWorthSnapshotKey
+    ? format(parse(latestNetWorthSnapshotKey, "yyyy-MM", new Date()), "MMM yyyy")
+    : null;
+
+  const handleImport = () => { setConfirmAction("import"); };
+  const handleFresh = () => { setConfirmAction("fresh"); };
+  const handleConfirm = () => {
+    if (confirmAction === "import") importNetWorthFromPrevious();
+    else if (confirmAction === "fresh") createEmptyNetWorth();
+    setConfirmAction(null);
+  };
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
@@ -283,6 +297,50 @@ const NetWorthTab = () => {
           {...ed}
         />
       )}
+
+      {/* Bottom action cards */}
+      <div className="flex gap-2 pb-2">
+        {latestLabel && (
+          <button
+            onClick={handleImport}
+            className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
+          >
+            <Copy className="h-4 w-4 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-[11px] font-medium">Import {latestLabel}</p>
+              <p className="text-[9px] text-muted-foreground">Copy assets & liabilities</p>
+            </div>
+          </button>
+        )}
+        <button
+          onClick={handleFresh}
+          className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
+        >
+          <FilePlus className="h-4 w-4 text-primary flex-shrink-0" />
+          <div>
+            <p className="text-[11px] font-medium">Start fresh</p>
+            <p className="text-[9px] text-muted-foreground">Blank statement</p>
+          </div>
+        </button>
+      </div>
+
+      {/* Confirm overwrite dialog */}
+      <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Replace existing statement?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              {format(selectedMonth, "MMMM yyyy")} already has a net worth statement. This will replace all assets and liabilities.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirm} className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Replace
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
