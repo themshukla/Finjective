@@ -157,12 +157,25 @@ const NetWorthItemsDialog = ({
                   className="h-9 text-sm"
                 />
                 <div className="flex gap-2 pt-1">
-                  <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
-                    Delete
-                  </Button>
-                  <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
-                    Save
-                  </Button>
+                  {confirmDeleteId === entry.id ? (
+                    <>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(null)}>
+                        No
+                      </Button>
+                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
+                        Confirm
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(entry.id)}>
+                        Delete
+                      </Button>
+                      <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
+                        Save
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
