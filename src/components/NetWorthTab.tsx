@@ -270,8 +270,8 @@ const NetWorthTab = () => {
       {/* Liabilities section */}
       <section>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <span className="text-sm font-bold text-primary tabular-nums">
+          <h3 className="text-[17px] font-normal text-primary">Liabilities</h3>
+          <span className="text-[17px] font-normal text-primary tabular-nums">
             ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </div>
