@@ -31,7 +31,7 @@ type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | 
 
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, clearNetWorth, latestNetWorthSnapshotKey } = useBudget();
-  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
+  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh" | "clear">(null);
 
   const latestLabel = latestNetWorthSnapshotKey
     ? format(parse(latestNetWorthSnapshotKey, "yyyy-MM", new Date()), "MMM yyyy")
