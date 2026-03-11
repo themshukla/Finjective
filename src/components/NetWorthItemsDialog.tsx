@@ -67,7 +67,7 @@ const NetWorthItemsDialog = ({
     if (!editingId || !name.trim() || !amount) return;
     onEntriesChange(
       entries.map((e) =>
-        e.id === editingId ? { ...e, name: name.trim(), amount: parseFloat(amount) } : e
+        e.id === editingId ? { ...e, name: name.trim(), amount: parseAmountInput(amount) } : e
       )
     );
     setEditingId(null);
