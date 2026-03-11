@@ -340,15 +340,19 @@ const NetWorthTab = () => {
       <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
         <AlertDialogContent className="max-w-[320px] rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">Replace existing statement?</AlertDialogTitle>
+            <AlertDialogTitle className="text-sm">
+              {confirmAction === "clear" ? "Clear this month?" : "Replace existing statement?"}
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs">
-              {format(selectedMonth, "MMMM yyyy")} already has a net worth statement. This will replace all assets and liabilities.
+              {confirmAction === "clear"
+                ? `This will delete the ${format(selectedMonth, "MMMM yyyy")} net worth statement and remove it from your history.`
+                : `${format(selectedMonth, "MMMM yyyy")} already has a net worth statement. This will replace all assets and liabilities.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm} className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Replace
+              {confirmAction === "clear" ? "Clear" : "Replace"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
