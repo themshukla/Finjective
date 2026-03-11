@@ -56,6 +56,10 @@ const NetWorthTab = () => {
   const [inlineVal, setInlineVal] = useState("");
   const [confirmDeleteCard, setConfirmDeleteCard] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
 
+  // inline add
+  const [inlineAdding, setInlineAdding] = useState<"asset" | "liability" | null>(null);
+  const [inlineAddVal, setInlineAddVal] = useState("");
+
   const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
   const netWorth = totalAssets - totalLiabilities;
@@ -129,6 +133,13 @@ const NetWorthTab = () => {
     const trimmed = inlineVal.trim();
     if (trimmed) handleSaveName(inlineEdit.list, inlineEdit.index, trimmed);
     setInlineEdit(null);
+  };
+
+  const commitInlineAdd = () => {
+    const trimmed = inlineAddVal.trim();
+    if (trimmed && inlineAdding) handleAdd(inlineAdding, { name: trimmed });
+    setInlineAdding(null);
+    setInlineAddVal("");
   };
 
   const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
@@ -296,13 +307,28 @@ const NetWorthTab = () => {
           containerId="assets"
           renderItem={(cat: any, i) => renderCard("asset", cat, i)}
         />
-        <button
-          onClick={() => setEditTarget("addAsset")}
-          className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
-        >
-          <Plus className="h-3.5 w-3.5 shrink-0" />
-          <span className="text-[15px] font-medium">Add Asset</span>
-        </button>
+        {inlineAdding === "asset" ? (
+          <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+            <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <input
+              autoFocus
+              value={inlineAddVal}
+              onChange={(e) => setInlineAddVal(e.target.value)}
+              onBlur={commitInlineAdd}
+              onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd(); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+              placeholder="Asset name"
+              className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => { setInlineAdding("asset"); setInlineAddVal(""); }}
+            className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+          >
+            <Plus className="h-3.5 w-3.5 shrink-0" />
+            <span className="text-[15px] font-medium">Add Asset</span>
+          </button>
+        )}
       </section>
 
       {/* Liabilities section */}
@@ -319,14 +345,30 @@ const NetWorthTab = () => {
           containerId="liabilities"
           renderItem={(cat: any, i) => renderCard("liability", cat, i)}
         />
-        <button
-          onClick={() => setEditTarget("addLiability")}
-          className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
-        >
-          <Plus className="h-3.5 w-3.5 shrink-0" />
-          <span className="text-[15px] font-medium">Add Liability</span>
-        </button>
+        {inlineAdding === "liability" ? (
+          <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+            <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <input
+              autoFocus
+              value={inlineAddVal}
+              onChange={(e) => setInlineAddVal(e.target.value)}
+              onBlur={commitInlineAdd}
+              onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd(); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+              placeholder="Liability name"
+              className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => { setInlineAdding("liability"); setInlineAddVal(""); }}
+            className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+          >
+            <Plus className="h-3.5 w-3.5 shrink-0" />
+            <span className="text-[15px] font-medium">Add Liability</span>
+          </button>
+        )}
       </section>
+
 
 
       {/* Items sheet */}
