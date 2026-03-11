@@ -272,27 +272,6 @@ const BudgetTab = () => {
 
   const getEditingData = () => {
     if (!editing) return null;
-    if (editing === "addIncome" || editing === "addExpense") {
-      return {
-        title: editing === "addIncome" ? "Add Income" : "Add Expense",
-        fields: [
-          { key: "name", label: "Name", type: "text" as const, value: "" },
-          { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-        ],
-        onSave: (v: Record<string, string | number>) => handleAdd(editing === "addIncome" ? "income" : "expense", v),
-      };
-    }
-    if (typeof editing === "object" && "type" in editing && editing.type === "addCustomItem") {
-      const section = customSections.find(s => s.id === editing.sectionId);
-      return {
-        title: `Add to ${section?.name ?? "Section"}`,
-        fields: [
-          { key: "name", label: "Name", type: "text" as const, value: "" },
-          { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-        ],
-        onSave: (v: Record<string, string | number>) => handleAddCustomItem(editing.sectionId, v),
-      };
-    }
     if (typeof editing === "object" && "list" in editing && editing.list === "custom") {
       const section = customSections.find(s => s.id === editing.sectionId);
       const cat = section?.items[editing.index];
@@ -320,6 +299,17 @@ const BudgetTab = () => {
       };
     }
     return null;
+  };
+
+  const commitInlineAdd = (list: "income" | "expense" | string) => {
+    const name = inlineAddVal.trim();
+    if (name) {
+      if (list === "income") handleAdd("income", { name, budgeted: 0, spent: 0 });
+      else if (list === "expense") handleAdd("expense", { name, budgeted: 0, spent: 0 });
+      else handleAddCustomItem(list, { name, budgeted: 0, spent: 0 });
+    }
+    setInlineAdding(null);
+    setInlineAddVal("");
   };
 
   const ed = getEditingData();
