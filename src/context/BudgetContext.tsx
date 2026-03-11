@@ -161,9 +161,16 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     saveInitialSnapshot([], [], monthKey);
   }, [saveInitialSnapshot, monthKey]);
 
-  // Load assets/liabilities for the selected month from snapshots
+  // Track which month's net worth we've already loaded to avoid re-loading on saves
+  const netWorthLoadedMonthRef = useRef<string>("");
+
+  // Load assets/liabilities for the selected month from snapshots.
+  // Only runs when navigating to a new month (not after every save).
   useEffect(() => {
     if (!snapshotsLoaded) return;
+    if (netWorthLoadedMonthRef.current === monthKey) return;
+    netWorthLoadedMonthRef.current = monthKey;
+
     const snapshot = netWorthSnapshots.find(s => s.month_key === monthKey);
     if (snapshot) {
       setAssets(snapshot.assets?.length ? snapshot.assets : []);
