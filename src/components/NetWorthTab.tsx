@@ -29,8 +29,20 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey, netWorthNeedsSetup: _nwns } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey } = useBudget();
   const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
+
+  const latestLabel = latestNetWorthSnapshotKey
+    ? format(parse(latestNetWorthSnapshotKey, "yyyy-MM", new Date()), "MMM yyyy")
+    : null;
+
+  const handleImport = () => { setConfirmAction("import"); };
+  const handleFresh = () => { setConfirmAction("fresh"); };
+  const handleConfirm = () => {
+    if (confirmAction === "import") importNetWorthFromPrevious();
+    else if (confirmAction === "fresh") createEmptyNetWorth();
+    setConfirmAction(null);
+  };
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
