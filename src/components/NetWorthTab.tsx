@@ -188,7 +188,7 @@ const NetWorthTab = () => {
                 if (e.key === "Enter") commitInlineEdit();
                 if (e.key === "Escape") setInlineEdit(null);
               }}
-              className="text-[15px] font-medium bg-transparent border-0 border-b border-primary outline-none w-full text-foreground pb-0 leading-tight"
+              className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground pb-0 leading-tight"
             />
           ) : (
             <p
