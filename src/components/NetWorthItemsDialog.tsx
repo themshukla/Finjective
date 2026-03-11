@@ -221,6 +221,7 @@ const NetWorthItemsDialog = ({
       </div>
     </div>
   );
+
 };
 
 export default NetWorthItemsDialog;
