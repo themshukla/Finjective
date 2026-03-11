@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight, Copy, FilePlus } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight, Copy, FilePlus, Trash2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { NetWorthEntry } from "@/data/budgetData";
@@ -8,6 +8,7 @@ import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
 import NetWorthSetupPrompt from "./NetWorthSetupPrompt";
 import EditItemDialog from "./EditItemDialog";
+import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
@@ -49,6 +50,11 @@ const NetWorthTab = () => {
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
+
+  // inline card name editing
+  const [inlineEdit, setInlineEdit] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
+  const [inlineVal, setInlineVal] = useState("");
+  const [confirmDeleteCard, setConfirmDeleteCard] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
 
   const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
@@ -100,15 +106,11 @@ const NetWorthTab = () => {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
+  const handleSaveName = (list: "asset" | "liability", index: number, name: string) => {
     if (list === "asset") {
-      const arr = [...assets];
-      arr[index] = { ...arr[index], name: String(values.name) };
-      setAssets(arr);
+      const arr = [...assets]; arr[index] = { ...arr[index], name }; setAssets(arr);
     } else {
-      const arr = [...liabilities];
-      arr[index] = { ...arr[index], name: String(values.name) };
-      setLiabilities(arr);
+      const arr = [...liabilities]; arr[index] = { ...arr[index], name }; setLiabilities(arr);
     }
   };
 
@@ -122,6 +124,13 @@ const NetWorthTab = () => {
     else setLiabilities([...liabilities, { name: String(values.name), value: 0, entries: [] }]);
   };
 
+  const commitInlineEdit = () => {
+    if (!inlineEdit) return;
+    const trimmed = inlineVal.trim();
+    if (trimmed) handleSaveName(inlineEdit.list, inlineEdit.index, trimmed);
+    setInlineEdit(null);
+  };
+
   const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
     if (list === "asset") {
       const arr = [...assets]; arr[index] = { ...arr[index], entries }; setAssets(arr);
@@ -130,7 +139,7 @@ const NetWorthTab = () => {
     }
   };
 
-  // ── EditItemDialog data ──────────────────────────────────────────────────────
+  // ── EditItemDialog — only for Add ───────────────────────────────────────────
 
   const getEditingData = () => {
     if (!editTarget) return null;
@@ -142,13 +151,7 @@ const NetWorthTab = () => {
         onSave: (v: Record<string, string | number>) => handleAdd(list, v),
       };
     }
-    const item = editTarget.list === "asset" ? assets[editTarget.index] : liabilities[editTarget.index];
-    return {
-      title: `Edit ${item.name}`,
-      fields: [{ key: "name", label: "Name", type: "text" as const, value: item.name }],
-      onSave: (v: Record<string, string | number>) => handleSave(editTarget.list, editTarget.index, v),
-      onDelete: () => handleDelete(editTarget.list, editTarget.index),
-    };
+    return null;
   };
 
   const ed = getEditingData();
@@ -166,32 +169,65 @@ const NetWorthTab = () => {
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
+    const isEditing = inlineEdit?.list === list && inlineEdit?.index === i;
+
     return (
-      <button
-        className="w-full rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
-        onClick={() => setViewingItems({ list, index: i })}
+      <div
+        className="w-full rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 select-none text-left cursor-pointer"
+        onClick={() => { if (!isEditing) setViewingItems({ list, index: i }); }}
       >
-        {/* Name — shrinks to content width only; tap opens edit/delete */}
-        <span
-          className="shrink-0 max-w-[55%] min-w-0"
-          onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
-        >
-          <p className="text-[15px] font-medium text-foreground truncate">{cat.name}</p>
+        {/* Name — tap to edit inline */}
+        <span className="shrink-0 max-w-[55%] min-w-0" onClick={(e) => e.stopPropagation()}>
+          {isEditing ? (
+            <input
+              autoFocus
+              value={inlineVal}
+              onChange={(e) => setInlineVal(e.target.value)}
+              onBlur={commitInlineEdit}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitInlineEdit();
+                if (e.key === "Escape") setInlineEdit(null);
+              }}
+              className="text-[15px] font-medium bg-transparent border-0 border-b border-primary outline-none w-full text-foreground pb-0 leading-tight"
+            />
+          ) : (
+            <p
+              className="text-[15px] font-medium text-foreground truncate cursor-text"
+              onClick={(e) => {
+                e.stopPropagation();
+                setInlineEdit({ list, index: i });
+                setInlineVal(item.name);
+              }}
+            >
+              {cat.name}
+            </p>
+          )}
           <p className="text-[13px] text-muted-foreground">
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </span>
 
-        {/* Spacer — flex-1 gap, tapping here opens items sheet via outer button */}
         <span className="flex-1" />
 
-        <span className="text-[15px] font-medium text-foreground tabular-nums shrink-0">
-          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </span>
-        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-      </button>
+        {isEditing ? (
+          <button
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+            onClick={(e) => { e.stopPropagation(); setConfirmDeleteCard({ list, index: i }); setInlineEdit(null); }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        ) : (
+          <>
+            <span className="text-[15px] font-medium text-foreground tabular-nums shrink-0">
+              ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          </>
+        )}
+      </div>
     );
   };
+
 
   return (
     <div className="space-y-5">
@@ -357,8 +393,28 @@ const NetWorthTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirm delete card dialog */}
+      <AlertDialog open={!!confirmDeleteCard} onOpenChange={() => setConfirmDeleteCard(null)}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Delete this card?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">This will remove the card and all its items.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { if (confirmDeleteCard) { handleDelete(confirmDeleteCard.list, confirmDeleteCard.index); setConfirmDeleteCard(null); } }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
 export default NetWorthTab;
+
