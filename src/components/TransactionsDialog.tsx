@@ -73,7 +73,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     const newTx: Transaction = {
       id: Date.now().toString(),
       date: format(date, "yyyy-MM-dd"),
-      amount: Number(amount),
+      amount: parseAmountInput(amount),
       merchant: merchant.trim(),
     };
     onUpdate([...transactions, newTx]);
