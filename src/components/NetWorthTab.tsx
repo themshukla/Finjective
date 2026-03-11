@@ -145,10 +145,10 @@ const NetWorthTab = () => {
     const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
       <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
-        {/* Left: name + item count → edit dialog */}
+        {/* Left: name + item count → opens items sheet */}
         <button
           className="flex-1 min-w-0 text-left"
-          onClick={() => setEditTarget({ list, index: i })}
+          onClick={() => setViewingItems({ list, index: i })}
         >
           <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
           <p className="text-[10px] text-muted-foreground">
@@ -156,10 +156,10 @@ const NetWorthTab = () => {
           </p>
         </button>
 
-        {/* Right: value + chevron → opens items sheet to add/manage items */}
+        {/* Right: value + chevron → edit/delete dialog */}
         <button
-          className={`flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity`}
-          onClick={() => setViewingItems({ list, index: i })}
+          className="flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity"
+          onClick={() => setEditTarget({ list, index: i })}
         >
           <span className={`text-[12px] tabular-nums ${accentClass}`}>
             ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
