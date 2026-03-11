@@ -76,12 +76,14 @@ const NetWorthItemsDialog = ({
 
   const cancelEdit = () => {
     setEditingId(null);
+    setConfirmDeleteId(null);
     setName("");
     setAmount("");
   };
 
   // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDelete = (id: string) => {
+    setConfirmDeleteId(null);
     if (editingId === id) cancelEdit();
     onEntriesChange(entries.filter((e) => e.id !== id));
   };
