@@ -44,7 +44,7 @@ const Index = () => {
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
-              <Tabs defaultValue="budget" className="w-full h-full flex flex-col">
+              <Tabs defaultValue="budget" onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                 <PullToRefresh
 onRefresh={() => new Promise(r => setTimeout(r, 600))}
                   onScroll={handleScroll}
