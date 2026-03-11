@@ -28,6 +28,7 @@ const NetWorthItemsDialog = ({
 
   // editingId = id of entry being edited, null = adding new
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -75,12 +76,14 @@ const NetWorthItemsDialog = ({
 
   const cancelEdit = () => {
     setEditingId(null);
+    setConfirmDeleteId(null);
     setName("");
     setAmount("");
   };
 
   // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDelete = (id: string) => {
+    setConfirmDeleteId(null);
     if (editingId === id) cancelEdit();
     onEntriesChange(entries.filter((e) => e.id !== id));
   };
@@ -154,12 +157,25 @@ const NetWorthItemsDialog = ({
                   className="h-9 text-sm"
                 />
                 <div className="flex gap-2 pt-1">
-                  <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
-                    Delete
-                  </Button>
-                  <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
-                    Save
-                  </Button>
+                  {confirmDeleteId === entry.id ? (
+                    <>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(null)}>
+                        No
+                      </Button>
+                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
+                        Confirm
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(entry.id)}>
+                        Delete
+                      </Button>
+                      <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
+                        Save
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
