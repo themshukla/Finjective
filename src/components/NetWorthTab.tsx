@@ -81,6 +81,10 @@ const NetWorthTab = () => {
         const cutoff = format(subMonths(now, 11), "yyyy-MM");
         return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
       }
+      case "5Y": {
+        const cutoff = format(subMonths(now, 59), "yyyy-MM");
+        return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
       case "ALL":
       default:
         return allChartData;
