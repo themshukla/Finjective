@@ -101,7 +101,7 @@ const NetWorthItemsDialog = ({
     <div className="absolute inset-0 z-50 flex flex-col justify-end overflow-hidden rounded-[40px]">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 transition-opacity duration-300"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
         style={{ opacity: visible ? 1 : 0 }}
         onClick={handleClose}
       />
@@ -183,7 +183,7 @@ const NetWorthItemsDialog = ({
               <div
                 key={entry.id}
                 onClick={() => openEdit(entry)}
-                className="flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                className={`flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-all duration-200 ${editingId ? "opacity-30 pointer-events-none" : ""}`}
               >
                 <p className="text-[14px] text-foreground truncate flex-1 min-w-0">{entry.name}</p>
                 <span className="text-[14px] tabular-nums text-foreground ml-2 shrink-0">
