@@ -191,7 +191,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
               ) : (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                  className={`flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-all duration-200 ${editingId ? "opacity-30 pointer-events-none" : ""}`}
                   onClick={() => startEditing(tx)}
                 >
                   <div className="min-w-0 flex-1">
