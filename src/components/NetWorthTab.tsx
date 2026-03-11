@@ -39,9 +39,11 @@ const NetWorthTab = () => {
 
   const handleImport = () => { setConfirmAction("import"); };
   const handleFresh = () => { setConfirmAction("fresh"); };
+  const handleClear = () => { setConfirmAction("clear"); };
   const handleConfirm = () => {
     if (confirmAction === "import") importNetWorthFromPrevious();
     else if (confirmAction === "fresh") createEmptyNetWorth();
+    else if (confirmAction === "clear") clearNetWorth();
     setConfirmAction(null);
   };
   const [filter, setFilter] = useState<TimeFilter>("YTD");
