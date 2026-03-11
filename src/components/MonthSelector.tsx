@@ -64,10 +64,15 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                style={isEmpty && !m.isToday ? {
-                  outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
-                  outlineOffset: "3px"
-                } : undefined}
+                style={{
+                  ...(isEmpty && !m.isToday ? {
+                    outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
+                    outlineOffset: "3px"
+                  } : {}),
+                  ...(m.isToday && !m.isSelected ? {
+                    border: "2px solid hsl(var(--primary))"
+                  } : {})
+                }}
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   m.isSelected
                     ? "bg-primary text-primary-foreground"
@@ -80,10 +85,6 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
                 <span className={`text-[10px] ${m.isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
                 </span>
-                {/* Solid underline for Today pill when not selected */}
-                {m.isToday && !m.isSelected && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
-                )}
               </button>
             );
           })}
