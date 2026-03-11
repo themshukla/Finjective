@@ -210,13 +210,13 @@ const NetWorthTab = () => {
       </div>
 
       {/* Line chart */}
-      <div className="rounded-xl bg-card border border-border p-3 pb-3">
+      <div className="pb-1">
         {chartData.length < 2 ? (
           <p className="text-xs text-muted-foreground text-center py-10">No history yet. Data will appear once you have more than one month recorded.</p>
         ) : (
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border) / 0.25)" vertical={true} horizontal={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <YAxis hide />
