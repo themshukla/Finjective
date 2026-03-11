@@ -154,9 +154,6 @@ const NetWorthItemsDialog = ({
                   className="h-9 text-sm"
                 />
                 <div className="flex gap-2 pt-1">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={cancelEdit}>
-                    Cancel
-                  </Button>
                   <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
                     Delete
                   </Button>
