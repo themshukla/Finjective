@@ -401,6 +401,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       latestNetWorthSnapshotKey: getLatestNetWorthSnapshotKey(),
       importNetWorthFromPrevious,
       createEmptyNetWorth,
+      clearNetWorth,
       snapshotsLoaded,
     }}>
       {children}
