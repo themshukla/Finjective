@@ -22,12 +22,39 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
         { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: true },
         { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
       ]
-    : [
-        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
-        { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), todayLabel: "Today", action: now, isSelected: false, isToday: true },
-        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: false },
-        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
-      ];
+    : (() => {
+        const prevIsToday = format(prev, "yyyy-MM") === format(now, "yyyy-MM");
+        const nextIsToday = format(next, "yyyy-MM") === format(now, "yyyy-MM");
+        const todayEntry = { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), todayLabel: "Today", action: now, isSelected: false, isToday: true };
+        const selectedEntry = { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: false };
+
+        if (prevIsToday) {
+          // e.g. viewing Apr when today=Mar: show [Feb] [Today=Mar] [Apr] [May]
+          const twoBefore = subMonths(now, 1);
+          return [
+            { date: twoBefore, label: format(twoBefore, "MMM"), subLabel: format(twoBefore, "yyyy"), action: twoBefore, isSelected: false, isToday: false },
+            todayEntry,
+            selectedEntry,
+            { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
+          ];
+        } else if (nextIsToday) {
+          // e.g. viewing Feb when today=Mar: show [Jan] [Feb] [Today=Mar] [Apr]
+          const twoAfter = addMonths(now, 1);
+          return [
+            { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
+            selectedEntry,
+            todayEntry,
+            { date: twoAfter, label: format(twoAfter, "MMM"), subLabel: format(twoAfter, "yyyy"), action: twoAfter, isSelected: false, isToday: false },
+          ];
+        } else {
+          return [
+            { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
+            todayEntry,
+            selectedEntry,
+            { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
+          ];
+        }
+      })();
 
   const hasData = (date: Date) => {
     const key = format(date, "yyyy-MM");
