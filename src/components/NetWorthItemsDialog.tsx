@@ -184,6 +184,24 @@ const SwipeableRow = ({
         )}
       </div>
     </div>
+
+    <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+      <AlertDialogContent className="max-w-[320px] rounded-xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-sm">Delete item?</AlertDialogTitle>
+          <AlertDialogDescription className="text-xs">This action cannot be undone.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="h-8 text-xs" onClick={() => { setTranslateX(0); setSwipeOpenId(null); }}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => onDelete(entry.id)}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
