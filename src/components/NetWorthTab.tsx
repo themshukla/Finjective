@@ -212,7 +212,8 @@ const NetWorthTab = () => {
         {isEditing ? (
           <button
             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
-            onClick={(e) => { e.stopPropagation(); setConfirmDeleteCard({ list, index: i }); setInlineEdit(null); }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => { e.stopPropagation(); setInlineEdit(null); setConfirmDeleteCard({ list, index: i }); }}
           >
             <Trash2 className="h-4 w-4" />
           </button>
