@@ -121,22 +121,45 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     return keys.length > 0 ? keys[keys.length - 1] : null;
   }, [netWorthSnapshots, monthKey]);
 
+  const saveInitialSnapshot = useCallback(async (newAssets: AssetItem[], newLiabilities: LiabilityItem[], key: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const totalAssets = newAssets.reduce((s, a) => s + (a.entries?.length ? a.entries.reduce((sum, e) => sum + e.amount, 0) : (a.value ?? 0)), 0);
+    const totalLiabilities = newLiabilities.reduce((s, l) => s + (l.entries?.length ? l.entries.reduce((sum, e) => sum + e.amount, 0) : (l.value ?? 0)), 0);
+    const netWorth = totalAssets - totalLiabilities;
+    const { error } = await (supabase.from('net_worth_snapshots') as any).upsert({
+      user_id: user.id,
+      month_key: key,
+      net_worth: netWorth,
+      assets: newAssets as unknown as Record<string, unknown>[],
+      liabilities: newLiabilities as unknown as Record<string, unknown>[],
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,month_key' });
+    if (!error) {
+      setNetWorthSnapshots(prev => {
+        const existing = prev.findIndex(s => s.month_key === key);
+        const updated = { month_key: key, net_worth: netWorth, assets: newAssets, liabilities: newLiabilities };
+        if (existing >= 0) { const arr = [...prev]; arr[existing] = updated; return arr; }
+        return [...prev, updated].sort((a, b) => a.month_key.localeCompare(b.month_key));
+      });
+    }
+  }, []);
+
   const importNetWorthFromPrevious = useCallback(() => {
     const sourceKey = getLatestNetWorthSnapshotKey();
     const source = sourceKey ? netWorthSnapshots.find(s => s.month_key === sourceKey) : null;
-    if (source) {
-      setAssets(source.assets);
-      setLiabilities(source.liabilities);
-    } else {
-      setAssets([]);
-      setLiabilities([]);
-    }
-  }, [netWorthSnapshots, getLatestNetWorthSnapshotKey]);
+    const newAssets = source ? source.assets : [];
+    const newLiabilities = source ? source.liabilities : [];
+    setAssets(newAssets);
+    setLiabilities(newLiabilities);
+    saveInitialSnapshot(newAssets, newLiabilities, monthKey);
+  }, [netWorthSnapshots, getLatestNetWorthSnapshotKey, saveInitialSnapshot, monthKey]);
 
   const createEmptyNetWorth = useCallback(() => {
     setAssets([]);
     setLiabilities([]);
-  }, []);
+    saveInitialSnapshot([], [], monthKey);
+  }, [saveInitialSnapshot, monthKey]);
 
   // Load assets/liabilities for the selected month from snapshots
   useEffect(() => {
