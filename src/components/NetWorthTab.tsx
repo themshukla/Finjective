@@ -15,14 +15,15 @@ const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
     ? entries.reduce((s, e) => s + e.amount, 0)
     : (fallback ?? 0);
 
-type TimeFilter = "1W" | "1M" | "6M" | "YTD" | "1Y" | "ALL";
+type TimeFilter = "1M" | "3M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
 const FILTERS: { label: string; value: TimeFilter }[] = [
-  { label: "1W", value: "1W" },
   { label: "1M", value: "1M" },
+  { label: "3M", value: "3M" },
   { label: "6M", value: "6M" },
   { label: "YTD", value: "YTD" },
   { label: "1Y", value: "1Y" },
+  { label: "5Y", value: "5Y" },
   { label: "ALL", value: "ALL" },
 ];
 
