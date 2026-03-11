@@ -41,6 +41,8 @@ const SwipeableRow = ({
 
   const isOpen = swipeOpenId === entry.id;
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   // swipe state
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
