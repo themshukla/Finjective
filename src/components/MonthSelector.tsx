@@ -58,8 +58,10 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
   const hasData = (date: Date) => {
     const key = format(date, "yyyy-MM");
+    const hasBudget = hasMonthData(key);
     const snap = netWorthSnapshots.find(s => s.month_key === key);
-    return !!snap && (snap.assets.length > 0 || snap.liabilities.length > 0);
+    const hasNetWorth = !!snap && (snap.assets.length > 0 || snap.liabilities.length > 0);
+    return hasBudget || hasNetWorth;
   };
 
   if (collapsed) {
