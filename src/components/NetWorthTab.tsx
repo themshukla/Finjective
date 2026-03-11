@@ -15,14 +15,15 @@ const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
     ? entries.reduce((s, e) => s + e.amount, 0)
     : (fallback ?? 0);
 
-type TimeFilter = "1W" | "1M" | "6M" | "YTD" | "1Y" | "ALL";
+type TimeFilter = "1M" | "3M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
 const FILTERS: { label: string; value: TimeFilter }[] = [
-  { label: "1W", value: "1W" },
   { label: "1M", value: "1M" },
+  { label: "3M", value: "3M" },
   { label: "6M", value: "6M" },
   { label: "YTD", value: "YTD" },
   { label: "1Y", value: "1Y" },
+  { label: "5Y", value: "5Y" },
   { label: "ALL", value: "ALL" },
 ];
 
@@ -64,9 +65,12 @@ const NetWorthTab = () => {
     const currentMonthKey = format(now, "yyyy-MM");
     const currentYear = format(now, "yyyy");
     switch (filter) {
-      case "1W":
       case "1M":
         return allChartData.filter((d) => d.monthKey === currentMonthKey);
+      case "3M": {
+        const cutoff = format(subMonths(now, 2), "yyyy-MM");
+        return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
       case "6M": {
         const cutoff = format(subMonths(now, 5), "yyyy-MM");
         return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
@@ -75,6 +79,10 @@ const NetWorthTab = () => {
         return allChartData.filter((d) => d.monthKey.startsWith(currentYear) && d.monthKey <= currentMonthKey);
       case "1Y": {
         const cutoff = format(subMonths(now, 11), "yyyy-MM");
+        return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
+      case "5Y": {
+        const cutoff = format(subMonths(now, 59), "yyyy-MM");
         return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
       }
       case "ALL":
