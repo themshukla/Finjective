@@ -375,12 +375,27 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
-          <button
-            onClick={() => setEditing("addIncome")}
-            className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add Income
-          </button>
+          {inlineAdding === "income" ? (
+            <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+              <input
+                autoFocus
+                value={inlineAddVal}
+                onChange={(e) => setInlineAddVal(e.target.value)}
+                onBlur={() => commitInlineAdd("income")}
+                onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd("income"); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                placeholder="Income name"
+                className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => { setInlineAdding("income"); setInlineAddVal(""); }}
+              className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-[15px] font-medium">Add Income</span>
+            </button>
+          )}
         </section>
 
         {/* Expenses section */}
@@ -406,12 +421,27 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
-          <button
-            onClick={() => setEditing("addExpense")}
-            className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add Expense
-          </button>
+          {inlineAdding === "expense" ? (
+            <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+              <input
+                autoFocus
+                value={inlineAddVal}
+                onChange={(e) => setInlineAddVal(e.target.value)}
+                onBlur={() => commitInlineAdd("expense")}
+                onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd("expense"); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                placeholder="Expense name"
+                className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => { setInlineAdding("expense"); setInlineAddVal(""); }}
+              className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-[15px] font-medium">Add Expense</span>
+            </button>
+          )}
         </section>
 
         {customSections.length === 0 && (
@@ -454,19 +484,35 @@ const BudgetTab = () => {
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap the add button below.</p>
+                    <p className="text-xs text-muted-foreground text-center py-4">No items yet.</p>
                   )}
                 </SortableContext>
               </DroppableSection>
-              <button
-                onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })}
-                className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" /> Add {section.name} Item
-              </button>
+              {inlineAdding === section.id ? (
+                <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={inlineAddVal}
+                    onChange={(e) => setInlineAddVal(e.target.value)}
+                    onBlur={() => commitInlineAdd(section.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd(section.id); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                    placeholder={`${section.name} item name`}
+                    className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setInlineAdding(section.id); setInlineAddVal(""); }}
+                  className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+                >
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
+                  <span className="text-[15px] font-medium">Add {section.name} Item</span>
+                </button>
+              )}
             </section>
           );
         })}
+
 
         {customSections.length > 0 && (
           <div className="flex justify-center mt-5">
