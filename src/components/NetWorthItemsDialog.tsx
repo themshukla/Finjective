@@ -187,8 +187,8 @@ const NetWorthItemsDialog = ({
                 onClick={() => openEdit(entry)}
                 className="w-full flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2.5 text-left active:opacity-70 transition-opacity"
               >
-                <span className="text-sm font-medium text-foreground">{entry.name}</span>
-                <span className="text-sm font-bold tabular-nums text-foreground">
+                <span className="text-[14px] text-foreground">{entry.name}</span>
+                <span className="text-[14px] tabular-nums text-foreground">
                   ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </span>
               </button>
