@@ -46,6 +46,7 @@ interface BudgetState {
   latestNetWorthSnapshotKey: string | null;
   importNetWorthFromPrevious: () => void;
   createEmptyNetWorth: () => void;
+  clearNetWorth: () => void;
   snapshotsLoaded: boolean;
 }
 
