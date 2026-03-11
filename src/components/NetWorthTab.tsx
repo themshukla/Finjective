@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
   entries && entries.length > 0
     ? entries.reduce((s, e) => s + e.amount, 0)
@@ -31,14 +30,24 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
   { label: "ALL", value: "ALL" },
 ];
 
-
-
+type EditTarget = { list: "asset" | "liability"; index: number } | null;
+type AddTarget = "asset" | "liability" | null;
 
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
-  const [editing, setEditing] = useState<{ list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null>(null);
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
+
+  // Rename dialog state
+  const [editTarget, setEditTarget] = useState<EditTarget>(null);
+  const [editName, setEditName] = useState("");
+
+  // Delete confirm state
+  const [deleteTarget, setDeleteTarget] = useState<EditTarget>(null);
+
+  // Add dialog state
+  const [addTarget, setAddTarget] = useState<AddTarget>(null);
+  const [addName, setAddName] = useState("");
 
   const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
@@ -88,29 +97,54 @@ const NetWorthTab = () => {
 
   const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
 
-  // Edit (rename only)
-  const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
-    if (list === "asset") {
+  // Rename handlers
+  const openEdit = (list: "asset" | "liability", index: number) => {
+    const name = list === "asset" ? assets[index].name : liabilities[index].name;
+    setEditTarget({ list, index });
+    setEditName(name);
+  };
+
+  const confirmRename = () => {
+    if (!editTarget || !editName.trim()) return;
+    if (editTarget.list === "asset") {
       const arr = [...assets];
-      arr[index] = { ...arr[index], name: String(values.name) };
+      arr[editTarget.index] = { ...arr[editTarget.index], name: editName.trim() };
       setAssets(arr);
     } else {
       const arr = [...liabilities];
-      arr[index] = { ...arr[index], name: String(values.name) };
+      arr[editTarget.index] = { ...arr[editTarget.index], name: editName.trim() };
       setLiabilities(arr);
     }
+    setEditTarget(null);
+    setEditName("");
   };
 
-  const handleAdd = (list: "asset" | "liability", values: Record<string, string | number>) => {
-    if (list === "asset") setAssets([...assets, { name: String(values.name), value: 0, entries: [] }]);
-    else setLiabilities([...liabilities, { name: String(values.name), value: 0, entries: [] }]);
+  // Delete handlers
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.list === "asset") {
+      const a = [...assets]; a.splice(deleteTarget.index, 1); setAssets(a);
+    } else {
+      const a = [...liabilities]; a.splice(deleteTarget.index, 1); setLiabilities(a);
+    }
+    setDeleteTarget(null);
   };
 
-  const handleDelete = (list: "asset" | "liability", index: number) => {
-    if (list === "asset") { const a = [...assets]; a.splice(index, 1); setAssets(a); }
-    else { const a = [...liabilities]; a.splice(index, 1); setLiabilities(a); }
+  // Add handlers
+  const openAdd = (list: "asset" | "liability") => {
+    setAddTarget(list);
+    setAddName("");
   };
 
+  const confirmAdd = () => {
+    if (!addTarget || !addName.trim()) return;
+    if (addTarget === "asset") setAssets([...assets, { name: addName.trim(), value: 0, entries: [] }]);
+    else setLiabilities([...liabilities, { name: addName.trim(), value: 0, entries: [] }]);
+    setAddTarget(null);
+    setAddName("");
+  };
+
+  // Entries change
   const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
     if (list === "asset") {
       const arr = [...assets];
@@ -123,33 +157,8 @@ const NetWorthTab = () => {
     }
   };
 
-  const getEditingData = () => {
-    if (!editing) return null;
-    if (editing === "addAsset" || editing === "addLiability") {
-      const list = editing === "addAsset" ? "asset" : "liability";
-      return {
-        title: `Add ${list === "asset" ? "Asset" : "Liability"}`,
-        fields: [
-          { key: "name", label: "Name", type: "text" as const, value: "" },
-        ],
-        onSave: (v: Record<string, string | number>) => handleAdd(list, v),
-      };
-    }
-    const item = editing.list === "asset" ? assets[editing.index] : liabilities[editing.index];
-    return {
-      title: `Rename`,
-      fields: [
-        { key: "name", label: "Name", type: "text" as const, value: item.name },
-      ],
-      onSave: (v: Record<string, string | number>) => handleSave(editing.list, editing.index, v),
-      onDelete: () => handleDelete(editing.list, editing.index),
-    };
-  };
-
-  const ed = getEditingData();
   const assetIcons = [TrendingUp, DollarSign];
 
-  // Items dialog data
   const itemsDialogData = viewingItems
     ? viewingItems.list === "asset"
       ? { item: assets[viewingItems.index], list: "asset" as const, index: viewingItems.index }
@@ -157,6 +166,50 @@ const NetWorthTab = () => {
     : null;
 
   if (netWorthNeedsSetup) return <NetWorthSetupPrompt />;
+
+  const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
+    const item = list === "asset" ? assets[i] : liabilities[i];
+    const cardValue = getCardValue(item?.entries, item?.value);
+    const accentClass = list === "asset" ? "text-income" : "text-expense";
+    return (
+      <div className="w-full rounded-xl bg-card border border-border px-3 py-2 flex items-center gap-1">
+        {/* Main tap area → open items */}
+        <button
+          onClick={() => setViewingItems({ list, index: i })}
+          className="flex-1 min-w-0 text-left"
+        >
+          <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
+          <p className="text-[10px] text-muted-foreground">
+            {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
+          </p>
+        </button>
+
+        {/* Value */}
+        <button
+          onClick={() => setViewingItems({ list, index: i })}
+          className={`text-[12px] tabular-nums shrink-0 mr-2 ${accentClass}`}
+        >
+          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </button>
+
+        {/* Edit icon */}
+        <button
+          onClick={(e) => { e.stopPropagation(); openEdit(list, i); }}
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 shrink-0"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Delete icon */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setDeleteTarget({ list, index: i }); }}
+          className="text-muted-foreground hover:text-destructive transition-colors p-1 shrink-0"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-5">
@@ -188,18 +241,8 @@ const NetWorthTab = () => {
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <CartesianGrid
-                  strokeDasharray="0"
-                  stroke="hsl(var(--border) / 0.25)"
-                  vertical={true}
-                  horizontal={false}
-                />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+                <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border) / 0.25)" vertical={true} horizontal={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip
                   contentStyle={{
@@ -215,14 +258,7 @@ const NetWorthTab = () => {
                   ]}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
-                <Line
-                  type="monotone"
-                  dataKey="netWorth"
-                  stroke={lineColor}
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }}
-                />
+                <Line type="monotone" dataKey="netWorth" stroke={lineColor} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -235,9 +271,7 @@ const NetWorthTab = () => {
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={`flex-1 py-1.5 text-[11px] font-semibold rounded-full transition-all ${
-                filter === f.value
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                filter === f.value ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {f.label}
@@ -246,13 +280,11 @@ const NetWorthTab = () => {
         </div>
       </div>
 
-      {/* Assets & Liabilities summary */}
-
       {/* Assets section */}
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Assets</h3>
-          <button onClick={() => setEditing("addAsset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+          <button onClick={() => openAdd("asset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
@@ -260,32 +292,7 @@ const NetWorthTab = () => {
           items={assets.map((a, i) => ({ name: a.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(a.entries, a.value), _iconIndex: i, _entries: a.entries ?? [] } as any))}
           onReorder={(reordered) => setAssets(reordered.map((r: any, i: number) => ({ ...assets[i], name: r.name, value: r._value ?? 0, entries: r._entries ?? [] })))}
           containerId="assets"
-          renderItem={(cat: any, i) => {
-            const cardValue = getCardValue(assets[i]?.entries, assets[i]?.value);
-            const Icon = assetIcons[i % assetIcons.length];
-            return (
-              <button
-                onClick={() => setViewingItems({ list: "asset", index: i })}
-                className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform"
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {(assets[i]?.entries?.length ?? 0)} item{(assets[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <p className="text-[12px] tabular-nums text-foreground">
-                      ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            );
-          }}
+          renderItem={(cat: any, i) => renderCard("asset", cat, i)}
         />
       </section>
 
@@ -293,7 +300,7 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <button onClick={() => setEditing("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+          <button onClick={() => openAdd("liability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
@@ -301,36 +308,9 @@ const NetWorthTab = () => {
           items={liabilities.map((l, i) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(l.entries, l.value), _entries: l.entries ?? [] } as any))}
           onReorder={(reordered) => setLiabilities(reordered.map((r: any, i: number) => ({ ...liabilities[i], name: r.name, value: r._value ?? 0, entries: r._entries ?? [] })))}
           containerId="liabilities"
-          renderItem={(cat: any, i) => {
-            const cardValue = getCardValue(liabilities[i]?.entries, liabilities[i]?.value);
-            return (
-              <button
-                onClick={() => setViewingItems({ list: "liability", index: i })}
-                className="w-full rounded-xl bg-card border border-border px-3 py-1.5 text-left active:scale-[0.98] transition-transform"
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {(liabilities[i]?.entries?.length ?? 0)} item{(liabilities[i]?.entries?.length ?? 0) !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <p className="text-[12px] tabular-nums text-foreground">
-                      ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            );
-          }}
+          renderItem={(cat: any, i) => renderCard("liability", cat, i)}
         />
       </section>
-
-      {/* Edit/rename dialog */}
-      {ed && <EditItemDialog open={editing !== null} onClose={() => setEditing(null)} {...ed} />}
 
       {/* Items sheet */}
       {itemsDialogData && (
@@ -343,6 +323,67 @@ const NetWorthTab = () => {
           accentClass={itemsDialogData.list === "asset" ? "text-income" : "text-expense"}
         />
       )}
+
+      {/* Rename dialog */}
+      <AlertDialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Rename</AlertDialogTitle>
+          </AlertDialogHeader>
+          <Input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && confirmRename()}
+            className="h-9 text-sm"
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs" onClick={() => setEditTarget(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="h-8 text-xs" onClick={confirmRename} disabled={!editName.trim()}>Save</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirm dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Delete card?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              This will remove the card and all its items. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add dialog */}
+      <AlertDialog open={!!addTarget} onOpenChange={(o) => { if (!o) setAddTarget(null); }}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">
+              Add {addTarget === "asset" ? "Asset" : "Liability"}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <Input
+            placeholder="e.g. Checking Account"
+            value={addName}
+            onChange={(e) => setAddName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && confirmAdd()}
+            className="h-9 text-sm"
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs" onClick={() => setAddTarget(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="h-8 text-xs" onClick={confirmAdd} disabled={!addName.trim()}>Add</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
