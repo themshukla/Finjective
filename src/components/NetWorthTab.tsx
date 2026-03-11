@@ -339,8 +339,8 @@ const NetWorthTab = () => {
           </span>
         </div>
         <SortableCategoryList
-          items={liabilities.map((l, i) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(l.entries, l.value), _entries: l.entries ?? [] } as any))}
-          onReorder={(reordered) => setLiabilities(reordered.map((r: any, i: number) => ({ ...liabilities[i], name: r.name, value: r._value ?? 0, entries: r._entries ?? [] })))}
+          items={liabilities.map((l) => ({ ...l, _value: getCardValue(l.entries, l.value) } as any))}
+          onReorder={(reordered) => setLiabilities(reordered.map((r: any) => ({ name: r.name, value: r.value ?? 0, entries: r.entries ?? [] })))}
           containerId="liabilities"
           renderItem={(cat: any, i) => renderCard("liability", cat, i)}
         />
