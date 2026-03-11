@@ -47,7 +47,7 @@ const NetWorthItemsDialog = ({
     const entry: NetWorthEntry = {
       id: Date.now().toString(),
       name: name.trim(),
-      amount: parseFloat(amount),
+      amount: parseAmountInput(amount),
     };
     onEntriesChange([...entries, entry]);
     setName("");
