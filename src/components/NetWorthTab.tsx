@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
@@ -7,11 +7,7 @@ import { format, parse, subMonths } from "date-fns";
 import SortableCategoryList from "./SortableCategoryList";
 import NetWorthItemsDialog from "./NetWorthItemsDialog";
 import NetWorthSetupPrompt from "./NetWorthSetupPrompt";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
+import EditItemDialog from "./EditItemDialog";
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
   entries && entries.length > 0
@@ -29,121 +25,18 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
   { label: "ALL", value: "ALL" },
 ];
 
-type EditTarget = { list: "asset" | "liability"; index: number } | null;
-type AddTarget = "asset" | "liability" | null;
+type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
-// ── Long-press hook ────────────────────────────────────────────────────────────
-// Fires onLongPress on release if held long enough and pointer didn't move (scroll).
-const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500, moveThreshold = 8) => {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongRef = useRef(false);
-  const cancelledRef = useRef(false);
-  const startPos = useRef<{ x: number; y: number } | null>(null);
-
-  const start = useCallback((e: React.PointerEvent) => {
-    isLongRef.current = false;
-    cancelledRef.current = false;
-    startPos.current = { x: e.clientX, y: e.clientY };
-    timerRef.current = setTimeout(() => {
-      if (!cancelledRef.current) isLongRef.current = true;
-    }, delay);
-  }, [delay]);
-
-  const move = useCallback((e: React.PointerEvent) => {
-    if (!startPos.current) return;
-    const dx = Math.abs(e.clientX - startPos.current.x);
-    const dy = Math.abs(e.clientY - startPos.current.y);
-    if (dx > moveThreshold || dy > moveThreshold) {
-      // Pointer moved too far — cancel long press so scroll works normally
-      if (timerRef.current) clearTimeout(timerRef.current);
-      isLongRef.current = false;
-      cancelledRef.current = true;
-    }
-  }, [moveThreshold]);
-
-  const release = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (cancelledRef.current) return; // Was a scroll, do nothing
-    if (isLongRef.current) {
-      isLongRef.current = false;
-      onLongPress();
-    } else {
-      onClick();
-    }
-  }, [onLongPress, onClick]);
-
-  const cancel = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    isLongRef.current = false;
-    cancelledRef.current = false;
-  }, []);
-
-  return { onPointerDown: start, onPointerMove: move, onPointerUp: release, onPointerLeave: cancel, onClick: () => {} };
-};
-
-// ── Card component (needs its own hooks) ──────────────────────────────────────
-interface CardItemProps {
-  list: "asset" | "liability";
-  cat: any;
-  i: number;
-  item: any;
-  onEdit: () => void;
-  onDelete: () => void;
-  onOpenItems: () => void;
-}
-
-const CardItem = ({ list, cat, i, item, onEdit, onDelete, onOpenItems }: CardItemProps) => {
-  const cardValue = getCardValue(item?.entries, item?.value);
-  const accentClass = list === "asset" ? "text-income" : "text-expense";
-  const longPressHandlers = useLongPress(onDelete, onEdit);
-
-  return (
-    <div
-      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform touch-pan-y"
-      {...longPressHandlers}
-    >
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-        <p className="text-[10px] text-muted-foreground">
-          {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
-        </p>
-      </div>
-      <span className={`text-[12px] tabular-nums shrink-0 ${accentClass}`}>
-        ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-      </span>
-      <button
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => { e.stopPropagation(); onOpenItems(); }}
-        className="text-muted-foreground shrink-0 p-0.5"
-      >
-        <ChevronRight className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-};
-
-// ── Main tab ──────────────────────────────────────────────────────────────────
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
-
-  // Rename dialog state
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
-  const [editName, setEditName] = useState("");
-
-  // Delete confirm state
-  const [deleteTarget, setDeleteTarget] = useState<EditTarget>(null);
-
-  // Add dialog state
-  const [addTarget, setAddTarget] = useState<AddTarget>(null);
-  const [addName, setAddName] = useState("");
 
   const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
   const netWorth = totalAssets - totalLiabilities;
 
-  // Build chart data from persisted net worth snapshots
   const allChartData = useMemo(() => {
     return netWorthSnapshots.map((snap) => ({
       month: format(parse(snap.month_key, "yyyy-MM", new Date()), "MMM yy"),
@@ -156,7 +49,6 @@ const NetWorthTab = () => {
     const now = selectedMonth;
     const currentMonthKey = format(now, "yyyy-MM");
     const currentYear = format(now, "yyyy");
-
     switch (filter) {
       case "1W":
       case "1M":
@@ -179,73 +71,63 @@ const NetWorthTab = () => {
 
   const isPositive = netWorth > 0;
   const isNegative = netWorth < 0;
-  const lineColor = isPositive
-    ? "hsl(142 55% 45%)"
-    : isNegative
-    ? "hsl(0 72% 55%)"
-    : "hsl(var(--muted-foreground))";
-
+  const lineColor = isPositive ? "hsl(142 55% 45%)" : isNegative ? "hsl(0 72% 55%)" : "hsl(var(--muted-foreground))";
   const TrendIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
 
-  // Rename handlers
-  const openEdit = (list: "asset" | "liability", index: number) => {
-    const name = list === "asset" ? assets[index].name : liabilities[index].name;
-    setEditTarget({ list, index });
-    setEditName(name);
-  };
+  // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const confirmRename = () => {
-    if (!editTarget || !editName.trim()) return;
-    if (editTarget.list === "asset") {
-      const arr = [...assets];
-      arr[editTarget.index] = { ...arr[editTarget.index], name: editName.trim() };
-      setAssets(arr);
-    } else {
-      const arr = [...liabilities];
-      arr[editTarget.index] = { ...arr[editTarget.index], name: editName.trim() };
-      setLiabilities(arr);
-    }
-    setEditTarget(null);
-    setEditName("");
-  };
-
-  // Delete handlers
-  const confirmDelete = () => {
-    if (!deleteTarget) return;
-    if (deleteTarget.list === "asset") {
-      const a = [...assets]; a.splice(deleteTarget.index, 1); setAssets(a);
-    } else {
-      const a = [...liabilities]; a.splice(deleteTarget.index, 1); setLiabilities(a);
-    }
-    setDeleteTarget(null);
-  };
-
-  // Add handlers
-  const openAdd = (list: "asset" | "liability") => {
-    setAddTarget(list);
-    setAddName("");
-  };
-
-  const confirmAdd = () => {
-    if (!addTarget || !addName.trim()) return;
-    if (addTarget === "asset") setAssets([...assets, { name: addName.trim(), value: 0, entries: [] }]);
-    else setLiabilities([...liabilities, { name: addName.trim(), value: 0, entries: [] }]);
-    setAddTarget(null);
-    setAddName("");
-  };
-
-  // Entries change
-  const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
+  const handleSave = (list: "asset" | "liability", index: number, values: Record<string, string | number>) => {
     if (list === "asset") {
       const arr = [...assets];
-      arr[index] = { ...arr[index], entries };
+      arr[index] = { ...arr[index], name: String(values.name) };
       setAssets(arr);
     } else {
       const arr = [...liabilities];
-      arr[index] = { ...arr[index], entries };
+      arr[index] = { ...arr[index], name: String(values.name) };
       setLiabilities(arr);
     }
   };
+
+  const handleDelete = (list: "asset" | "liability", index: number) => {
+    if (list === "asset") { const a = [...assets]; a.splice(index, 1); setAssets(a); }
+    else { const a = [...liabilities]; a.splice(index, 1); setLiabilities(a); }
+  };
+
+  const handleAdd = (list: "asset" | "liability", values: Record<string, string | number>) => {
+    if (list === "asset") setAssets([...assets, { name: String(values.name), value: 0, entries: [] }]);
+    else setLiabilities([...liabilities, { name: String(values.name), value: 0, entries: [] }]);
+  };
+
+  const handleEntriesChange = (list: "asset" | "liability", index: number, entries: NetWorthEntry[]) => {
+    if (list === "asset") {
+      const arr = [...assets]; arr[index] = { ...arr[index], entries }; setAssets(arr);
+    } else {
+      const arr = [...liabilities]; arr[index] = { ...arr[index], entries }; setLiabilities(arr);
+    }
+  };
+
+  // ── EditItemDialog data ──────────────────────────────────────────────────────
+
+  const getEditingData = () => {
+    if (!editTarget) return null;
+    if (editTarget === "addAsset" || editTarget === "addLiability") {
+      const list = editTarget === "addAsset" ? "asset" : "liability";
+      return {
+        title: `Add ${list === "asset" ? "Asset" : "Liability"}`,
+        fields: [{ key: "name", label: "Name", type: "text" as const, value: "" }],
+        onSave: (v: Record<string, string | number>) => handleAdd(list, v),
+      };
+    }
+    const item = editTarget.list === "asset" ? assets[editTarget.index] : liabilities[editTarget.index];
+    return {
+      title: `Edit ${item.name}`,
+      fields: [{ key: "name", label: "Name", type: "text" as const, value: item.name }],
+      onSave: (v: Record<string, string | number>) => handleSave(editTarget.list, editTarget.index, v),
+      onDelete: () => handleDelete(editTarget.list, editTarget.index),
+    };
+  };
+
+  const ed = getEditingData();
 
   const itemsDialogData = viewingItems
     ? viewingItems.list === "asset"
@@ -255,19 +137,41 @@ const NetWorthTab = () => {
 
   if (netWorthNeedsSetup) return <NetWorthSetupPrompt />;
 
+  // ── Card renderer ────────────────────────────────────────────────────────────
+
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
+    const cardValue = getCardValue(item?.entries, item?.value);
+    const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
-      <CardItem
-        key={i}
-        list={list}
-        cat={cat}
-        i={i}
-        item={item}
-        onEdit={() => openEdit(list, i)}
-        onDelete={() => setDeleteTarget({ list, index: i })}
-        onOpenItems={() => setViewingItems({ list, index: i })}
-      />
+      <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
+        {/* Tap card body → edit dialog */}
+        <button
+          className="flex-1 min-w-0 text-left"
+          onClick={() => setEditTarget({ list, index: i })}
+        >
+          <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
+          <p className="text-[10px] text-muted-foreground">
+            {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
+          </p>
+        </button>
+
+        {/* Value — also opens edit */}
+        <button
+          className={`text-[12px] tabular-nums shrink-0 ${accentClass}`}
+          onClick={() => setEditTarget({ list, index: i })}
+        >
+          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </button>
+
+        {/* Chevron → opens items sheet */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setViewingItems({ list, index: i }); }}
+          className="text-muted-foreground shrink-0 p-0.5 active:scale-90 transition-transform"
+        >
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
     );
   };
 
@@ -275,13 +179,9 @@ const NetWorthTab = () => {
     <div className="space-y-5">
       {/* Hero summary */}
       <div className="text-center pt-2 pb-1">
-        <p className="text-[14px] text-primary uppercase tracking-[0.2em] font-medium mb-2">
-          Net Worth
-        </p>
+        <p className="text-[14px] text-primary uppercase tracking-[0.2em] font-medium mb-2">Net Worth</p>
         <p
-          className={`font-bold tabular-nums ${
-            isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"
-          }`}
+          className={`font-bold tabular-nums ${isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"}`}
           style={{ fontSize: "30px" }}
         >
           {isNegative ? "-" : ""}${Math.abs(netWorth).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -305,17 +205,8 @@ const NetWorthTab = () => {
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip
-                  contentStyle={{
-                    borderRadius: 12,
-                    border: "1px solid hsl(var(--border))",
-                    fontSize: 12,
-                    backgroundColor: "hsl(var(--card))",
-                    color: "hsl(var(--foreground))",
-                  }}
-                  formatter={(value: number) => [
-                    `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`,
-                    "Cumulative Net",
-                  ]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
+                  formatter={(value: number) => [`${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`, "Cumulative Net"]}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
                 <Line type="monotone" dataKey="netWorth" stroke={lineColor} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }} />
@@ -323,16 +214,12 @@ const NetWorthTab = () => {
             </ResponsiveContainer>
           </div>
         )}
-
-        {/* Filter buttons */}
         <div className="flex items-center justify-between mt-3 border-t border-border pt-3">
           {FILTERS.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`flex-1 py-1.5 text-[11px] font-semibold rounded-full transition-all ${
-                filter === f.value ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`flex-1 py-1.5 text-[11px] font-semibold rounded-full transition-all ${filter === f.value ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               {f.label}
             </button>
@@ -344,7 +231,7 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Assets</h3>
-          <button onClick={() => openAdd("asset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+          <button onClick={() => setEditTarget("addAsset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
@@ -360,7 +247,7 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <button onClick={() => openAdd("liability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+          <button onClick={() => setEditTarget("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
         </div>
@@ -384,66 +271,14 @@ const NetWorthTab = () => {
         />
       )}
 
-      {/* Rename dialog */}
-      <AlertDialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
-        <AlertDialogContent className="max-w-[320px] rounded-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">Rename</AlertDialogTitle>
-          </AlertDialogHeader>
-          <Input
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && confirmRename()}
-            className="h-9 text-sm"
-            autoFocus
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-8 text-xs" onClick={() => setEditTarget(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="h-8 text-xs" onClick={confirmRename} disabled={!editName.trim()}>Save</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete confirm dialog */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-[320px] rounded-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">Delete card?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
-              This will remove the card and all its items. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add dialog */}
-      <AlertDialog open={!!addTarget} onOpenChange={(o) => { if (!o) setAddTarget(null); }}>
-        <AlertDialogContent className="max-w-[320px] rounded-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">
-              Add {addTarget === "asset" ? "Asset" : "Liability"}
-            </AlertDialogTitle>
-          </AlertDialogHeader>
-          <Input
-            placeholder="e.g. Checking Account"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && confirmAdd()}
-            className="h-9 text-sm"
-            autoFocus
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-8 text-xs" onClick={() => setAddTarget(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="h-8 text-xs" onClick={confirmAdd} disabled={!addName.trim()}>Add</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Edit / Add dialog */}
+      {ed && (
+        <EditItemDialog
+          open={editTarget !== null}
+          onClose={() => setEditTarget(null)}
+          {...ed}
+        />
+      )}
     </div>
   );
 };
