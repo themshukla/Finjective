@@ -63,13 +63,17 @@ function DroppableSection({ id, children }: { id: string; children: React.ReactN
 
 const BudgetTab = () => {
   const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
-  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
+  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [activeItemData, setActiveItemData] = useState<{ category: BudgetCategory; variant: "income" | "expense" } | null>(null);
+
+  // inline add state
+  const [inlineAdding, setInlineAdding] = useState<"income" | "expense" | string | null>(null); // string = custom sectionId
+  const [inlineAddVal, setInlineAddVal] = useState("");
 
   // DnD sensors
   const sensors = useSensors(
