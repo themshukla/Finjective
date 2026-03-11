@@ -247,14 +247,9 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Assets</h3>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-primary tabular-nums">
-              ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
-            <button onClick={() => setEditTarget("addAsset")} className="text-xs text-primary font-medium flex items-center gap-0.5">
-              <Plus className="h-3.5 w-3.5" /> Add
-            </button>
-          </div>
+          <span className="text-sm font-bold text-primary tabular-nums">
+            ${totalAssets.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
         </div>
         <SortableCategoryList
           items={assets.map((a, i) => ({ name: a.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(a.entries, a.value), _iconIndex: i, _entries: a.entries ?? [] } as any))}
@@ -262,20 +257,21 @@ const NetWorthTab = () => {
           containerId="assets"
           renderItem={(cat: any, i) => renderCard("asset", cat, i)}
         />
+        <button
+          onClick={() => setEditTarget("addAsset")}
+          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Asset
+        </button>
       </section>
 
       {/* Liabilities section */}
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-primary tabular-nums">
-              ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
-            <button onClick={() => setEditTarget("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
-              <Plus className="h-3.5 w-3.5" /> Add
-            </button>
-          </div>
+          <span className="text-sm font-bold text-primary tabular-nums">
+            ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
         </div>
         <SortableCategoryList
           items={liabilities.map((l, i) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(l.entries, l.value), _entries: l.entries ?? [] } as any))}
@@ -283,6 +279,12 @@ const NetWorthTab = () => {
           containerId="liabilities"
           renderItem={(cat: any, i) => renderCard("liability", cat, i)}
         />
+        <button
+          onClick={() => setEditTarget("addLiability")}
+          className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Liability
+        </button>
       </section>
 
       {/* Items sheet */}
