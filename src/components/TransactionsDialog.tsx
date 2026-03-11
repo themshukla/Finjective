@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { formatAmountInput, parseAmountInput } from "@/lib/utils";
 import { Plus, Trash2, CalendarIcon, Pencil, Check, X } from "lucide-react";
 import { Transaction } from "@/data/budgetData";
 import { Button } from "@/components/ui/button";
