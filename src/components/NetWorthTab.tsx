@@ -65,9 +65,12 @@ const NetWorthTab = () => {
     const currentMonthKey = format(now, "yyyy-MM");
     const currentYear = format(now, "yyyy");
     switch (filter) {
-      case "1W":
       case "1M":
         return allChartData.filter((d) => d.monthKey === currentMonthKey);
+      case "3M": {
+        const cutoff = format(subMonths(now, 2), "yyyy-MM");
+        return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
+      }
       case "6M": {
         const cutoff = format(subMonths(now, 5), "yyyy-MM");
         return allChartData.filter((d) => d.monthKey >= cutoff && d.monthKey <= currentMonthKey);
