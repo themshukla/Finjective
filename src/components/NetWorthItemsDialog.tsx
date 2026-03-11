@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, X } from "lucide-react";
 import { NetWorthEntry } from "@/data/budgetData";
+import { formatAmountInput, parseAmountInput } from "@/lib/utils";
 
 interface NetWorthItemsDialogProps {
   open: boolean;
@@ -46,7 +47,7 @@ const NetWorthItemsDialog = ({
     const entry: NetWorthEntry = {
       id: Date.now().toString(),
       name: name.trim(),
-      amount: parseFloat(amount),
+      amount: parseAmountInput(amount),
     };
     onEntriesChange([...entries, entry]);
     setName("");
@@ -66,7 +67,7 @@ const NetWorthItemsDialog = ({
     if (!editingId || !name.trim() || !amount) return;
     onEntriesChange(
       entries.map((e) =>
-        e.id === editingId ? { ...e, name: name.trim(), amount: parseFloat(amount) } : e
+        e.id === editingId ? { ...e, name: name.trim(), amount: parseAmountInput(amount) } : e
       )
     );
     setEditingId(null);
@@ -149,10 +150,11 @@ const NetWorthItemsDialog = ({
                   autoFocus
                 />
                 <Input
-                  type="number"
-                  placeholder="$0.00"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                   onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
                   className="h-9 text-sm"
                 />
@@ -204,10 +206,11 @@ const NetWorthItemsDialog = ({
                 autoFocus
               />
               <Input
-                type="number"
-                placeholder="$0.00"
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                 onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                 className="h-9 text-sm"
               />

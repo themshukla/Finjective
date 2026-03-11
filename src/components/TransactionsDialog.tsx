@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { formatAmountInput, parseAmountInput } from "@/lib/utils";
 import { Plus, Trash2, CalendarIcon, Pencil, Check, X } from "lucide-react";
 import { Transaction } from "@/data/budgetData";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     if (!editingId || !editDate || !editAmount || !editMerchant.trim()) return;
     const updated = transactions.map((t) =>
       t.id === editingId
-        ? { ...t, merchant: editMerchant.trim(), amount: Number(editAmount), date: format(editDate, "yyyy-MM-dd") }
+        ? { ...t, merchant: editMerchant.trim(), amount: parseAmountInput(editAmount), date: format(editDate, "yyyy-MM-dd") }
         : t
     );
     onUpdate(updated);
@@ -72,7 +73,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     const newTx: Transaction = {
       id: Date.now().toString(),
       date: format(date, "yyyy-MM-dd"),
-      amount: Number(amount),
+      amount: parseAmountInput(amount),
       merchant: merchant.trim(),
     };
     onUpdate([...transactions, newTx]);
@@ -150,9 +151,10 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                   <div>
                     <Label className="text-xs text-muted-foreground">Amount</Label>
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       value={editAmount}
-                      onChange={(e) => setEditAmount(e.target.value)}
+                      onChange={(e) => setEditAmount(formatAmountInput(e.target.value))}
                       onKeyDown={(e) => e.key === "Enter" && saveEditing()}
                       className="mt-1 h-9"
                     />
@@ -229,10 +231,11 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                 <div>
                   <Label className="text-xs text-muted-foreground">Amount</Label>
                   <Input
-                    type="number"
-                    placeholder="$0.00"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     className="mt-1 h-9"
                   />
