@@ -166,7 +166,7 @@ const SwipeableRow = ({
             onChange={(e) => setNameVal(e.target.value)}
             onBlur={commitName}
             onKeyDown={(e) => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(entry.name); setEditingName(false); } }}
-            className="h-7 text-sm flex-1 min-w-0 mr-2 px-1 border-0 border-b border-primary rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-7 text-sm flex-1 min-w-0 mr-2 px-1 border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         ) : (
           <p
@@ -187,7 +187,7 @@ const SwipeableRow = ({
             onChange={(e) => setAmountVal(formatAmountInput(e.target.value))}
             onBlur={commitAmount}
             onKeyDown={(e) => { if (e.key === "Enter") commitAmount(); if (e.key === "Escape") { setAmountVal(formatAmountInput(String(entry.amount))); setEditingAmount(false); } }}
-            className="h-7 text-sm w-24 shrink-0 ml-2 px-1 text-right border-0 border-b border-primary rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-7 text-sm w-24 shrink-0 ml-2 px-1 text-right border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         ) : (
           <span
