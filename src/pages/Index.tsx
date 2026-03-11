@@ -12,6 +12,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 
 const Index = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("budget");
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrolled(e.currentTarget.scrollTop > 10);
@@ -39,11 +40,11 @@ const Index = () => {
             {/* Spacer for status bar */}
 
             {/* Month selector */}
-            <MonthSelector collapsed={scrolled} />
+            <MonthSelector collapsed={scrolled} activeTab={activeTab} />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
-              <Tabs defaultValue="budget" className="w-full h-full flex flex-col">
+              <Tabs defaultValue="budget" onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                 <PullToRefresh
 onRefresh={() => new Promise(r => setTimeout(r, 600))}
                   onScroll={handleScroll}
