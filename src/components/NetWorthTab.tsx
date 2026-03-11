@@ -325,13 +325,13 @@ const NetWorthTab = () => {
           </button>
         )}
         <button
-          onClick={handleFresh}
+          onClick={handleClear}
           className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
         >
           <FilePlus className="h-4 w-4 text-primary flex-shrink-0" />
           <div>
-            <p className="text-[11px] font-medium">Start fresh</p>
-            <p className="text-[9px] text-muted-foreground">Blank statement</p>
+            <p className="text-[11px] font-medium">Clear</p>
+            <p className="text-[9px] text-muted-foreground">Remove this month</p>
           </div>
         </button>
       </div>
