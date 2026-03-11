@@ -246,9 +246,14 @@ const NetWorthTab = () => {
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-bold text-primary">Liabilities</h3>
-          <button onClick={() => setEditTarget("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
-            <Plus className="h-3.5 w-3.5" /> Add
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-primary tabular-nums">
+              ${totalLiabilities.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+            <button onClick={() => setEditTarget("addLiability")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+              <Plus className="h-3.5 w-3.5" /> Add
+            </button>
+          </div>
         </div>
         <SortableCategoryList
           items={liabilities.map((l, i) => ({ name: l.name, budgeted: 0, spent: 0, icon: "", _value: getCardValue(l.entries, l.value), _entries: l.entries ?? [] } as any))}
