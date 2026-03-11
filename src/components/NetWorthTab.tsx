@@ -169,32 +169,65 @@ const NetWorthTab = () => {
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
+    const isEditing = inlineEdit?.list === list && inlineEdit?.index === i;
+
     return (
-      <button
-        className="w-full rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
-        onClick={() => setViewingItems({ list, index: i })}
+      <div
+        className="w-full rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 select-none text-left cursor-pointer"
+        onClick={() => { if (!isEditing) setViewingItems({ list, index: i }); }}
       >
-        {/* Name — shrinks to content width only; tap opens edit/delete */}
-        <span
-          className="shrink-0 max-w-[55%] min-w-0"
-          onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
-        >
-          <p className="text-[15px] font-medium text-foreground truncate">{cat.name}</p>
+        {/* Name — tap to edit inline */}
+        <span className="shrink-0 max-w-[55%] min-w-0" onClick={(e) => e.stopPropagation()}>
+          {isEditing ? (
+            <input
+              autoFocus
+              value={inlineVal}
+              onChange={(e) => setInlineVal(e.target.value)}
+              onBlur={commitInlineEdit}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitInlineEdit();
+                if (e.key === "Escape") setInlineEdit(null);
+              }}
+              className="text-[15px] font-medium bg-transparent border-0 border-b border-primary outline-none w-full text-foreground pb-0 leading-tight"
+            />
+          ) : (
+            <p
+              className="text-[15px] font-medium text-foreground truncate cursor-text"
+              onClick={(e) => {
+                e.stopPropagation();
+                setInlineEdit({ list, index: i });
+                setInlineVal(item.name);
+              }}
+            >
+              {cat.name}
+            </p>
+          )}
           <p className="text-[13px] text-muted-foreground">
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </span>
 
-        {/* Spacer — flex-1 gap, tapping here opens items sheet via outer button */}
         <span className="flex-1" />
 
-        <span className="text-[15px] font-medium text-foreground tabular-nums shrink-0">
-          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </span>
-        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-      </button>
+        {isEditing ? (
+          <button
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+            onClick={(e) => { e.stopPropagation(); setConfirmDeleteCard({ list, index: i }); setInlineEdit(null); }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        ) : (
+          <>
+            <span className="text-[15px] font-medium text-foreground tabular-nums shrink-0">
+              ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          </>
+        )}
+      </div>
     );
   };
+
 
   return (
     <div className="space-y-5">
