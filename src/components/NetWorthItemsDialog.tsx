@@ -1,10 +1,185 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, X, Trash2 } from "lucide-react";
 import { NetWorthEntry } from "@/data/budgetData";
 import { formatAmountInput, parseAmountInput } from "@/lib/utils";
 
+// ── Swipeable row ─────────────────────────────────────────────────────────────
+interface SwipeableRowProps {
+  entry: NetWorthEntry;
+  onDelete: (id: string) => void;
+  onSaveName: (id: string, name: string) => void;
+  onSaveAmount: (id: string, amount: number) => void;
+  anySwipeOpen: boolean;
+  setSwipeOpenId: (id: string | null) => void;
+  swipeOpenId: string | null;
+}
+
+const DELETE_WIDTH = 72;
+
+const SwipeableRow = ({
+  entry,
+  onDelete,
+  onSaveName,
+  onSaveAmount,
+  swipeOpenId,
+  setSwipeOpenId,
+}: SwipeableRowProps) => {
+  const [editingName, setEditingName] = useState(false);
+  const [editingAmount, setEditingAmount] = useState(false);
+  const [nameVal, setNameVal] = useState(entry.name);
+  const [amountVal, setAmountVal] = useState(
+    entry.amount === 0 ? "" : formatAmountInput(String(entry.amount))
+  );
+
+  // keep local state in sync if parent entries change (e.g. after save)
+  useEffect(() => { if (!editingName) setNameVal(entry.name); }, [entry.name, editingName]);
+  useEffect(() => {
+    if (!editingAmount) setAmountVal(entry.amount === 0 ? "" : formatAmountInput(String(entry.amount)));
+  }, [entry.amount, editingAmount]);
+
+  const isOpen = swipeOpenId === entry.id;
+
+  // swipe state
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const [translateX, setTranslateX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const isSwiping = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+    setDragging(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (!isSwiping.current && Math.abs(dx) > 5) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        isSwiping.current = true;
+        setDragging(true);
+      } else {
+        return;
+      }
+    }
+    if (!isSwiping.current) return;
+    const base = isOpen ? -DELETE_WIDTH : 0;
+    const next = Math.min(0, Math.max(-DELETE_WIDTH, base + dx));
+    setTranslateX(next);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping.current) return;
+    setDragging(false);
+    const threshold = DELETE_WIDTH * 0.4;
+    const shouldOpen = translateX < -threshold;
+    if (shouldOpen) {
+      setTranslateX(-DELETE_WIDTH);
+      setSwipeOpenId(entry.id);
+    } else {
+      setTranslateX(0);
+      setSwipeOpenId(null);
+    }
+  };
+
+  // close when another row opens
+  useEffect(() => {
+    if (!isOpen) { setTranslateX(0); }
+  }, [isOpen]);
+
+  const commitName = () => {
+    const trimmed = nameVal.trim();
+    if (trimmed) onSaveName(entry.id, trimmed);
+    else setNameVal(entry.name);
+    setEditingName(false);
+  };
+
+  const commitAmount = () => {
+    onSaveAmount(entry.id, parseAmountInput(amountVal));
+    setEditingAmount(false);
+  };
+
+  const handleNameTap = () => {
+    if (dragging || isOpen) { setSwipeOpenId(null); setTranslateX(0); return; }
+    setEditingName(true);
+  };
+
+  const handleAmountTap = () => {
+    if (dragging || isOpen) { setSwipeOpenId(null); setTranslateX(0); return; }
+    setEditingAmount(true);
+  };
+
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete button behind */}
+      <div
+        className="absolute inset-y-0 right-0 flex items-center justify-center bg-destructive"
+        style={{ width: DELETE_WIDTH }}
+        onClick={() => onDelete(entry.id)}
+      >
+        <Trash2 className="h-4 w-4 text-destructive-foreground" />
+      </div>
+
+      {/* Row content */}
+      <div
+        className="flex items-center justify-between py-3 bg-card relative z-10"
+        style={{
+          transform: `translateX(${translateX}px)`,
+          transition: dragging ? "none" : "transform 0.22s ease",
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Name */}
+        {editingName ? (
+          <Input
+            autoFocus
+            value={nameVal}
+            onChange={(e) => setNameVal(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(entry.name); setEditingName(false); } }}
+            className="h-7 text-sm flex-1 min-w-0 mr-2 px-1 border-0 border-b border-primary rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        ) : (
+          <p
+            className="text-[14px] text-foreground truncate flex-1 min-w-0 cursor-text"
+            onClick={handleNameTap}
+          >
+            {entry.name}
+          </p>
+        )}
+
+        {/* Amount */}
+        {editingAmount ? (
+          <Input
+            autoFocus
+            type="text"
+            inputMode="decimal"
+            value={amountVal}
+            onChange={(e) => setAmountVal(formatAmountInput(e.target.value))}
+            onBlur={commitAmount}
+            onKeyDown={(e) => { if (e.key === "Enter") commitAmount(); if (e.key === "Escape") { setAmountVal(formatAmountInput(String(entry.amount))); setEditingAmount(false); } }}
+            className="h-7 text-sm w-24 shrink-0 ml-2 px-1 text-right border-0 border-b border-primary rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        ) : (
+          <span
+            className="text-[14px] tabular-nums text-foreground ml-2 shrink-0 cursor-text"
+            onClick={handleAmountTap}
+          >
+            ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Main dialog ───────────────────────────────────────────────────────────────
 interface NetWorthItemsDialogProps {
   open: boolean;
   onClose: () => void;
@@ -20,28 +195,20 @@ const NetWorthItemsDialog = ({
   title,
   entries,
   onEntriesChange,
-  accentClass = "text-foreground",
 }: NetWorthItemsDialogProps) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [visible, setVisible] = useState(false);
-
-  // editingId = id of entry being edited, null = adding new
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) {
-      requestAnimationFrame(() => setVisible(true));
-    } else {
-      setVisible(false);
-    }
+    if (open) requestAnimationFrame(() => setVisible(true));
+    else setVisible(false);
   }, [open]);
 
   const total = entries.reduce((s, e) => s + e.amount, 0);
 
-  // ── Add ──────────────────────────────────────────────────────────────────────
   const handleAdd = () => {
     if (!name.trim() || !amount) return;
     const entry: NetWorthEntry = {
@@ -55,44 +222,23 @@ const NetWorthItemsDialog = ({
     setShowForm(false);
   };
 
-  // ── Edit ─────────────────────────────────────────────────────────────────────
-  const openEdit = (entry: NetWorthEntry) => {
-    setEditingId(entry.id);
-    setName(entry.name);
-    setAmount(String(entry.amount));
-    setShowForm(false); // close add form if open
+  const handleSaveName = (id: string, newName: string) => {
+    onEntriesChange(entries.map((e) => (e.id === id ? { ...e, name: newName } : e)));
   };
 
-  const handleSaveEdit = () => {
-    if (!editingId || !name.trim() || !amount) return;
-    onEntriesChange(
-      entries.map((e) =>
-        e.id === editingId ? { ...e, name: name.trim(), amount: parseAmountInput(amount) } : e
-      )
-    );
-    setEditingId(null);
-    setName("");
-    setAmount("");
+  const handleSaveAmount = (id: string, newAmount: number) => {
+    onEntriesChange(entries.map((e) => (e.id === id ? { ...e, amount: newAmount } : e)));
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setConfirmDeleteId(null);
-    setName("");
-    setAmount("");
-  };
-
-  // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDelete = (id: string) => {
-    setConfirmDeleteId(null);
-    if (editingId === id) cancelEdit();
     onEntriesChange(entries.filter((e) => e.id !== id));
+    setSwipeOpenId(null);
   };
 
   const handleClose = () => {
     setVisible(false);
-    cancelEdit();
     setShowForm(false);
+    setSwipeOpenId(null);
     setTimeout(onClose, 300);
   };
 
@@ -138,62 +284,18 @@ const NetWorthItemsDialog = ({
             </p>
           )}
 
-          {!showForm && entries.map((entry) =>
-            editingId === entry.id ? (
-              /* ── Inline edit form ── */
-              <div key={entry.id} className="rounded-xl border border-primary/30 bg-card p-3 space-y-2.5 my-2">
-                <Input
-                  placeholder="Item name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-9 text-sm"
-                  autoFocus
-                />
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmountInput(e.target.value))}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
-                  className="h-9 text-sm"
-                />
-                <div className="flex gap-2 pt-1">
-                  {confirmDeleteId === entry.id ? (
-                    <>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(null)}>
-                        No
-                      </Button>
-                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
-                        Confirm
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="destructive" size="sm" className="flex-1" onClick={() => setConfirmDeleteId(entry.id)}>
-                        Delete
-                      </Button>
-                      <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
-                        Save
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* ── Regular row — tap to edit ── */
-              <div
-                key={entry.id}
-                onClick={() => openEdit(entry)}
-                className={`flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-all duration-200 ${editingId ? "opacity-30 pointer-events-none" : ""}`}
-              >
-                <p className="text-[14px] text-foreground truncate flex-1 min-w-0">{entry.name}</p>
-                <span className="text-[14px] tabular-nums text-foreground ml-2 shrink-0">
-                  ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            )
-          )}
+          {entries.map((entry) => (
+            <SwipeableRow
+              key={entry.id}
+              entry={entry}
+              onDelete={handleDelete}
+              onSaveName={handleSaveName}
+              onSaveAmount={handleSaveAmount}
+              anySwipeOpen={swipeOpenId !== null}
+              swipeOpenId={swipeOpenId}
+              setSwipeOpenId={setSwipeOpenId}
+            />
+          ))}
 
           {/* Add form */}
           {showForm && (
@@ -215,7 +317,12 @@ const NetWorthItemsDialog = ({
                 className="h-9 text-sm"
               />
               <div className="flex gap-2 pt-1">
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => { setShowForm(false); setName(""); setAmount(""); }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => { setShowForm(false); setName(""); setAmount(""); }}
+                >
                   Cancel
                 </Button>
                 <Button size="sm" className="flex-1" onClick={handleAdd} disabled={!name.trim() || !amount}>
@@ -227,9 +334,9 @@ const NetWorthItemsDialog = ({
         </div>
 
         {/* Footer add button */}
-        {!showForm && !editingId && (
+        {!showForm && (
           <div className="px-4 pb-4 pt-2 border-t border-border shrink-0">
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowForm(true)}>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowForm(true); setSwipeOpenId(null); }}>
               <Plus className="h-3.5 w-3.5 mr-1" /> Add Item
             </Button>
           </div>
@@ -237,7 +344,6 @@ const NetWorthItemsDialog = ({
       </div>
     </div>
   );
-
 };
 
 export default NetWorthItemsDialog;
