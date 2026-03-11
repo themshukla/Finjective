@@ -40,7 +40,7 @@ const Index = () => {
             {/* Spacer for status bar */}
 
             {/* Month selector */}
-            <MonthSelector collapsed={scrolled} />
+            <MonthSelector collapsed={scrolled} activeTab={activeTab} />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
