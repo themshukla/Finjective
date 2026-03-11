@@ -142,7 +142,6 @@ const NetWorthTab = () => {
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
-    const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
       <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
         {/* Left: name + item count → opens items sheet */}
@@ -161,7 +160,7 @@ const NetWorthTab = () => {
           className="flex items-center gap-1 shrink-0 active:opacity-70 transition-opacity"
           onClick={() => setEditTarget({ list, index: i })}
         >
-          <span className={`text-[12px] tabular-nums ${accentClass}`}>
+          <span className="text-[12px] tabular-nums text-foreground">
             ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
