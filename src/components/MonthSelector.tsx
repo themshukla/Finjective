@@ -64,10 +64,6 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                style={isEmpty && !m.isToday ? {
-                  outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
-                  outlineOffset: "3px"
-                } : undefined}
                 style={{
                   ...(isEmpty && !m.isToday ? {
                     outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
