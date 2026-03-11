@@ -309,7 +309,6 @@ const NetWorthTab = () => {
         />
         {inlineAdding === "asset" ? (
           <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
-            <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <input
               autoFocus
               value={inlineAddVal}
