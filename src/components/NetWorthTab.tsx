@@ -393,8 +393,28 @@ const NetWorthTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirm delete card dialog */}
+      <AlertDialog open={!!confirmDeleteCard} onOpenChange={() => setConfirmDeleteCard(null)}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Delete this card?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">This will remove the card and all its items.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { if (confirmDeleteCard) { handleDelete(confirmDeleteCard.list, confirmDeleteCard.index); setConfirmDeleteCard(null); } }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
 export default NetWorthTab;
+
