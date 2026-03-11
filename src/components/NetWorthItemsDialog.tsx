@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, X, Trash2 } from "lucide-react";
 import { NetWorthEntry } from "@/data/budgetData";
 import { formatAmountInput, parseAmountInput } from "@/lib/utils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // ── Swipeable row ─────────────────────────────────────────────────────────────
 interface SwipeableRowProps {
@@ -116,89 +117,92 @@ const SwipeableRow = ({
   };
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Delete button behind */}
-      <div
-        className="absolute inset-y-0 right-0 flex items-stretch"
-        style={{ width: confirmDelete ? DELETE_WIDTH * 2 : DELETE_WIDTH, transition: "width 0.18s ease" }}
-      >
-        {confirmDelete ? (
-          <>
-            <button
-              className="flex-1 flex items-center justify-center bg-muted text-muted-foreground text-xs font-medium"
-              onClick={() => setConfirmDelete(false)}
-            >
-              No
-            </button>
-            <button
-              className="flex-1 flex items-center justify-center bg-destructive text-destructive-foreground text-xs font-medium"
-              onClick={() => onDelete(entry.id)}
-            >
-              Yes
-            </button>
-          </>
-        ) : (
+    <>
+      <div className="relative overflow-hidden">
+        {/* Delete button behind */}
+        <div
+          className="absolute inset-y-0 right-0 flex items-stretch"
+          style={{ width: DELETE_WIDTH }}
+        >
           <button
             className="flex-1 flex items-center justify-center bg-destructive"
             onClick={() => setConfirmDelete(true)}
           >
             <Trash2 className="h-4 w-4 text-destructive-foreground" />
           </button>
-        )}
+        </div>
+
+        {/* Row content */}
+        <div
+          className="flex items-center justify-between py-3 bg-card relative z-10"
+          style={{
+            transform: `translateX(${translateX}px)`,
+            transition: dragging ? "none" : "transform 0.22s ease",
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Name */}
+          {editingName ? (
+            <Input
+              autoFocus
+              value={nameVal}
+              onChange={(e) => setNameVal(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={(e) => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(entry.name); setEditingName(false); } }}
+              className="h-7 text-sm flex-1 min-w-0 mr-2 px-1 border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          ) : (
+            <p
+              className="text-[14px] text-foreground truncate flex-1 min-w-0 cursor-text"
+              onClick={handleNameTap}
+            >
+              {entry.name}
+            </p>
+          )}
+
+          {/* Amount */}
+          {editingAmount ? (
+            <Input
+              autoFocus
+              type="text"
+              inputMode="decimal"
+              value={amountVal}
+              onChange={(e) => setAmountVal(formatAmountInput(e.target.value))}
+              onBlur={commitAmount}
+              onKeyDown={(e) => { if (e.key === "Enter") commitAmount(); if (e.key === "Escape") { setAmountVal(formatAmountInput(String(entry.amount))); setEditingAmount(false); } }}
+              className="h-7 text-sm w-24 shrink-0 ml-2 px-1 text-right border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          ) : (
+            <span
+              className="text-[14px] tabular-nums text-foreground ml-2 shrink-0 cursor-text"
+              onClick={handleAmountTap}
+            >
+              ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Row content */}
-      <div
-        className="flex items-center justify-between py-3 bg-card relative z-10"
-        style={{
-          transform: `translateX(${translateX}px)`,
-          transition: dragging ? "none" : "transform 0.22s ease",
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Name */}
-        {editingName ? (
-          <Input
-            autoFocus
-            value={nameVal}
-            onChange={(e) => setNameVal(e.target.value)}
-            onBlur={commitName}
-            onKeyDown={(e) => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(entry.name); setEditingName(false); } }}
-            className="h-7 text-sm flex-1 min-w-0 mr-2 px-1 border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
-        ) : (
-          <p
-            className="text-[14px] text-foreground truncate flex-1 min-w-0 cursor-text"
-            onClick={handleNameTap}
-          >
-            {entry.name}
-          </p>
-        )}
-
-        {/* Amount */}
-        {editingAmount ? (
-          <Input
-            autoFocus
-            type="text"
-            inputMode="decimal"
-            value={amountVal}
-            onChange={(e) => setAmountVal(formatAmountInput(e.target.value))}
-            onBlur={commitAmount}
-            onKeyDown={(e) => { if (e.key === "Enter") commitAmount(); if (e.key === "Escape") { setAmountVal(formatAmountInput(String(entry.amount))); setEditingAmount(false); } }}
-            className="h-7 text-sm w-24 shrink-0 ml-2 px-1 text-right border-0 rounded-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
-        ) : (
-          <span
-            className="text-[14px] tabular-nums text-foreground ml-2 shrink-0 cursor-text"
-            onClick={handleAmountTap}
-          >
-            ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </span>
-        )}
-      </div>
-    </div>
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-sm">Delete item?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-xs" onClick={() => { setTranslateX(0); setSwipeOpenId(null); }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => onDelete(entry.id)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
