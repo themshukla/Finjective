@@ -30,8 +30,8 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey } = useBudget();
-  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, clearNetWorth, latestNetWorthSnapshotKey } = useBudget();
+  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh" | "clear">(null);
 
   const latestLabel = latestNetWorthSnapshotKey
     ? format(parse(latestNetWorthSnapshotKey, "yyyy-MM", new Date()), "MMM yyyy")
@@ -39,9 +39,11 @@ const NetWorthTab = () => {
 
   const handleImport = () => { setConfirmAction("import"); };
   const handleFresh = () => { setConfirmAction("fresh"); };
+  const handleClear = () => { setConfirmAction("clear"); };
   const handleConfirm = () => {
     if (confirmAction === "import") importNetWorthFromPrevious();
     else if (confirmAction === "fresh") createEmptyNetWorth();
+    else if (confirmAction === "clear") clearNetWorth();
     setConfirmAction(null);
   };
   const [filter, setFilter] = useState<TimeFilter>("YTD");
@@ -323,13 +325,13 @@ const NetWorthTab = () => {
           </button>
         )}
         <button
-          onClick={handleFresh}
+          onClick={handleClear}
           className="flex-1 flex items-center gap-2 rounded-xl bg-card border border-border p-2.5 text-left active:scale-[0.98] transition-transform"
         >
           <FilePlus className="h-4 w-4 text-primary flex-shrink-0" />
           <div>
-            <p className="text-[11px] font-medium">Start fresh</p>
-            <p className="text-[9px] text-muted-foreground">Blank statement</p>
+            <p className="text-[11px] font-medium">Clear</p>
+            <p className="text-[9px] text-muted-foreground">Remove this month</p>
           </div>
         </button>
       </div>
@@ -338,15 +340,19 @@ const NetWorthTab = () => {
       <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
         <AlertDialogContent className="max-w-[320px] rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">Replace existing statement?</AlertDialogTitle>
+            <AlertDialogTitle className="text-sm">
+              {confirmAction === "clear" ? "Clear this month?" : "Replace existing statement?"}
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs">
-              {format(selectedMonth, "MMMM yyyy")} already has a net worth statement. This will replace all assets and liabilities.
+              {confirmAction === "clear"
+                ? `This will delete the ${format(selectedMonth, "MMMM yyyy")} net worth statement and remove it from your history.`
+                : `${format(selectedMonth, "MMMM yyyy")} already has a net worth statement. This will replace all assets and liabilities.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm} className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Replace
+              {confirmAction === "clear" ? "Clear" : "Replace"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
