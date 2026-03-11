@@ -142,7 +142,6 @@ const NetWorthTab = () => {
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
-    const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
       <div className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none">
         {/* Left: name + item count → opens items sheet */}
