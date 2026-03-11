@@ -223,8 +223,6 @@ const NetWorthTab = () => {
     }
   };
 
-  const assetIcons = [TrendingUp, DollarSign];
-
   const itemsDialogData = viewingItems
     ? viewingItems.list === "asset"
       ? { item: assets[viewingItems.index], list: "asset" as const, index: viewingItems.index }
@@ -233,76 +231,21 @@ const NetWorthTab = () => {
 
   if (netWorthNeedsSetup) return <NetWorthSetupPrompt />;
 
-  // Long-press hook factory
-  const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500) => {
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const didLongPress = useRef(false);
-
-    const start = useCallback(() => {
-      didLongPress.current = false;
-      timerRef.current = setTimeout(() => {
-        didLongPress.current = true;
-        onLongPress();
-      }, delay);
-    }, [onLongPress, delay]);
-
-    const cancel = useCallback(() => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    }, []);
-
-    const handleClick = useCallback(() => {
-      if (!didLongPress.current) onClick();
-    }, [onClick]);
-
-    return {
-      onPointerDown: start,
-      onPointerUp: cancel,
-      onPointerLeave: cancel,
-      onClick: handleClick,
-    };
-  };
-
-  const CardItem = ({ list, cat, i }: { list: "asset" | "liability"; cat: any; i: number }) => {
+  const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
-    const cardValue = getCardValue(item?.entries, item?.value);
-    const accentClass = list === "asset" ? "text-income" : "text-expense";
-
-    const longPressHandlers = useLongPress(
-      () => setDeleteTarget({ list, index: i }),
-      () => openEdit(list, i),
-    );
-
     return (
-      <div
-        className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform"
-        {...longPressHandlers}
-      >
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-          <p className="text-[10px] text-muted-foreground">
-            {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        <span className={`text-[12px] tabular-nums shrink-0 ${accentClass}`}>
-          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </span>
-
-        {/* Chevron taps into items dialog */}
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); setViewingItems({ list, index: i }); }}
-          className="text-muted-foreground shrink-0 p-0.5"
-        >
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
+      <CardItem
+        key={i}
+        list={list}
+        cat={cat}
+        i={i}
+        item={item}
+        onEdit={() => openEdit(list, i)}
+        onDelete={() => setDeleteTarget({ list, index: i })}
+        onOpenItems={() => setViewingItems({ list, index: i })}
+      />
     );
   };
-
-  const renderCard = (list: "asset" | "liability", cat: any, i: number) => (
-    <CardItem list={list} cat={cat} i={i} />
-  );
 
   return (
     <div className="space-y-5">
