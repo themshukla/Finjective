@@ -29,7 +29,8 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | "addAsset" | "addLiability" | null;
 
 const NetWorthTab = () => {
-  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
+  const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup, importNetWorthFromPrevious, createEmptyNetWorth, latestNetWorthSnapshotKey, netWorthNeedsSetup: _nwns } = useBudget();
+  const [confirmAction, setConfirmAction] = useState<null | "import" | "fresh">(null);
   const [filter, setFilter] = useState<TimeFilter>("YTD");
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
