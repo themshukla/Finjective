@@ -121,32 +121,16 @@ const SwipeableRow = ({
       {/* Delete button behind */}
       <div
         className="absolute inset-y-0 right-0 flex items-stretch"
-        style={{ width: confirmDelete ? DELETE_WIDTH * 2 : DELETE_WIDTH, transition: "width 0.18s ease" }}
+        style={{ width: DELETE_WIDTH }}
       >
-        {confirmDelete ? (
-          <>
-            <button
-              className="flex-1 flex items-center justify-center bg-muted text-muted-foreground text-xs font-medium"
-              onClick={() => setConfirmDelete(false)}
-            >
-              No
-            </button>
-            <button
-              className="flex-1 flex items-center justify-center bg-destructive text-destructive-foreground text-xs font-medium"
-              onClick={() => onDelete(entry.id)}
-            >
-              Yes
-            </button>
-          </>
-        ) : (
-          <button
-            className="flex-1 flex items-center justify-center bg-destructive"
-            onClick={() => setConfirmDelete(true)}
-          >
-            <Trash2 className="h-4 w-4 text-destructive-foreground" />
-          </button>
-        )}
+        <button
+          className="flex-1 flex items-center justify-center bg-destructive"
+          onClick={() => setConfirmDelete(true)}
+        >
+          <Trash2 className="h-4 w-4 text-destructive-foreground" />
+        </button>
       </div>
+
 
       {/* Row content */}
       <div
