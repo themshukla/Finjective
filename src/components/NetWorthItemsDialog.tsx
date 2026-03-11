@@ -127,17 +127,17 @@ const NetWorthItemsDialog = ({
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-4 pt-px pb-4 space-y-px">
+        <div className="flex-1 overflow-y-auto px-4 py-0 min-h-0 divide-y divide-border">
           {entries.length === 0 && !showForm && (
             <p className="text-xs text-muted-foreground text-center py-6">
               No items yet. Tap + Add Item to get started.
             </p>
           )}
 
-          {entries.map((entry) =>
+          {!showForm && entries.map((entry) =>
             editingId === entry.id ? (
               /* ── Inline edit form ── */
-              <div key={entry.id} className="rounded-xl bg-card border border-primary/40 p-3 space-y-2">
+              <div key={entry.id} className="rounded-xl border border-primary/30 bg-card p-3 space-y-2.5 my-2">
                 <Input
                   placeholder="Item name"
                   value={name}
@@ -154,50 +154,35 @@ const NetWorthItemsDialog = ({
                   className="h-9 text-sm"
                 />
                 <div className="flex gap-2 pt-1">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => handleDelete(entry.id)}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={cancelEdit}
-                  >
+                  <Button variant="outline" size="sm" className="flex-1" onClick={cancelEdit}>
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1"
-                    onClick={handleSaveEdit}
-                    disabled={!name.trim() || !amount}
-                  >
+                  <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(entry.id)}>
+                    Delete
+                  </Button>
+                  <Button size="sm" className="flex-1" onClick={handleSaveEdit} disabled={!name.trim() || !amount}>
                     Save
                   </Button>
                 </div>
               </div>
             ) : (
               /* ── Regular row — tap to edit ── */
-              <button
+              <div
                 key={entry.id}
                 onClick={() => openEdit(entry)}
-                className="w-full flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2.5 text-left active:opacity-70 transition-opacity"
+                className="flex items-center justify-between px-0 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
               >
-                <span className="text-[14px] text-foreground">{entry.name}</span>
-                <span className="text-[14px] tabular-nums text-foreground">
+                <p className="text-[14px] text-foreground truncate flex-1 min-w-0">{entry.name}</p>
+                <span className="text-[14px] tabular-nums text-foreground ml-2 shrink-0">
                   ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </span>
-              </button>
+              </div>
             )
           )}
 
           {/* Add form */}
           {showForm && (
-            <div className="rounded-xl bg-card border border-border p-3 space-y-2">
+            <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2.5 my-2">
               <Input
                 placeholder="Item name"
                 value={name}
@@ -214,12 +199,7 @@ const NetWorthItemsDialog = ({
                 className="h-9 text-sm"
               />
               <div className="flex gap-2 pt-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => { setShowForm(false); setName(""); setAmount(""); }}
-                >
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => { setShowForm(false); setName(""); setAmount(""); }}>
                   Cancel
                 </Button>
                 <Button size="sm" className="flex-1" onClick={handleAdd} disabled={!name.trim() || !amount}>
@@ -228,17 +208,16 @@ const NetWorthItemsDialog = ({
               </div>
             </div>
           )}
-
-          {!showForm && !editingId && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-3 text-xs font-medium text-primary hover:bg-secondary/40 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Item
-            </button>
-          )}
         </div>
+
+        {/* Footer add button */}
+        {!showForm && !editingId && (
+          <div className="px-4 pb-4 pt-2 border-t border-border shrink-0">
+            <Button variant="outline" size="sm" className="w-full" onClick={() => setShowForm(true)}>
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Item
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
