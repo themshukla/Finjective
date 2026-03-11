@@ -210,7 +210,7 @@ const NetWorthTab = () => {
       </div>
 
       {/* Line chart */}
-      <div className="rounded-xl bg-card border border-border p-3 pb-3">
+      <div className="pb-1">
         {chartData.length < 2 ? (
           <p className="text-xs text-muted-foreground text-center py-10">No history yet. Data will appear once you have more than one month recorded.</p>
         ) : (
