@@ -99,7 +99,7 @@ const CardItem = ({ list, cat, i, item, onEdit, onDelete, onOpenItems }: CardIte
 
   return (
     <div
-      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform"
+      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform touch-pan-y"
       {...longPressHandlers}
     >
       <div className="flex-1 min-w-0">
