@@ -19,16 +19,18 @@ const NetWorthItemsDialog = ({
   title,
   entries,
   onEntriesChange,
-  accentClass = "text-income",
+  accentClass = "text-foreground",
 }: NetWorthItemsDialogProps) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  // editingId = id of entry being edited, null = adding new
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   useEffect(() => {
     if (open) {
-      // Small delay so the entering animation triggers after mount
       requestAnimationFrame(() => setVisible(true));
     } else {
       setVisible(false);
@@ -37,6 +39,7 @@ const NetWorthItemsDialog = ({
 
   const total = entries.reduce((s, e) => s + e.amount, 0);
 
+  // ── Add ──────────────────────────────────────────────────────────────────────
   const handleAdd = () => {
     if (!name.trim() || !amount) return;
     const entry: NetWorthEntry = {
@@ -50,12 +53,42 @@ const NetWorthItemsDialog = ({
     setShowForm(false);
   };
 
+  // ── Edit ─────────────────────────────────────────────────────────────────────
+  const openEdit = (entry: NetWorthEntry) => {
+    setEditingId(entry.id);
+    setName(entry.name);
+    setAmount(String(entry.amount));
+    setShowForm(false); // close add form if open
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingId || !name.trim() || !amount) return;
+    onEntriesChange(
+      entries.map((e) =>
+        e.id === editingId ? { ...e, name: name.trim(), amount: parseFloat(amount) } : e
+      )
+    );
+    setEditingId(null);
+    setName("");
+    setAmount("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setName("");
+    setAmount("");
+  };
+
+  // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDelete = (id: string) => {
+    if (editingId === id) cancelEdit();
     onEntriesChange(entries.filter((e) => e.id !== id));
   };
 
   const handleClose = () => {
     setVisible(false);
+    cancelEdit();
+    setShowForm(false);
     setTimeout(onClose, 300);
   };
 
@@ -84,7 +117,7 @@ const NetWorthItemsDialog = ({
         <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
           <h2 className="text-base font-bold text-foreground">{title}</h2>
           <div className="flex items-center gap-3">
-            <span className={`text-lg font-bold tabular-nums ${accentClass}`}>
+            <span className="text-lg font-bold tabular-nums text-foreground">
               ${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
             <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -101,26 +134,68 @@ const NetWorthItemsDialog = ({
             </p>
           )}
 
-          {entries.map((entry) => (
-            <div
-              key={entry.id}
-              className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2.5"
-            >
-              <span className="text-sm font-medium text-foreground">{entry.name}</span>
-              <div className="flex items-center gap-3">
-                <span className={`text-sm font-bold tabular-nums ${accentClass}`}>
+          {entries.map((entry) =>
+            editingId === entry.id ? (
+              /* ── Inline edit form ── */
+              <div key={entry.id} className="rounded-xl bg-card border border-primary/40 p-3 space-y-2">
+                <Input
+                  placeholder="Item name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-9 text-sm"
+                  autoFocus
+                />
+                <Input
+                  type="number"
+                  placeholder="$0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
+                  className="h-9 text-sm"
+                />
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleDelete(entry.id)}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={cancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleSaveEdit}
+                    disabled={!name.trim() || !amount}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              /* ── Regular row — tap to edit ── */
+              <button
+                key={entry.id}
+                onClick={() => openEdit(entry)}
+                className="w-full flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2.5 text-left active:opacity-70 transition-opacity"
+              >
+                <span className="text-sm font-medium text-foreground">{entry.name}</span>
+                <span className="text-sm font-bold tabular-nums text-foreground">
                   ${entry.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </span>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
+              </button>
+            )
+          )}
 
+          {/* Add form */}
           {showForm && (
             <div className="rounded-xl bg-card border border-border p-3 space-y-2">
               <Input
@@ -154,7 +229,7 @@ const NetWorthItemsDialog = ({
             </div>
           )}
 
-          {!showForm && (
+          {!showForm && !editingId && (
             <button
               onClick={() => setShowForm(true)}
               className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-3 text-xs font-medium text-primary hover:bg-secondary/40 transition-colors"
