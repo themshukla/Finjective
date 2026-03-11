@@ -143,7 +143,6 @@ const NetWorthTab = () => {
     const item = list === "asset" ? assets[i] : liabilities[i];
     const cardValue = getCardValue(item?.entries, item?.value);
     return (
-      {/* Outer card: entire right side (empty space + value + chevron) opens items sheet */}
       <button
         className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
         onClick={() => setViewingItems({ list, index: i })}
