@@ -43,12 +43,16 @@ const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete }: Edit
             {fields.map((f) => (
               <div key={f.key}>
                 <Label className="text-xs text-muted-foreground">{f.label}</Label>
-              <Input
-                type={f.type}
+            <Input
+                type={f.type === "number" ? "text" : f.type}
+                inputMode={f.type === "number" ? "decimal" : undefined}
                 value={values[f.key]}
-                placeholder={f.type === "number" ? "$0.00" : ""}
+                placeholder={f.type === "number" ? "0.00" : ""}
                 onChange={(e) =>
-                  setValues((v) => ({ ...v, [f.key]: f.type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value }))
+                  setValues((v) => ({
+                    ...v,
+                    [f.key]: f.type === "number" ? formatAmountInput(e.target.value) : e.target.value,
+                  }))
                 }
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
                 className="mt-1 h-10"
