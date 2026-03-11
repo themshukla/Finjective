@@ -14,16 +14,19 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
 
+  // When viewing current month: show 3 pills [prev] [selected=current] [next]
+  // When viewing past/future: show 4 pills [prev] [Today] [selected] [next]
   const months = isCurrentMonth
     ? [
-        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
-        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth },
-        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
+        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
+        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: true },
+        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
       ]
     : [
-        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev },
-        { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now },
-        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next },
+        { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
+        { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now, isSelected: false, isToday: true },
+        { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: false },
+        { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
       ];
 
   const hasData = (date: Date) => {
@@ -56,28 +59,31 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
         <div className="flex gap-1">
           {months.map((m, i) => {
-            const isCenter = i === 1;
-            const isCurrent = format(m.date, "yyyy-MM") === format(now, "yyyy-MM");
             const isEmpty = !hasData(m.action);
             return (
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                style={isEmpty ? {
-                  outline: `1.5px dashed ${isCenter ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
+                style={isEmpty && !m.isToday ? {
+                  outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
                   outlineOffset: "3px"
                 } : undefined}
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
-                  isCenter
+                  m.isSelected
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground active:opacity-60"
                 }`}
               >
-                <span className={`text-sm font-semibold ${isCenter ? "text-primary-foreground" : "text-foreground"}`}>{m.label}</span>
-                <span className={`text-[10px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                  {m.subLabel}
-                  {isCurrent && !isCenter && " ·"}
+                <span className={`text-sm font-semibold ${m.isSelected ? "text-primary-foreground" : "text-foreground"}`}>
+                  {m.label}
                 </span>
+                <span className={`text-[10px] ${m.isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  {m.subLabel}
+                </span>
+                {/* Solid underline for Today pill when not selected */}
+                {m.isToday && !m.isSelected && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
+                )}
               </button>
             );
           })}
