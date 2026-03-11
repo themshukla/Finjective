@@ -61,7 +61,7 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
     if (!editingId || !editDate || !editAmount || !editMerchant.trim()) return;
     const updated = transactions.map((t) =>
       t.id === editingId
-        ? { ...t, merchant: editMerchant.trim(), amount: Number(editAmount), date: format(editDate, "yyyy-MM-dd") }
+        ? { ...t, merchant: editMerchant.trim(), amount: parseAmountInput(editAmount), date: format(editDate, "yyyy-MM-dd") }
         : t
     );
     onUpdate(updated);
