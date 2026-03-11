@@ -59,10 +59,11 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
 
   const hasData = (date: Date) => {
     const key = format(date, "yyyy-MM");
-    const hasBudget = hasMonthData(key);
-    const snap = netWorthSnapshots.find(s => s.month_key === key);
-    const hasNetWorth = !!snap && (snap.assets.length > 0 || snap.liabilities.length > 0);
-    return hasBudget || hasNetWorth;
+    if (activeTab === "networth") {
+      const snap = netWorthSnapshots.find(s => s.month_key === key);
+      return !!snap && (snap.assets.length > 0 || snap.liabilities.length > 0);
+    }
+    return hasMonthData(key);
   };
 
   if (collapsed) {
