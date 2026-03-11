@@ -161,6 +161,19 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
     saveInitialSnapshot([], [], monthKey);
   }, [saveInitialSnapshot, monthKey]);
 
+  const clearNetWorth = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await (supabase.from('net_worth_snapshots') as any)
+      .delete()
+      .eq('user_id', user.id)
+      .eq('month_key', monthKey);
+    setNetWorthSnapshots(prev => prev.filter(s => s.month_key !== monthKey));
+    setAssets([]);
+    setLiabilities([]);
+    netWorthLoadedMonthRef.current = "";
+  }, [monthKey]);
+
   // Track which month's net worth we've already loaded to avoid re-loading on saves
   const netWorthLoadedMonthRef = useRef<string>("");
 
