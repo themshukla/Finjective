@@ -216,7 +216,7 @@ const NetWorthTab = () => {
         ) : (
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border) / 0.25)" vertical={true} horizontal={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <YAxis hide />
