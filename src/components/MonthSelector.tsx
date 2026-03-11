@@ -86,20 +86,17 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
 
         <div className="flex gap-1">
           {months.map((m, i) => {
-            const isEmpty = !hasData(m.action);
             return (
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                style={{
-                  ...(isEmpty && !m.isToday ? {
-                    outline: `1.5px dashed ${m.isSelected ? "hsl(var(--primary-foreground) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)"}`,
-                    outlineOffset: "3px"
-                  } : {}),
-                  ...(m.isToday && !m.isSelected ? {
-                    border: "2px solid hsl(var(--primary))"
-                  } : {})
-                }}
+                style={
+                  m.isSelected
+                    ? {}
+                    : m.isToday
+                    ? { border: "2px solid hsl(var(--primary))" }
+                    : { border: "1.5px dashed hsl(var(--muted-foreground) / 0.5)" }
+                }
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   m.isSelected
                     ? "bg-primary text-primary-foreground"
