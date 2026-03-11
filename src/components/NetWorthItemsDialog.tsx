@@ -117,6 +117,7 @@ const SwipeableRow = ({
   };
 
   return (
+    <>
     <div className="relative overflow-hidden">
       {/* Delete button behind */}
       <div
