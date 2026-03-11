@@ -12,7 +12,6 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
   entries && entries.length > 0
