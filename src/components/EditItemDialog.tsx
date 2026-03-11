@@ -4,6 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatAmountInput, parseAmountInput } from "@/lib/utils";
 
 interface EditItemDialogProps {
   open: boolean;
@@ -16,12 +17,18 @@ interface EditItemDialogProps {
 
 const EditItemDialog = ({ open, onClose, title, fields, onSave, onDelete }: EditItemDialogProps) => {
   const [values, setValues] = useState<Record<string, string | number>>(
-    Object.fromEntries(fields.map((f) => [f.key, f.type === "number" && f.value === 0 ? "" : f.value]))
+    Object.fromEntries(fields.map((f) => [
+      f.key,
+      f.type === "number" && f.value === 0 ? "" : f.type === "number" ? formatAmountInput(String(f.value)) : f.value
+    ]))
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleSave = () => {
-    onSave(values);
+    const parsed = Object.fromEntries(
+      fields.map((f) => [f.key, f.type === "number" ? parseAmountInput(String(values[f.key])) : values[f.key]])
+    );
+    onSave(parsed);
     onClose();
   };
 
