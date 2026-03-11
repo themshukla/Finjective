@@ -33,20 +33,37 @@ type EditTarget = { list: "asset" | "liability"; index: number } | null;
 type AddTarget = "asset" | "liability" | null;
 
 // ── Long-press hook ────────────────────────────────────────────────────────────
-// Fires onLongPress on release (pointerUp) if held long enough, otherwise onClick.
-const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500) => {
+// Fires onLongPress on release if held long enough and pointer didn't move (scroll).
+const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500, moveThreshold = 8) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongRef = useRef(false);
+  const cancelledRef = useRef(false);
+  const startPos = useRef<{ x: number; y: number } | null>(null);
 
-  const start = useCallback(() => {
+  const start = useCallback((e: React.PointerEvent) => {
     isLongRef.current = false;
+    cancelledRef.current = false;
+    startPos.current = { x: e.clientX, y: e.clientY };
     timerRef.current = setTimeout(() => {
-      isLongRef.current = true;
+      if (!cancelledRef.current) isLongRef.current = true;
     }, delay);
   }, [delay]);
 
+  const move = useCallback((e: React.PointerEvent) => {
+    if (!startPos.current) return;
+    const dx = Math.abs(e.clientX - startPos.current.x);
+    const dy = Math.abs(e.clientY - startPos.current.y);
+    if (dx > moveThreshold || dy > moveThreshold) {
+      // Pointer moved too far — cancel long press so scroll works normally
+      if (timerRef.current) clearTimeout(timerRef.current);
+      isLongRef.current = false;
+      cancelledRef.current = true;
+    }
+  }, [moveThreshold]);
+
   const release = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (cancelledRef.current) return; // Was a scroll, do nothing
     if (isLongRef.current) {
       isLongRef.current = false;
       onLongPress();
@@ -58,9 +75,10 @@ const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500)
   const cancel = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     isLongRef.current = false;
+    cancelledRef.current = false;
   }, []);
 
-  return { onPointerDown: start, onPointerUp: release, onPointerLeave: cancel, onClick: () => {} };
+  return { onPointerDown: start, onPointerMove: move, onPointerUp: release, onPointerLeave: cancel, onClick: () => {} };
 };
 
 // ── Card component (needs its own hooks) ──────────────────────────────────────
@@ -81,7 +99,7 @@ const CardItem = ({ list, cat, i, item, onEdit, onDelete, onOpenItems }: CardIte
 
   return (
     <div
-      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform"
+      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform touch-pan-y"
       {...longPressHandlers}
     >
       <div className="flex-1 min-w-0">
