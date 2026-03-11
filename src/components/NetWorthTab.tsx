@@ -208,21 +208,10 @@ const NetWorthTab = () => {
         ) : (
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border) / 0.25)" vertical={true} horizontal={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
-                  width={52}
-                  tickFormatter={(v: number) => {
-                    const abs = Math.abs(v);
-                    if (abs >= 1_000_000) return `${v < 0 ? "-" : ""}$${(abs / 1_000_000).toFixed(1)}M`;
-                    if (abs >= 1_000) return `${v < 0 ? "-" : ""}$${(abs / 1_000).toFixed(0)}K`;
-                    return `${v < 0 ? "-" : ""}$${abs}`;
-                  }}
-                />
+                <YAxis hide />
                 <Tooltip
                   contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12, backgroundColor: "hsl(var(--card))", color: "hsl(var(--foreground))" }}
                   formatter={(value: number) => [`${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`, "Cumulative Net"]}
