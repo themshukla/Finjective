@@ -51,6 +51,11 @@ const NetWorthTab = () => {
   const [viewingItems, setViewingItems] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
 
+  // inline card name editing
+  const [inlineEdit, setInlineEdit] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
+  const [inlineVal, setInlineVal] = useState("");
+  const [confirmDeleteCard, setConfirmDeleteCard] = useState<{ list: "asset" | "liability"; index: number } | null>(null);
+
   const totalAssets = assets.reduce((s, a) => s + getCardValue(a.entries, a.value), 0);
   const totalLiabilities = liabilities.reduce((s, l) => s + getCardValue(l.entries, l.value), 0);
   const netWorth = totalAssets - totalLiabilities;
