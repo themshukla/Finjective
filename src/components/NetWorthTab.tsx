@@ -176,8 +176,8 @@ const NetWorthTab = () => {
           className="shrink-0 max-w-[55%] min-w-0"
           onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
         >
-          <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-base font-semibold text-foreground truncate">{cat.name}</p>
+          <p className="text-[13px] text-muted-foreground">
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </span>
@@ -185,7 +185,7 @@ const NetWorthTab = () => {
         {/* Spacer — flex-1 gap, tapping here opens items sheet via outer button */}
         <span className="flex-1" />
 
-        <span className="text-[12px] tabular-nums text-foreground shrink-0">
+        <span className="text-base font-semibold text-foreground tabular-nums shrink-0">
           ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </span>
         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
