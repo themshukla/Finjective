@@ -147,9 +147,9 @@ const NetWorthTab = () => {
         className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none text-left active:opacity-80 transition-opacity"
         onClick={() => setViewingItems({ list, index: i })}
       >
-        {/* Name — stops propagation and opens edit/delete */}
+        {/* Name — shrinks to content width only; tap opens edit/delete */}
         <span
-          className="flex-1 min-w-0"
+          className="shrink-0 max-w-[55%] min-w-0"
           onClick={(e) => { e.stopPropagation(); setEditTarget({ list, index: i }); }}
         >
           <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
@@ -157,6 +157,9 @@ const NetWorthTab = () => {
             {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </span>
+
+        {/* Spacer — flex-1 gap, tapping here opens items sheet via outer button */}
+        <span className="flex-1" />
 
         <span className="text-[12px] tabular-nums text-foreground shrink-0">
           ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
