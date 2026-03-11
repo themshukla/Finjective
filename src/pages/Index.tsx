@@ -12,6 +12,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 
 const Index = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("budget");
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrolled(e.currentTarget.scrollTop > 10);
