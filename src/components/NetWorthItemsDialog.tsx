@@ -115,9 +115,9 @@ const NetWorthItemsDialog = ({
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
-          <h2 className="text-base font-bold text-foreground">{title}</h2>
+          <h2 className="text-base font-bold text-primary">{title}</h2>
           <div className="flex items-center gap-3">
-            <span className="text-[14px] font-bold tabular-nums text-foreground">
+            <span className="text-[14px] font-bold tabular-nums text-primary">
               ${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
             <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
