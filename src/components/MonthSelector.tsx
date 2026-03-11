@@ -112,11 +112,6 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
                 <span className={`text-[10px] ${m.isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                   {m.subLabel}
                 </span>
-                {m.isToday && !m.isSelected && (
-                  <span className="text-[8px] font-semibold leading-tight text-primary">
-                    Today
-                  </span>
-                )}
               </button>
             );
           })}
