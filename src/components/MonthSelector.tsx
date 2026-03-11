@@ -64,11 +64,12 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
+                style={isEmpty ? { outline: "1.5px dashed hsl(var(--muted-foreground) / 0.45)", outlineOffset: "2px" } : undefined}
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   isCenter
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground active:opacity-60"
-                } ${!isCenter && isEmpty ? "ring-1 ring-dashed ring-muted-foreground/40 rounded-full" : ""}`}
+                }`}
               >
                 <span className={`text-sm font-semibold ${isCenter ? "text-primary-foreground" : "text-foreground"}`}>{m.label}</span>
                 <span className={`text-[10px] ${isCenter ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
