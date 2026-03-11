@@ -150,10 +150,11 @@ const NetWorthItemsDialog = ({
                   autoFocus
                 />
                 <Input
-                  type="number"
-                  placeholder="$0.00"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                   onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
                   className="h-9 text-sm"
                 />

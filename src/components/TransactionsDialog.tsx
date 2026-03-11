@@ -231,10 +231,11 @@ const TransactionsDialog = ({ open, onClose, categoryName, transactions, onUpdat
                 <div>
                   <Label className="text-xs text-muted-foreground">Amount</Label>
                   <Input
-                    type="number"
-                    placeholder="$0.00"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     className="mt-1 h-9"
                   />
