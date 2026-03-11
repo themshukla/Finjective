@@ -24,7 +24,7 @@ const MonthSelector = ({ collapsed = false }: MonthSelectorProps) => {
       ]
     : [
         { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: false },
-        { date: now, label: "Today", subLabel: format(now, "MMM yyyy"), action: now, isSelected: false, isToday: true },
+        { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), todayLabel: "Today", action: now, isSelected: false, isToday: true },
         { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: false },
         { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: false },
       ];
