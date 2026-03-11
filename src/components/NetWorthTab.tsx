@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, TrendingUp, DollarSign, TrendingDown, Minus, Pencil, Trash2 } from "lucide-react";
+import { useState, useMemo, useRef, useCallback } from "react";
+import { Plus, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { useBudget } from "@/context/BudgetContext";
 import { NetWorthEntry } from "@/data/budgetData";
@@ -12,7 +12,6 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 const getCardValue = (entries?: NetWorthEntry[], fallback?: number) =>
   entries && entries.length > 0
@@ -33,6 +32,72 @@ const FILTERS: { label: string; value: TimeFilter }[] = [
 type EditTarget = { list: "asset" | "liability"; index: number } | null;
 type AddTarget = "asset" | "liability" | null;
 
+// ── Long-press hook ────────────────────────────────────────────────────────────
+const useLongPress = (onLongPress: () => void, onClick: () => void, delay = 500) => {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPress = useRef(false);
+
+  const start = useCallback(() => {
+    didLongPress.current = false;
+    timerRef.current = setTimeout(() => {
+      didLongPress.current = true;
+      onLongPress();
+    }, delay);
+  }, [onLongPress, delay]);
+
+  const cancel = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (!didLongPress.current) onClick();
+  }, [onClick]);
+
+  return { onPointerDown: start, onPointerUp: cancel, onPointerLeave: cancel, onClick: handleClick };
+};
+
+// ── Card component (needs its own hooks) ──────────────────────────────────────
+interface CardItemProps {
+  list: "asset" | "liability";
+  cat: any;
+  i: number;
+  item: any;
+  onEdit: () => void;
+  onDelete: () => void;
+  onOpenItems: () => void;
+}
+
+const CardItem = ({ list, cat, i, item, onEdit, onDelete, onOpenItems }: CardItemProps) => {
+  const cardValue = getCardValue(item?.entries, item?.value);
+  const accentClass = list === "asset" ? "text-income" : "text-expense";
+  const longPressHandlers = useLongPress(onDelete, onEdit);
+
+  return (
+    <div
+      className="w-full rounded-xl bg-card border border-border px-3 py-2.5 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] transition-transform"
+      {...longPressHandlers}
+    >
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
+        <p className="text-[10px] text-muted-foreground">
+          {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
+        </p>
+      </div>
+      <span className={`text-[12px] tabular-nums shrink-0 ${accentClass}`}>
+        ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+      </span>
+      <button
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); onOpenItems(); }}
+        className="text-muted-foreground shrink-0 p-0.5"
+      >
+        <ChevronRight className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+};
+
+// ── Main tab ──────────────────────────────────────────────────────────────────
 const NetWorthTab = () => {
   const { assets, liabilities, setAssets, setLiabilities, selectedMonth, netWorthSnapshots, netWorthNeedsSetup } = useBudget();
   const [filter, setFilter] = useState<TimeFilter>("YTD");
@@ -157,8 +222,6 @@ const NetWorthTab = () => {
     }
   };
 
-  const assetIcons = [TrendingUp, DollarSign];
-
   const itemsDialogData = viewingItems
     ? viewingItems.list === "asset"
       ? { item: assets[viewingItems.index], list: "asset" as const, index: viewingItems.index }
@@ -169,45 +232,17 @@ const NetWorthTab = () => {
 
   const renderCard = (list: "asset" | "liability", cat: any, i: number) => {
     const item = list === "asset" ? assets[i] : liabilities[i];
-    const cardValue = getCardValue(item?.entries, item?.value);
-    const accentClass = list === "asset" ? "text-income" : "text-expense";
     return (
-      <div className="w-full rounded-xl bg-card border border-border px-3 py-2 flex items-center gap-1">
-        {/* Main tap area → open items */}
-        <button
-          onClick={() => setViewingItems({ list, index: i })}
-          className="flex-1 min-w-0 text-left"
-        >
-          <p className="text-xs font-medium text-foreground truncate">{cat.name}</p>
-          <p className="text-[10px] text-muted-foreground">
-            {(item?.entries?.length ?? 0)} item{(item?.entries?.length ?? 0) !== 1 ? "s" : ""}
-          </p>
-        </button>
-
-        {/* Value */}
-        <button
-          onClick={() => setViewingItems({ list, index: i })}
-          className={`text-[12px] tabular-nums shrink-0 mr-2 ${accentClass}`}
-        >
-          ${cardValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </button>
-
-        {/* Edit icon */}
-        <button
-          onClick={(e) => { e.stopPropagation(); openEdit(list, i); }}
-          className="text-muted-foreground hover:text-foreground transition-colors p-1 shrink-0"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-
-        {/* Delete icon */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setDeleteTarget({ list, index: i }); }}
-          className="text-muted-foreground hover:text-destructive transition-colors p-1 shrink-0"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
+      <CardItem
+        key={i}
+        list={list}
+        cat={cat}
+        i={i}
+        item={item}
+        onEdit={() => openEdit(list, i)}
+        onDelete={() => setDeleteTarget({ list, index: i })}
+        onOpenItems={() => setViewingItems({ list, index: i })}
+      />
     );
   };
 
