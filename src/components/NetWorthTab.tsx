@@ -197,7 +197,7 @@ const NetWorthTab = () => {
       <div className="text-center pt-2 pb-1">
         <p className="text-[14px] text-primary uppercase tracking-[0.2em] font-medium mb-2">Net Worth</p>
         <p
-          className={`font-bold tabular-nums ${isPositive ? "text-income" : isNegative ? "text-expense" : "text-foreground"}`}
+          className={`tabular-nums ${isPositive ? "text-positive" : isNegative ? "text-expense" : "text-foreground"}`}
           style={{ fontSize: "30px" }}
         >
           {isNegative ? "-" : ""}${Math.abs(netWorth).toLocaleString("en-US", { minimumFractionDigits: 2 })}
