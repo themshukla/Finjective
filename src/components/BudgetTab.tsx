@@ -363,9 +363,6 @@ const BudgetTab = () => {
           <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-bold text-primary">Income</h3>
-              <button onClick={() => setEditing("addIncome")} className="flex items-center gap-1 text-primary text-xs font-medium">
-                <Plus className="h-3.5 w-3.5" /> Add
-              </button>
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedIncome.toLocaleString()} budgeted</span>
@@ -384,6 +381,12 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
+          <button
+            onClick={() => setEditing("addIncome")}
+            className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Income
+          </button>
         </section>
 
         {/* Expenses section */}
@@ -391,9 +394,6 @@ const BudgetTab = () => {
           <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-bold text-primary">Expenses</h3>
-              <button onClick={() => setEditing("addExpense")} className="flex items-center gap-1 text-primary text-xs font-medium">
-                <Plus className="h-3.5 w-3.5" /> Add
-              </button>
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
@@ -412,6 +412,12 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
+          <button
+            onClick={() => setEditing("addExpense")}
+            className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Expense
+          </button>
         </section>
 
         {customSections.length === 0 && (
@@ -434,14 +440,9 @@ const BudgetTab = () => {
                   <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
                     <h3 className="text-sm font-bold text-primary">{section.name}</h3>
                   </button>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })} className="flex items-center gap-1 text-primary text-xs font-medium">
-                      <Plus className="h-3.5 w-3.5" /> Add
-                    </button>
-                    <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
                 <div className="flex justify-between mt-0.5">
                   <span className="text-[10px] text-muted-foreground tabular-nums">${sectionBudgeted.toLocaleString()} budgeted</span>
@@ -459,10 +460,16 @@ const BudgetTab = () => {
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap "Add" or drag items here.</p>
+                    <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap the add button below.</p>
                   )}
                 </SortableContext>
               </DroppableSection>
+              <button
+                onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })}
+                className="w-full mt-2 rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add {section.name} Item
+              </button>
             </section>
           );
         })}
