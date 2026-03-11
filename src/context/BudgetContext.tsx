@@ -170,7 +170,7 @@ export const BudgetProvider = ({ children }: { children: ReactNode }) => {
       setLiabilities(snapshot.liabilities?.length ? snapshot.liabilities : []);
     }
     // If no snapshot for this month, don't prefill — wait for user to choose
-  }, [monthKey, snapshotsLoaded]);
+  }, [monthKey, snapshotsLoaded, netWorthSnapshots]);
 
   // Save net worth snapshot when assets or liabilities change
   const prevNetWorthRef = useRef<string>("");
