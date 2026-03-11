@@ -63,13 +63,17 @@ function DroppableSection({ id, children }: { id: string; children: React.ReactN
 
 const BudgetTab = () => {
   const { income, expenses, setIncome, setExpenses, needsSetup, customSections, setCustomSections, addCustomSection } = useBudget();
-  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | "addIncome" | "addExpense" | { type: "addCustomItem"; sectionId: string } | null>(null);
+  const [editing, setEditing] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [renamingSection, setRenamingSection] = useState<{ id: string; name: string } | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [activeItemData, setActiveItemData] = useState<{ category: BudgetCategory; variant: "income" | "expense" } | null>(null);
+
+  // inline add state
+  const [inlineAdding, setInlineAdding] = useState<"income" | "expense" | string | null>(null); // string = custom sectionId
+  const [inlineAddVal, setInlineAddVal] = useState("");
 
   // DnD sensors
   const sensors = useSensors(
@@ -268,27 +272,6 @@ const BudgetTab = () => {
 
   const getEditingData = () => {
     if (!editing) return null;
-    if (editing === "addIncome" || editing === "addExpense") {
-      return {
-        title: editing === "addIncome" ? "Add Income" : "Add Expense",
-        fields: [
-          { key: "name", label: "Name", type: "text" as const, value: "" },
-          { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-        ],
-        onSave: (v: Record<string, string | number>) => handleAdd(editing === "addIncome" ? "income" : "expense", v),
-      };
-    }
-    if (typeof editing === "object" && "type" in editing && editing.type === "addCustomItem") {
-      const section = customSections.find(s => s.id === editing.sectionId);
-      return {
-        title: `Add to ${section?.name ?? "Section"}`,
-        fields: [
-          { key: "name", label: "Name", type: "text" as const, value: "" },
-          { key: "budgeted", label: "Budgeted", type: "number" as const, value: 0 },
-        ],
-        onSave: (v: Record<string, string | number>) => handleAddCustomItem(editing.sectionId, v),
-      };
-    }
     if (typeof editing === "object" && "list" in editing && editing.list === "custom") {
       const section = customSections.find(s => s.id === editing.sectionId);
       const cat = section?.items[editing.index];
@@ -316,6 +299,17 @@ const BudgetTab = () => {
       };
     }
     return null;
+  };
+
+  const commitInlineAdd = (list: "income" | "expense" | string) => {
+    const name = inlineAddVal.trim();
+    if (name) {
+      if (list === "income") handleAdd("income", { name, budgeted: 0, spent: 0 });
+      else if (list === "expense") handleAdd("expense", { name, budgeted: 0, spent: 0 });
+      else handleAddCustomItem(list, { name, budgeted: 0, spent: 0 });
+    }
+    setInlineAdding(null);
+    setInlineAddVal("");
   };
 
   const ed = getEditingData();
@@ -381,12 +375,27 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
-          <button
-            onClick={() => setEditing("addIncome")}
-            className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add Income
-          </button>
+          {inlineAdding === "income" ? (
+            <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+              <input
+                autoFocus
+                value={inlineAddVal}
+                onChange={(e) => setInlineAddVal(e.target.value)}
+                onBlur={() => commitInlineAdd("income")}
+                onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd("income"); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                placeholder="Income name"
+                className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => { setInlineAdding("income"); setInlineAddVal(""); }}
+              className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-[15px] font-medium">Add Income</span>
+            </button>
+          )}
         </section>
 
         {/* Expenses section */}
@@ -412,12 +421,27 @@ const BudgetTab = () => {
               ))}
             </SortableContext>
           </DroppableSection>
-          <button
-            onClick={() => setEditing("addExpense")}
-            className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add Expense
-          </button>
+          {inlineAdding === "expense" ? (
+            <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+              <input
+                autoFocus
+                value={inlineAddVal}
+                onChange={(e) => setInlineAddVal(e.target.value)}
+                onBlur={() => commitInlineAdd("expense")}
+                onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd("expense"); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                placeholder="Expense name"
+                className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => { setInlineAdding("expense"); setInlineAddVal(""); }}
+              className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-[15px] font-medium">Add Expense</span>
+            </button>
+          )}
         </section>
 
         {customSections.length === 0 && (
@@ -460,19 +484,35 @@ const BudgetTab = () => {
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">No items yet. Tap the add button below.</p>
+                    <p className="text-xs text-muted-foreground text-center py-4">No items yet.</p>
                   )}
                 </SortableContext>
               </DroppableSection>
-              <button
-                onClick={() => setEditing({ type: "addCustomItem", sectionId: section.id })}
-                className="w-full mt-px rounded-xl border border-dashed border-border px-3 py-2.5 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" /> Add {section.name} Item
-              </button>
+              {inlineAdding === section.id ? (
+                <div className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={inlineAddVal}
+                    onChange={(e) => setInlineAddVal(e.target.value)}
+                    onBlur={() => commitInlineAdd(section.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter") commitInlineAdd(section.id); if (e.key === "Escape") { setInlineAdding(null); setInlineAddVal(""); } }}
+                    placeholder={`${section.name} item name`}
+                    className="text-[15px] font-medium bg-transparent border-0 outline-none w-full text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setInlineAdding(section.id); setInlineAddVal(""); }}
+                  className="w-full mt-px rounded-xl bg-card border border-border px-3 py-1.5 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:opacity-80"
+                >
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
+                  <span className="text-[15px] font-medium">Add {section.name} Item</span>
+                </button>
+              )}
             </section>
           );
         })}
+
 
         {customSections.length > 0 && (
           <div className="flex justify-center mt-5">
