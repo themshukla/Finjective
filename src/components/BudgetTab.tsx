@@ -394,17 +394,11 @@ const BudgetTab = () => {
 
         {/* Expenses section */}
         <section className="mt-5">
-          <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
-            </div>
-            <div className="flex justify-between mt-0.5">
-              <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
-              <span className="text-[10px] text-muted-foreground tabular-nums">${totalExpenses.toLocaleString()} actual</span>
-              <span className="text-[10px] text-muted-foreground tabular-nums">
-                {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString()} remaining
-              </span>
-            </div>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
+            <span className="text-[17px] font-normal text-primary tabular-nums">
+              ${totalBudgetedExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
           </div>
           <DroppableSection id={EXPENSES_ID}>
             <SortableContext items={expenseIds} strategy={verticalListSortingStrategy}>
