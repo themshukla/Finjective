@@ -688,34 +688,25 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
 
   return (
     <div onClick={expanded ? onTransactions : undefined} className={`w-full rounded-xl bg-card border border-border px-3 min-h-[40px] flex flex-col justify-center text-left ${expanded ? "cursor-pointer active:opacity-80 transition-opacity" : ""}`}>
-      {/* Row 1: name col | budget + chevron */}
+      {/* Row 1: name | budget amount (always single line) */}
       <div className="flex items-center gap-2">
-        {/* Left: name + item count stacked — tapping name edits, count does nothing */}
-        <div className="flex flex-col flex-1 min-w-0">
-          {isEditingName ? (
-            <input
-              autoFocus
-              value={nameVal}
-              onChange={e => setNameVal(e.target.value)}
-              onBlur={commitName}
-              onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
-              className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground min-w-0"
-            />
-          ) : (
-            <span
-              onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-              className="text-[15px] font-medium text-foreground truncate self-start cursor-text"
-            >
-              {category.name}
-            </span>
-          )}
-          {expanded && (
-            <p className="text-[13px] text-muted-foreground">
-              {txCount === 0 ? "No transactions" : `${txCount} ${txCount === 1 ? "transaction" : "transactions"}`}
-            </p>
-          )}
-        </div>
-        {/* Right: amount (tapping edits) + chevron (tapping opens transactions) */}
+        {isEditingName ? (
+          <input
+            autoFocus
+            value={nameVal}
+            onChange={e => setNameVal(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
+            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground min-w-0 flex-1"
+          />
+        ) : (
+          <span
+            onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
+            className="text-[15px] font-medium text-foreground truncate flex-1 cursor-text"
+          >
+            {category.name}
+          </span>
+        )}
         <div className="flex-shrink-0 flex items-center gap-1.5">
           {isEditingBudget ? (
             <input
@@ -742,14 +733,19 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           )}
         </div>
       </div>
-      {/* Expanded: show actual + progress + remaining */}
+      {/* Row 2 (expanded): x items | actual | left */}
       {expanded && (
         <>
-          <div className="flex justify-end gap-3 mt-1">
-            <span className="text-[11px] text-muted-foreground tabular-nums">${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
-            <span className={`text-[11px] tabular-nums ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
-              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+          <div className="flex justify-between mt-1">
+            <span className="text-[11px] text-muted-foreground">
+              {txCount} {txCount === 1 ? "item" : "items"}
             </span>
+            <div className="flex gap-3">
+              <span className="text-[11px] text-muted-foreground tabular-nums">${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+              <span className={`text-[11px] tabular-nums ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+              </span>
+            </div>
           </div>
           <div className="w-full flex items-center gap-2 mt-1">
             <Progress value={barPct} className={`h-[3px] flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
