@@ -482,9 +482,11 @@ const BudgetTab = () => {
                       ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedHeaders[section.id] ? "rotate-180" : ""}`} />
                     </button>
-                    <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {expandedHeaders[section.id] && (
+                      <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 {expandedHeaders[section.id] && (
