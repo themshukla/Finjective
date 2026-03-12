@@ -15,16 +15,14 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
   const nowKey = format(now, "yyyy-MM");
+  const selectedKey = format(selectedMonth, "yyyy-MM");
 
-  // Center pill is ALWAYS today's month (fixed).
-  // Left/right pills show the months adjacent to the selected month so tapping them navigates one step.
-  // When today IS selected: [today-1] [today*] [today+1]
-  // When past selected:     [selected*] [today] [selected+2] — but we want prev/next of selected visible
-  // Rule: left=prev(selected), center=today, right=next(selected), each tagged correctly.
+  // Selected month is always in the CENTER. Prev/next surround it.
+  // Today's pill gets filled-blue styling wherever it appears.
   const months = [
-    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: format(prev, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: format(prev, "yyyy-MM") === nowKey },
-    { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), action: now, isSelected: isCurrentMonth, isToday: true },
-    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: format(next, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: format(next, "yyyy-MM") === nowKey },
+    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: format(prev, "yyyy-MM") === nowKey },
+    { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: isCurrentMonth },
+    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: format(next, "yyyy-MM") === nowKey },
   ];
 
   const hasData = (date: Date) => {
