@@ -70,6 +70,9 @@ const BudgetTab = () => {
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [activeItemData, setActiveItemData] = useState<{ category: BudgetCategory; variant: "income" | "expense" } | null>(null);
+  // header totals expand state: key = "income" | "expense" | sectionId
+  const [expandedHeaders, setExpandedHeaders] = useState<Record<string, boolean>>({});
+  const toggleHeader = (key: string) => setExpandedHeaders(prev => ({ ...prev, [key]: !prev[key] }));
 
   // inline add state
   const [inlineAdding, setInlineAdding] = useState<"income" | "expense" | string | null>(null); // string = custom sectionId
