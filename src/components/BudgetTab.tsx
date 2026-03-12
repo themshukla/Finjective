@@ -704,9 +704,11 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
               {category.name}
             </span>
           )}
-          <p className="text-[13px] text-muted-foreground">
-            {txCount === 0 ? "No transactions" : `${txCount} ${txCount === 1 ? "transaction" : "transactions"}`}
-          </p>
+          {expanded && (
+            <p className="text-[13px] text-muted-foreground">
+              {txCount === 0 ? "No transactions" : `${txCount} ${txCount === 1 ? "transaction" : "transactions"}`}
+            </p>
+          )}
         </div>
         {/* Right: amount (tapping edits) + chevron (tapping opens transactions) */}
         <div className="flex-shrink-0 flex items-center gap-1.5">
