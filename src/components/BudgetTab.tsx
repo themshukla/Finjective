@@ -683,29 +683,36 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
 
   return (
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 active:opacity-80 transition-opacity text-left">
-      {/* Row 1: name (inline edit on tap) | budgeted + badge + chevron */}
+      {/* Row 1: name col | budget + chevron */}
       <div className="flex items-center gap-2">
-        {isEditingName ? (
-          <input
-            autoFocus
-            value={nameVal}
-            onChange={e => setNameVal(e.target.value)}
-            onBlur={commitName}
-            onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
-            onClick={e => e.stopPropagation()}
-            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground min-w-0 flex-1"
-          />
-        ) : (
-          <span
-            onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-            className="text-[15px] font-medium text-foreground leading-none shrink-0 max-w-[55%] truncate"
-          >
-            {category.name}
-          </span>
-        )}
+        {/* Left: name + item count stacked */}
+        <div className="flex flex-col flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+          {isEditingName ? (
+            <input
+              autoFocus
+              value={nameVal}
+              onChange={e => setNameVal(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
+              onClick={e => e.stopPropagation()}
+              className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground min-w-0"
+            />
+          ) : (
+            <span
+              onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
+              className="text-[15px] font-medium text-foreground leading-none truncate"
+            >
+              {category.name}
+            </span>
+          )}
+          {txCount > 0 && (
+            <span className="text-[13px] text-muted-foreground mt-0.5 leading-none">
+              {txCount} {txCount === 1 ? "transaction" : "transactions"}
+            </span>
+          )}
+        </div>
         {/* Spacer — tap triggers onTransactions */}
-        {!isEditingName && <div className="flex-1" />}
-        <span className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center gap-1.5">
           {isEditingBudget ? (
             <input
               autoFocus
@@ -721,18 +728,13 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           ) : (
             <span
               onClick={startEditBudget}
-              className="text-[15px] font-medium tabular-nums text-foreground leading-none shrink-0"
+              className="text-[15px] font-medium tabular-nums text-foreground leading-none"
             >
               ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
           )}
-          {txCount > 0 && (
-            <span className="flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded-full border border-primary bg-card text-primary text-[10px] font-semibold">
-              {txCount}
-            </span>
-          )}
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </span>
+        </div>
       </div>
       {/* Expanded: show actual + progress + remaining */}
       {expanded && (
