@@ -709,7 +709,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
         )}
         {/* Dead spacer — no action on tap */}
         {!isEditingName && <div className="flex-1" onClick={e => e.stopPropagation()} />}
-        <div className="flex-shrink-0 flex items-center gap-1.5">
+        <div className="flex-shrink-0 flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
           {isEditingBudget ? (
             <input
               autoFocus
