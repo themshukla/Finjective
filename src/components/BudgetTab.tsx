@@ -755,7 +755,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           </div>
         </>
       )}
-    </button>
+    </div>
   );
 }
 
