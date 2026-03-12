@@ -646,7 +646,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       {/* Row 1: name (→ edit) | chevron/badge */}
       <div className="flex items-center justify-between">
         <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
+          <p className="text-[15px] font-medium text-foreground leading-none">{category.name}</p>
         </span>
         <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-auto py-0.5">
           {(category.transactions ?? []).length > 0 && (
