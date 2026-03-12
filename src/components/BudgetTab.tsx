@@ -649,9 +649,11 @@ const BudgetTab = () => {
   );
 };
 
-function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; expanded: boolean; onNameEdit: (name: string) => void; onTransactions: () => void }) {
+function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; expanded: boolean; onNameEdit: (name: string) => void; onBudgetEdit: (amount: number) => void; onTransactions: () => void }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(category.name);
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [budgetVal, setBudgetVal] = useState("");
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
   const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
@@ -665,6 +667,18 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions 
     if (trimmed && trimmed !== category.name) onNameEdit(trimmed);
     else setNameVal(category.name);
     setIsEditingName(false);
+  };
+
+  const startEditBudget = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBudgetVal(budgeted === 0 ? "" : String(budgeted));
+    setIsEditingBudget(true);
+  };
+
+  const commitBudget = () => {
+    const parsed = parseFloat(budgetVal.replace(/,/g, "")) || 0;
+    onBudgetEdit(parsed);
+    setIsEditingBudget(false);
   };
 
   return (
@@ -690,9 +704,26 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions 
           </span>
         )}
         <span className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[15px] font-medium tabular-nums text-foreground leading-none">
-            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </span>
+          {isEditingBudget ? (
+            <input
+              autoFocus
+              inputMode="decimal"
+              value={budgetVal}
+              onChange={e => setBudgetVal(e.target.value)}
+              onBlur={commitBudget}
+              onKeyDown={e => { if (e.key === "Enter") commitBudget(); if (e.key === "Escape") setIsEditingBudget(false); }}
+              onClick={e => e.stopPropagation()}
+              placeholder="0"
+              className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground tabular-nums text-right w-24"
+            />
+          ) : (
+            <span
+              onClick={startEditBudget}
+              className="text-[15px] font-medium tabular-nums text-foreground leading-none"
+            >
+              ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+          )}
           {txCount > 0 && (
             <span className="flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded-full border border-primary bg-card text-primary text-[10px] font-semibold">
               {txCount}
