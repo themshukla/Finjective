@@ -700,7 +700,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           ) : (
             <span
               onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-              className="text-[15px] font-medium text-foreground leading-none truncate"
+              className="text-[15px] font-medium text-foreground truncate"
             >
               {category.name}
             </span>
