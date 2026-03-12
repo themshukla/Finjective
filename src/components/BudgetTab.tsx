@@ -377,7 +377,7 @@ const BudgetTab = () => {
             <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
               {income.map((cat, i) => (
                 <SortableItem key={incomeIds[i]} id={incomeIds[i]}>
-                  <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders["income"]} onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+                  <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders["income"]} onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onBudgetEdit={(budgeted) => { const arr = [...income]; arr[i] = { ...arr[i], budgeted }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
@@ -427,7 +427,7 @@ const BudgetTab = () => {
             <SortableContext items={expenseIds} strategy={verticalListSortingStrategy}>
               {expenses.map((cat, i) => (
                 <SortableItem key={expenseIds[i]} id={expenseIds[i]}>
-                  <CategoryCard category={cat} variant="expense" expanded={!!expandedHeaders["expense"]} onNameEdit={(name) => { const arr = [...expenses]; arr[i] = { ...arr[i], name }; setExpenses(arr); }} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
+                  <CategoryCard category={cat} variant="expense" expanded={!!expandedHeaders["expense"]} onNameEdit={(name) => { const arr = [...expenses]; arr[i] = { ...arr[i], name }; setExpenses(arr); }} onBudgetEdit={(budgeted) => { const arr = [...expenses]; arr[i] = { ...arr[i], budgeted }; setExpenses(arr); }} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
@@ -497,7 +497,7 @@ const BudgetTab = () => {
                 <SortableContext items={sectionItemIds} strategy={verticalListSortingStrategy}>
                   {section.items.map((cat, i) => (
                     <SortableItem key={sectionItemIds[i]} id={sectionItemIds[i]}>
-                      <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders[section.id]} onNameEdit={(name) => { const updated = customSections.map(s => { if (s.id !== section.id) return s; const items = [...s.items]; items[i] = { ...items[i], name }; return { ...s, items }; }); setCustomSections(updated); }} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
+                      <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders[section.id]} onNameEdit={(name) => { const updated = customSections.map(s => { if (s.id !== section.id) return s; const items = [...s.items]; items[i] = { ...items[i], name }; return { ...s, items }; }); setCustomSections(updated); }} onBudgetEdit={(budgeted) => { const updated = customSections.map(s => { if (s.id !== section.id) return s; const items = [...s.items]; items[i] = { ...items[i], budgeted }; return { ...s, items }; }); setCustomSections(updated); }} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
@@ -542,7 +542,7 @@ const BudgetTab = () => {
         <DragOverlay dropAnimation={null}>
           {activeItemData ? (
             <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20">
-              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} expanded={false} onNameEdit={() => {}} onTransactions={() => {}} />
+              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} expanded={false} onNameEdit={() => {}} onBudgetEdit={() => {}} onTransactions={() => {}} />
             </div>
           ) : null}
         </DragOverlay>
@@ -649,9 +649,11 @@ const BudgetTab = () => {
   );
 };
 
-function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; expanded: boolean; onNameEdit: (name: string) => void; onTransactions: () => void }) {
+function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; expanded: boolean; onNameEdit: (name: string) => void; onBudgetEdit: (amount: number) => void; onTransactions: () => void }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(category.name);
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [budgetVal, setBudgetVal] = useState("");
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
   const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
@@ -665,6 +667,18 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions 
     if (trimmed && trimmed !== category.name) onNameEdit(trimmed);
     else setNameVal(category.name);
     setIsEditingName(false);
+  };
+
+  const startEditBudget = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBudgetVal(budgeted === 0 ? "" : String(budgeted));
+    setIsEditingBudget(true);
+  };
+
+  const commitBudget = () => {
+    const parsed = parseFloat(budgetVal.replace(/,/g, "")) || 0;
+    onBudgetEdit(parsed);
+    setIsEditingBudget(false);
   };
 
   return (
@@ -690,9 +704,26 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions 
           </span>
         )}
         <span className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[15px] font-medium tabular-nums text-foreground leading-none">
-            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </span>
+          {isEditingBudget ? (
+            <input
+              autoFocus
+              inputMode="decimal"
+              value={budgetVal}
+              onChange={e => setBudgetVal(e.target.value)}
+              onBlur={commitBudget}
+              onKeyDown={e => { if (e.key === "Enter") commitBudget(); if (e.key === "Escape") setIsEditingBudget(false); }}
+              onClick={e => e.stopPropagation()}
+              placeholder="0"
+              className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground tabular-nums text-right w-24"
+            />
+          ) : (
+            <span
+              onClick={startEditBudget}
+              className="text-[15px] font-medium tabular-nums text-foreground leading-none"
+            >
+              ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+          )}
           {txCount > 0 && (
             <span className="flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded-full border border-primary bg-card text-primary text-[10px] font-semibold">
               {txCount}
