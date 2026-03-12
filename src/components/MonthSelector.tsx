@@ -14,19 +14,17 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
   const next = addMonths(selectedMonth, 1);
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
-  const selectedKey = format(selectedMonth, "yyyy-MM");
   const nowKey = format(now, "yyyy-MM");
 
-  // Center pill is ALWAYS today's month.
-  // Left pill: selected month if it's before today, otherwise today-1.
-  // Right pill: selected month if it's after today, otherwise today+1.
-  const leftDate = selectedMonth < now && !isCurrentMonth ? selectedMonth : subMonths(now, 1);
-  const rightDate = selectedMonth > now && !isCurrentMonth ? selectedMonth : addMonths(now, 1);
-
+  // Center pill is ALWAYS today's month (fixed).
+  // Left/right pills show the months adjacent to the selected month so tapping them navigates one step.
+  // When today IS selected: [today-1] [today*] [today+1]
+  // When past selected:     [selected*] [today] [selected+2] — but we want prev/next of selected visible
+  // Rule: left=prev(selected), center=today, right=next(selected), each tagged correctly.
   const months = [
-    { date: leftDate, label: format(leftDate, "MMM"), subLabel: format(leftDate, "yyyy"), action: leftDate, isSelected: format(leftDate, "yyyy-MM") === selectedKey, isToday: format(leftDate, "yyyy-MM") === nowKey },
+    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: format(prev, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: format(prev, "yyyy-MM") === nowKey },
     { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), action: now, isSelected: isCurrentMonth, isToday: true },
-    { date: rightDate, label: format(rightDate, "MMM"), subLabel: format(rightDate, "yyyy"), action: rightDate, isSelected: format(rightDate, "yyyy-MM") === selectedKey, isToday: format(rightDate, "yyyy-MM") === nowKey },
+    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: format(next, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: format(next, "yyyy-MM") === nowKey },
   ];
 
   const hasData = (date: Date) => {
