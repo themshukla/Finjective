@@ -687,7 +687,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
   };
 
   return (
-    <div className="w-full rounded-xl bg-card border border-border px-3 min-h-[40px] flex flex-col justify-center text-left">
+    <div onClick={expanded ? onTransactions : undefined} className={`w-full rounded-xl bg-card border border-border px-3 min-h-[40px] flex flex-col justify-center text-left ${expanded ? "cursor-pointer active:opacity-80 transition-opacity" : ""}`}>
       {/* Row 1: name col | budget + chevron */}
       <div className="flex items-center gap-2">
         {/* Left: name + item count stacked — tapping name edits, count does nothing */}
