@@ -745,10 +745,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
       {/* Expanded: show actual + progress + remaining */}
       {expanded && (
         <>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-[14px] text-muted-foreground tabular-nums">
-              ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
+          <div className="flex items-center justify-end mt-1">
             <span className="text-[12px] text-muted-foreground tabular-nums">
               ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
             </span>
