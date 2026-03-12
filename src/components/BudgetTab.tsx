@@ -451,9 +451,14 @@ const BudgetTab = () => {
                 <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
                   <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                 </button>
-                <span className="text-[17px] font-normal text-primary tabular-nums">
-                  ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[17px] font-normal text-primary tabular-nums">
+                    ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </span>
+                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
               <DroppableSection id={section.id}>
                 <SortableContext items={sectionItemIds} strategy={verticalListSortingStrategy}>
