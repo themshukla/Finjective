@@ -649,7 +649,7 @@ const BudgetTab = () => {
   );
 };
 
-function CategoryCard({ category, variant, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onNameEdit: (name: string) => void; onTransactions: () => void }) {
+function CategoryCard({ category, variant, expanded, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; expanded: boolean; onNameEdit: (name: string) => void; onTransactions: () => void }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(category.name);
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
@@ -668,8 +668,8 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
   };
 
   return (
-    <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 pt-2 pb-1.5 active:opacity-80 transition-opacity text-left">
-      {/* Row 1: name (inline edit on tap) | badge + chevron */}
+    <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 active:opacity-80 transition-opacity text-left">
+      {/* Row 1: name (inline edit on tap) | budgeted + badge + chevron */}
       <div className="flex items-center justify-between gap-2">
         {isEditingName ? (
           <input
@@ -689,7 +689,10 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
             {category.name}
           </span>
         )}
-        <span className="flex items-center gap-1 flex-shrink-0">
+        <span className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-[15px] font-medium tabular-nums text-foreground leading-none">
+            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
           {txCount > 0 && (
             <span className="flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded-full border border-primary bg-card text-primary text-[10px] font-semibold">
               {txCount}
@@ -698,25 +701,28 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </span>
       </div>
-      {/* Row 2: budgeted (left) | actual (right) */}
-      <div className="flex items-center justify-between mt-1">
-        <span className="text-[14px] text-muted-foreground tabular-nums">
-          ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-        </span>
-        <span className="text-[12px] text-muted-foreground tabular-nums">
-          ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-        </span>
-      </div>
-      {/* Row 3: progress bar | % + remaining */}
-      <div className="w-full flex items-center gap-2 mt-1">
-        <Progress value={barPct} className={`h-[3px] flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-        <span className={`text-[11px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
-          {pct.toFixed(0)}%
-        </span>
-        <span className={`text-[11px] tabular-nums flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
-          {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
-        </span>
-      </div>
+      {/* Expanded: show actual + progress + remaining */}
+      {expanded && (
+        <>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[14px] text-muted-foreground tabular-nums">
+              ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </span>
+            <span className="text-[12px] text-muted-foreground tabular-nums">
+              ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+            </span>
+          </div>
+          <div className="w-full flex items-center gap-2 mt-1">
+            <Progress value={barPct} className={`h-[3px] flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+            <span className={`text-[11px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
+              {pct.toFixed(0)}%
+            </span>
+            <span className={`text-[11px] tabular-nums flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+            </span>
+          </div>
+        </>
+      )}
     </button>
   );
 }
