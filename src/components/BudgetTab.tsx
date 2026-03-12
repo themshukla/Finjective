@@ -377,7 +377,7 @@ const BudgetTab = () => {
             <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
               {income.map((cat, i) => (
                 <SortableItem key={incomeIds[i]} id={incomeIds[i]}>
-                  <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders["income"]} onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+                  <CategoryCard category={cat} variant="income" expanded={!!expandedHeaders["income"]} onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onBudgetEdit={(budgeted) => { const arr = [...income]; arr[i] = { ...arr[i], budgeted }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
