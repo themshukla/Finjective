@@ -658,6 +658,7 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
   const barPct = Math.min(pct, 100);
   const over = spent > budgeted;
   const remainingAmt = budgeted - spent;
+  const txCount = (category.transactions ?? []).length;
 
   const commitName = () => {
     const trimmed = nameVal.trim();
@@ -667,8 +668,8 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
   };
 
   return (
-    <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
-      {/* Row 1: name (inline edit on tap) | budgeted + badge/chevron */}
+    <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 pt-2 pb-1.5 active:opacity-80 transition-opacity text-left">
+      {/* Row 1: name (inline edit on tap) | badge + chevron */}
       <div className="flex items-center justify-between gap-2">
         {isEditingName ? (
           <input
@@ -678,39 +679,43 @@ function CategoryCard({ category, variant, onNameEdit, onTransactions }: { categ
             onBlur={commitName}
             onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
             onClick={e => e.stopPropagation()}
-            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground flex-1 min-w-0 py-0.5"
+            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground flex-1 min-w-0"
           />
         ) : (
           <span
             onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-            className="text-[15px] font-medium text-foreground leading-none py-0.5 flex-1 min-w-0 truncate"
+            className="text-[15px] font-medium text-foreground leading-none flex-1 min-w-0 truncate"
           >
             {category.name}
           </span>
         )}
-        <span className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-sm font-medium tabular-nums text-muted-foreground leading-none">
-            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </span>
-          {(category.transactions ?? []).length > 0 && (
-            <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
-              {(category.transactions ?? []).length}
+        <span className="flex items-center gap-1 flex-shrink-0">
+          {txCount > 0 && (
+            <span className="flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded-full border border-primary bg-card text-primary text-[10px] font-semibold">
+              {txCount}
             </span>
           )}
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </span>
       </div>
-      {/* Row 2: progress bar + % | remaining */}
-      <div className="w-full flex items-center justify-between gap-2 mt-0.5 py-0.5">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
-          <span className={`text-[10px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
-            {pct.toFixed(0)}%
-          </span>
-        </div>
-        <p className={`text-[10px] tabular-nums leading-none flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+      {/* Row 2: budgeted (left) | actual (right) */}
+      <div className="flex items-center justify-between mt-1">
+        <span className="text-[14px] text-muted-foreground tabular-nums">
+          ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        </span>
+        <span className="text-[12px] text-muted-foreground tabular-nums">
+          ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+        </span>
+      </div>
+      {/* Row 3: progress bar | % + remaining */}
+      <div className="w-full flex items-center gap-2 mt-1">
+        <Progress value={barPct} className={`h-[3px] flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
+        <span className={`text-[11px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
+          {pct.toFixed(0)}%
+        </span>
+        <span className={`text-[11px] tabular-nums flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
           {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
-        </p>
+        </span>
       </div>
     </button>
   );
