@@ -462,7 +462,7 @@ const BudgetTab = () => {
               <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
                 <div className="flex justify-between items-center">
                   <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
-                    <h3 className="text-sm font-bold text-primary">{section.name}</h3>
+                    <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                   </button>
                   <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
