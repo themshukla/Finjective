@@ -15,12 +15,14 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
 
-  // Always 3 pills: [prev] [selected] [next]
-  // Today's month gets filled-blue styling wherever it appears
+  // Pills are always fixed around today: [today-1] [today] [today+1]
+  // Selected month is highlighted with a border on whichever pill it matches
+  const todayPrev = subMonths(now, 1);
+  const todayNext = addMonths(now, 1);
   const months = [
-    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: format(prev, "yyyy-MM") === format(now, "yyyy-MM") },
-    { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: isCurrentMonth },
-    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: format(next, "yyyy-MM") === format(now, "yyyy-MM") },
+    { date: todayPrev, label: format(todayPrev, "MMM"), subLabel: format(todayPrev, "yyyy"), action: todayPrev, isSelected: format(todayPrev, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: false },
+    { date: now, label: format(now, "MMM"), subLabel: format(now, "yyyy"), action: now, isSelected: isCurrentMonth, isToday: true },
+    { date: todayNext, label: format(todayNext, "MMM"), subLabel: format(todayNext, "yyyy"), action: todayNext, isSelected: format(todayNext, "yyyy-MM") === format(selectedMonth, "yyyy-MM"), isToday: false },
   ];
 
   const hasData = (date: Date) => {
