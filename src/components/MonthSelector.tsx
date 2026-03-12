@@ -61,22 +61,18 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
         <div className="flex gap-1">
         {months.map((m, i) => {
             const hasMonthDataForPill = hasData(m.action);
-            // Today pill = filled blue; selected (non-today) pill = solid blue border; others = dashed or no border
             const isFilledToday = m.isToday;
-            const isSelectedNonToday = m.isSelected && !m.isToday;
+            // Always circle the selected/viewing month with a solid blue border
+            const borderStyle = m.isSelected
+              ? { border: "2px solid hsl(var(--primary))" }
+              : !isFilledToday && !hasMonthDataForPill
+              ? { border: "1.5px dashed hsl(var(--muted-foreground) / 0.4)" }
+              : {};
             return (
               <button
                 key={i}
                 onClick={() => setSelectedMonth(m.action)}
-                style={
-                  isFilledToday
-                    ? {}
-                    : isSelectedNonToday
-                    ? { border: "2px solid hsl(var(--primary))" }
-                    : hasMonthDataForPill
-                    ? {}
-                    : { border: "1.5px dashed hsl(var(--muted-foreground) / 0.4)" }
-                }
+                style={borderStyle}
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   isFilledToday
                     ? "bg-primary text-primary-foreground"
