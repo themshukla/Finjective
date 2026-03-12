@@ -10,20 +10,27 @@ interface MonthSelectorProps {
 const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelectorProps) => {
   const { selectedMonth, setSelectedMonth, hasMonthData, netWorthSnapshots } = useBudget();
 
-  const prev = subMonths(selectedMonth, 1);
-  const next = addMonths(selectedMonth, 1);
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
-  const nowKey = format(now, "yyyy-MM");
-  const selectedKey = format(selectedMonth, "yyyy-MM");
+  const isPast = selectedMonth < now && !isCurrentMonth;
+  const isFuture = selectedMonth > now && !isCurrentMonth;
 
-  // Selected month is always in the CENTER. Prev/next surround it.
-  // Today's pill gets filled-blue styling wherever it appears.
+  // Center = ALWAYS today (never moves).
+  // Left  = selected month if past, otherwise today-1.
+  // Right = selected month if future, otherwise today+1.
+  const leftDate  = isPast   ? selectedMonth : subMonths(now, 1);
+  const rightDate = isFuture ? selectedMonth : addMonths(now, 1);
+  const nowKey = format(now, "yyyy-MM");
+
   const months = [
-    { date: prev, label: format(prev, "MMM"), subLabel: format(prev, "yyyy"), action: prev, isSelected: false, isToday: format(prev, "yyyy-MM") === nowKey },
-    { date: selectedMonth, label: format(selectedMonth, "MMM"), subLabel: format(selectedMonth, "yyyy"), action: selectedMonth, isSelected: true, isToday: isCurrentMonth },
-    { date: next, label: format(next, "MMM"), subLabel: format(next, "yyyy"), action: next, isSelected: false, isToday: format(next, "yyyy-MM") === nowKey },
+    { date: leftDate,       action: leftDate,       label: format(leftDate, "MMM"),       subLabel: format(leftDate, "yyyy"),       isSelected: isPast,         isToday: format(leftDate, "yyyy-MM")  === nowKey },
+    { date: now,            action: now,             label: format(now, "MMM"),            subLabel: format(now, "yyyy"),            isSelected: isCurrentMonth, isToday: true },
+    { date: rightDate,      action: rightDate,       label: format(rightDate, "MMM"),      subLabel: format(rightDate, "yyyy"),      isSelected: isFuture,       isToday: format(rightDate, "yyyy-MM") === nowKey },
   ];
+
+  // Chevrons step one month relative to the currently selected month
+  const prev = subMonths(selectedMonth, 1);
+  const next = addMonths(selectedMonth, 1);
 
   const hasData = (date: Date) => {
     const key = format(date, "yyyy-MM");
