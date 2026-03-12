@@ -70,6 +70,9 @@ const BudgetTab = () => {
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [viewingTransactions, setViewingTransactions] = useState<{ list: "income" | "expense"; index: number } | { list: "custom"; sectionId: string; index: number } | null>(null);
   const [activeItemData, setActiveItemData] = useState<{ category: BudgetCategory; variant: "income" | "expense" } | null>(null);
+  // header totals expand state: key = "income" | "expense" | sectionId
+  const [expandedHeaders, setExpandedHeaders] = useState<Record<string, boolean>>({});
+  const toggleHeader = (key: string) => setExpandedHeaders(prev => ({ ...prev, [key]: !prev[key] }));
 
   // inline add state
   const [inlineAdding, setInlineAdding] = useState<"income" | "expense" | string | null>(null); // string = custom sectionId
@@ -354,17 +357,27 @@ const BudgetTab = () => {
       >
         {/* Income section */}
         <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-[17px] font-normal text-primary">Income</h3>
-            <span className="text-[17px] font-normal text-primary tabular-nums">
-              ${totalBudgetedIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
+          <div className="mb-3">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[17px] font-normal text-primary">Income</h3>
+              <button onClick={() => toggleHeader("income")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                ${totalBudgetedIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              </button>
+            </div>
+            {expandedHeaders["income"] && (
+              <div className="flex justify-end gap-3 mt-0.5">
+                <span className="text-[11px] text-muted-foreground tabular-nums">${totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+                <span className={`text-[11px] tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                  {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+                </span>
+              </div>
+            )}
           </div>
           <DroppableSection id={INCOME_ID}>
             <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
               {income.map((cat, i) => (
                 <SortableItem key={incomeIds[i]} id={incomeIds[i]}>
-                  <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+                  <CategoryCard category={cat} variant="income" onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
@@ -394,17 +407,27 @@ const BudgetTab = () => {
 
         {/* Expenses section */}
         <section className="mt-5">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
-            <span className="text-[17px] font-normal text-primary tabular-nums">
-              ${totalBudgetedExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
+          <div className="mb-3">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
+              <button onClick={() => toggleHeader("expense")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                ${totalBudgetedExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              </button>
+            </div>
+            {expandedHeaders["expense"] && (
+              <div className="flex justify-end gap-3 mt-0.5">
+                <span className="text-[11px] text-muted-foreground tabular-nums">${totalExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+                <span className={`text-[11px] tabular-nums ${(totalBudgetedExpenses - totalExpenses) >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                  {(totalBudgetedExpenses - totalExpenses) < 0 ? "-" : ""}${Math.abs(totalBudgetedExpenses - totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+                </span>
+              </div>
+            )}
           </div>
           <DroppableSection id={EXPENSES_ID}>
             <SortableContext items={expenseIds} strategy={verticalListSortingStrategy}>
               {expenses.map((cat, i) => (
                 <SortableItem key={expenseIds[i]} id={expenseIds[i]}>
-                  <CategoryCard category={cat} variant="expense" onTap={() => setEditing({ list: "expense", index: i })} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
+                  <CategoryCard category={cat} variant="expense" onNameEdit={(name) => { const arr = [...expenses]; arr[i] = { ...arr[i], name }; setExpenses(arr); }} onTransactions={() => setViewingTransactions({ list: "expense", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
@@ -447,24 +470,34 @@ const BudgetTab = () => {
           const sectionItemIds = customIds[section.id] ?? [];
           return (
             <section key={section.id} className="mt-5">
-              <div className="flex justify-between items-center mb-3">
-                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
-                  <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-normal text-primary tabular-nums">
-                    ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </span>
-                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
-                    <Trash2 className="h-3.5 w-3.5" />
+              <div className="mb-3">
+                <div className="flex justify-between items-center">
+                  <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
+                    <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                   </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => toggleHeader(section.id)} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                      ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </button>
+                    <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
+                {expandedHeaders[section.id] && (
+                  <div className="flex justify-end gap-3 mt-0.5">
+                    <span className="text-[11px] text-muted-foreground tabular-nums">${sectionTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+                    <span className={`text-[11px] tabular-nums ${(sectionBudgeted - sectionTotal) >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                      {(sectionBudgeted - sectionTotal) < 0 ? "-" : ""}${Math.abs(sectionBudgeted - sectionTotal).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+                    </span>
+                  </div>
+                )}
               </div>
               <DroppableSection id={section.id}>
                 <SortableContext items={sectionItemIds} strategy={verticalListSortingStrategy}>
                   {section.items.map((cat, i) => (
                     <SortableItem key={sectionItemIds[i]} id={sectionItemIds[i]}>
-                      <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
+                      <CategoryCard category={cat} variant="income" onNameEdit={(name) => { const updated = customSections.map(s => { if (s.id !== section.id) return s; const items = [...s.items]; items[i] = { ...items[i], name }; return { ...s, items }; }); setCustomSections(updated); }} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
@@ -509,7 +542,7 @@ const BudgetTab = () => {
         <DragOverlay dropAnimation={null}>
           {activeItemData ? (
             <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20">
-              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} onTap={() => {}} onTransactions={() => {}} />
+              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} onNameEdit={() => {}} onTransactions={() => {}} />
             </div>
           ) : null}
         </DragOverlay>
@@ -616,7 +649,9 @@ const BudgetTab = () => {
   );
 };
 
-function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
+function CategoryCard({ category, variant, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onNameEdit: (name: string) => void; onTransactions: () => void }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameVal, setNameVal] = useState(category.name);
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
   const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
@@ -624,37 +659,48 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const over = spent > budgeted;
   const remainingAmt = budgeted - spent;
 
-  // Entire card opens transactions; name & budget stop propagation to open edit instead
+  const commitName = () => {
+    const trimmed = nameVal.trim();
+    if (trimmed && trimmed !== category.name) onNameEdit(trimmed);
+    else setNameVal(category.name);
+    setIsEditingName(false);
+  };
+
   return (
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
-      {/* Row 1: name (→ edit) | chevron/badge */}
-      <div className="flex items-center justify-between">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-[15px] font-medium text-foreground leading-none">{category.name}</p>
-        </span>
-        <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-auto py-0.5">
+      {/* Row 1: name (inline edit on tap) | budgeted + badge/chevron */}
+      <div className="flex items-center justify-between gap-2">
+        {isEditingName ? (
+          <input
+            autoFocus
+            value={nameVal}
+            onChange={e => setNameVal(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
+            onClick={e => e.stopPropagation()}
+            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground flex-1 min-w-0 py-0.5"
+          />
+        ) : (
+          <span
+            onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
+            className="text-[15px] font-medium text-foreground leading-none py-0.5 flex-1 min-w-0 truncate"
+          >
+            {category.name}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-sm font-medium tabular-nums text-muted-foreground leading-none">
+            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
           {(category.transactions ?? []).length > 0 && (
             <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
               {(category.transactions ?? []).length}
             </span>
           )}
-          <ChevronRight className="h-3.5 w-3.5" />
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
         </span>
       </div>
-      {/* Row 2: budgeted (→ edit) | actual */}
-      <div className="flex items-baseline justify-between mt-0.5">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-sm font-medium tabular-nums text-muted-foreground leading-none">
-            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-        </span>
-        <span className="flex-shrink-0 ml-auto py-0.5">
-          <p className="text-xs text-muted-foreground tabular-nums leading-none">
-            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-          </p>
-        </span>
-      </div>
-      {/* Row 3: progress bar + % | remaining */}
+      {/* Row 2: progress bar + % | remaining */}
       <div className="w-full flex items-center justify-between gap-2 mt-0.5 py-0.5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
