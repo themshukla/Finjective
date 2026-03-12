@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Plus, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, ChevronRight, ChevronDown, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory, Transaction } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
@@ -360,8 +360,9 @@ const BudgetTab = () => {
           <div className="mb-3">
             <div className="flex justify-between items-center">
               <h3 className="text-[17px] font-normal text-primary">Income</h3>
-              <button onClick={() => toggleHeader("income")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+              <button onClick={() => toggleHeader("income")} className="flex items-center gap-1 text-[17px] font-normal text-primary tabular-nums active:opacity-70">
                 ${totalBudgetedIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedHeaders["income"] ? "rotate-180" : ""}`} />
               </button>
             </div>
             {expandedHeaders["income"] && (
@@ -410,8 +411,9 @@ const BudgetTab = () => {
           <div className="mb-3">
             <div className="flex justify-between items-center">
               <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
-              <button onClick={() => toggleHeader("expense")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+              <button onClick={() => toggleHeader("expense")} className="flex items-center gap-1 text-[17px] font-normal text-primary tabular-nums active:opacity-70">
                 ${totalBudgetedExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedHeaders["expense"] ? "rotate-180" : ""}`} />
               </button>
             </div>
             {expandedHeaders["expense"] && (
@@ -476,8 +478,9 @@ const BudgetTab = () => {
                     <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                   </button>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggleHeader(section.id)} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                    <button onClick={() => toggleHeader(section.id)} className="flex items-center gap-1 text-[17px] font-normal text-primary tabular-nums active:opacity-70">
                       ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedHeaders[section.id] ? "rotate-180" : ""}`} />
                     </button>
                     <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
                       <Trash2 className="h-3.5 w-3.5" />
