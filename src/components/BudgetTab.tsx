@@ -411,8 +411,9 @@ const BudgetTab = () => {
           <div className="mb-3">
             <div className="flex justify-between items-center">
               <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
-              <button onClick={() => toggleHeader("expense")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+              <button onClick={() => toggleHeader("expense")} className="flex items-center gap-1 text-[17px] font-normal text-primary tabular-nums active:opacity-70">
                 ${totalBudgetedExpenses.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedHeaders["expense"] ? "rotate-180" : ""}`} />
               </button>
             </div>
             {expandedHeaders["expense"] && (
