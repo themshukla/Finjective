@@ -542,7 +542,7 @@ const BudgetTab = () => {
         <DragOverlay dropAnimation={null}>
           {activeItemData ? (
             <div className="scale-[1.03] shadow-xl shadow-primary/10 rounded-xl ring-2 ring-primary/20">
-              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} onTap={() => {}} onTransactions={() => {}} />
+              <CategoryCard category={activeItemData.category} variant={activeItemData.variant} onNameEdit={() => {}} onTransactions={() => {}} />
             </div>
           ) : null}
         </DragOverlay>
