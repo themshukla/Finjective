@@ -357,17 +357,27 @@ const BudgetTab = () => {
       >
         {/* Income section */}
         <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-[17px] font-normal text-primary">Income</h3>
-            <span className="text-[17px] font-normal text-primary tabular-nums">
-              ${totalBudgetedIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
+          <div className="mb-3">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[17px] font-normal text-primary">Income</h3>
+              <button onClick={() => toggleHeader("income")} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                ${totalBudgetedIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              </button>
+            </div>
+            {expandedHeaders["income"] && (
+              <div className="flex justify-end gap-3 mt-0.5">
+                <span className="text-[11px] text-muted-foreground tabular-nums">${totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+                <span className={`text-[11px] tabular-nums ${(totalBudgetedIncome - totalIncome) >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                  {(totalBudgetedIncome - totalIncome) < 0 ? "-" : ""}${Math.abs(totalBudgetedIncome - totalIncome).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+                </span>
+              </div>
+            )}
           </div>
           <DroppableSection id={INCOME_ID}>
             <SortableContext items={incomeIds} strategy={verticalListSortingStrategy}>
               {income.map((cat, i) => (
                 <SortableItem key={incomeIds[i]} id={incomeIds[i]}>
-                  <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "income", index: i })} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
+                  <CategoryCard category={cat} variant="income" onNameEdit={(name) => { const arr = [...income]; arr[i] = { ...arr[i], name }; setIncome(arr); }} onTransactions={() => setViewingTransactions({ list: "income", index: i })} />
                 </SortableItem>
               ))}
             </SortableContext>
