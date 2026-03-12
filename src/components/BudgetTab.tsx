@@ -702,11 +702,13 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
         ) : (
           <span
             onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-            className="text-[15px] font-medium text-foreground truncate flex-1 cursor-text"
+            className="text-[15px] font-medium text-foreground shrink-0 max-w-[55%] truncate cursor-text"
           >
             {category.name}
           </span>
         )}
+        {/* Dead spacer — no action on tap */}
+        {!isEditingName && <div className="flex-1" onClick={e => e.stopPropagation()} />}
         <div className="flex-shrink-0 flex items-center gap-1.5">
           {isEditingBudget ? (
             <input
