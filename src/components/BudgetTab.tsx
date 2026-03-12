@@ -700,14 +700,14 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           ) : (
             <span
               onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-              className="text-[15px] font-medium text-foreground leading-none truncate"
+              className="text-[15px] font-medium text-foreground truncate"
             >
               {category.name}
             </span>
           )}
-          <span className="text-[13px] text-muted-foreground mt-0.5 leading-none">
+          <p className="text-[13px] text-muted-foreground">
             {txCount === 0 ? "No transactions" : `${txCount} ${txCount === 1 ? "transaction" : "transactions"}`}
-          </span>
+          </p>
         </div>
         {/* Spacer — tap triggers onTransactions */}
         <div className="flex-shrink-0 flex items-center gap-1.5">
