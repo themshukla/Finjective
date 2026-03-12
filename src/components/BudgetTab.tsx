@@ -470,24 +470,34 @@ const BudgetTab = () => {
           const sectionItemIds = customIds[section.id] ?? [];
           return (
             <section key={section.id} className="mt-5">
-              <div className="flex justify-between items-center mb-3">
-                <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
-                  <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-normal text-primary tabular-nums">
-                    ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </span>
-                  <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
-                    <Trash2 className="h-3.5 w-3.5" />
+              <div className="mb-3">
+                <div className="flex justify-between items-center">
+                  <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
+                    <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                   </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => toggleHeader(section.id)} className="text-[17px] font-normal text-primary tabular-nums active:opacity-70">
+                      ${sectionBudgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </button>
+                    <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
+                {expandedHeaders[section.id] && (
+                  <div className="flex justify-end gap-3 mt-0.5">
+                    <span className="text-[11px] text-muted-foreground tabular-nums">${sectionTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+                    <span className={`text-[11px] tabular-nums ${(sectionBudgeted - sectionTotal) >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+                      {(sectionBudgeted - sectionTotal) < 0 ? "-" : ""}${Math.abs(sectionBudgeted - sectionTotal).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
+                    </span>
+                  </div>
+                )}
               </div>
               <DroppableSection id={section.id}>
                 <SortableContext items={sectionItemIds} strategy={verticalListSortingStrategy}>
                   {section.items.map((cat, i) => (
                     <SortableItem key={sectionItemIds[i]} id={sectionItemIds[i]}>
-                      <CategoryCard category={cat} variant="income" onTap={() => setEditing({ list: "custom", sectionId: section.id, index: i })} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
+                      <CategoryCard category={cat} variant="income" onNameEdit={(name) => { const updated = customSections.map(s => { if (s.id !== section.id) return s; const items = [...s.items]; items[i] = { ...items[i], name }; return { ...s, items }; }); setCustomSections(updated); }} onTransactions={() => setViewingTransactions({ list: "custom", sectionId: section.id, index: i })} />
                     </SortableItem>
                   ))}
                   {section.items.length === 0 && (
