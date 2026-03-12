@@ -687,7 +687,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
   };
 
   return (
-    <div onClick={expanded ? onTransactions : undefined} className={`w-full rounded-xl bg-card border border-border px-3 min-h-[40px] flex flex-col justify-center text-left ${expanded ? "cursor-pointer active:opacity-80 transition-opacity" : ""}`}>
+    <div onClick={expanded ? onTransactions : undefined} className={`w-full rounded-xl bg-card border border-border px-3 py-[9px] flex flex-col text-left ${expanded ? "cursor-pointer active:opacity-80 transition-opacity" : ""}`}>
       {/* Row 1: name | budget amount (always single line) */}
       <div className="flex items-center gap-2">
         {isEditingName ? (
