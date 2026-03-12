@@ -11,39 +11,20 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
   const { selectedMonth, setSelectedMonth, hasMonthData, netWorthSnapshots } = useBudget();
 
   const now = new Date();
-  const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
   const nowKey = format(now, "yyyy-MM");
   const selectedKey = format(selectedMonth, "yyyy-MM");
+  const isCurrentMonth = selectedKey === nowKey;
 
-  const prevMonth = subMonths(selectedMonth, 1);
-  const nextMonth = addMonths(selectedMonth, 1);
+  // Determine the three pill dates:
+  // Center is ALWAYS "now" (today's month).
+  // If viewing current month: left = now-1, right = now+1
+  // If viewing a PAST month:  left = selectedMonth, center = now, right = now+1
+  // If viewing a FUTURE month: left = now-1, center = now, right = selectedMonth
+  const isPast = selectedKey < nowKey;
+  const isFuture = selectedKey > nowKey;
 
-  // Center = ALWAYS today (never moves).
-  // Left  = prev of selected → tapping navigates one step back.
-  // Right = next of selected → tapping navigates one step forward.
-  // Whichever pill matches the selected month gets the blue circle.
-  const months = [
-    {
-      date: prevMonth, action: prevMonth,
-      label: format(prevMonth, "MMM"), subLabel: format(prevMonth, "yyyy"),
-      isSelected: format(prevMonth, "yyyy-MM") === selectedKey,
-      isToday: format(prevMonth, "yyyy-MM") === nowKey,
-    },
-    {
-      date: now, action: now,
-      label: format(now, "MMM"), subLabel: format(now, "yyyy"),
-      isSelected: isCurrentMonth, isToday: true,
-    },
-    {
-      date: nextMonth, action: nextMonth,
-      label: format(nextMonth, "MMM"), subLabel: format(nextMonth, "yyyy"),
-      isSelected: format(nextMonth, "yyyy-MM") === selectedKey,
-      isToday: format(nextMonth, "yyyy-MM") === nowKey,
-    },
-  ];
-
-  const prev = prevMonth;
-  const next = nextMonth;
+  const leftDate  = isPast   ? selectedMonth : subMonths(now, 1);
+  const rightDate = isFuture ? selectedMonth : addMonths(now, 1);
 
   const hasData = (date: Date) => {
     const key = format(date, "yyyy-MM");
@@ -53,6 +34,34 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
     }
     return hasMonthData(key);
   };
+
+  const pills = [
+    {
+      date: leftDate,
+      label: format(leftDate, "MMM"),
+      subLabel: format(leftDate, "yyyy"),
+      isSelected: format(leftDate, "yyyy-MM") === selectedKey,
+      isToday: format(leftDate, "yyyy-MM") === nowKey,
+    },
+    {
+      date: now,
+      label: format(now, "MMM"),
+      subLabel: format(now, "yyyy"),
+      isSelected: isCurrentMonth,
+      isToday: true,
+    },
+    {
+      date: rightDate,
+      label: format(rightDate, "MMM"),
+      subLabel: format(rightDate, "yyyy"),
+      isSelected: format(rightDate, "yyyy-MM") === selectedKey,
+      isToday: format(rightDate, "yyyy-MM") === nowKey,
+    },
+  ];
+
+  // Chevrons always step selectedMonth back/forward by 1
+  const prev = subMonths(selectedMonth, 1);
+  const next = addMonths(selectedMonth, 1);
 
   if (collapsed) {
     return (
@@ -77,19 +86,18 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
         </button>
 
         <div className="flex gap-1">
-        {months.map((m, i) => {
-            const hasMonthDataForPill = hasData(m.action);
-            const isFilledToday = m.isToday;
-            // Always circle the selected/viewing month with a solid blue border
+          {pills.map((m, i) => {
+            const hasMonthDataForPill = hasData(m.date);
+            const isFilledToday = m.isToday && !m.isSelected;
             const borderStyle = m.isSelected
               ? { border: "2px solid hsl(var(--primary))" }
-              : !isFilledToday && !hasMonthDataForPill
+              : !m.isToday && !hasMonthDataForPill
               ? { border: "1.5px dashed hsl(var(--muted-foreground) / 0.4)" }
               : {};
             return (
               <button
                 key={i}
-                onClick={() => setSelectedMonth(m.action)}
+                onClick={() => setSelectedMonth(m.date)}
                 style={borderStyle}
                 className={`relative flex flex-col items-center px-4 py-1.5 rounded-full transition-colors ${
                   isFilledToday
@@ -128,4 +136,3 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
 };
 
 export default MonthSelector;
-
