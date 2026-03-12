@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
-import { Plus, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, ChevronRight, ChevronDown, Trash2 } from "lucide-react";
 import { useBudget } from "@/context/BudgetContext";
 import { BudgetCategory, Transaction } from "@/data/budgetData";
 import EditItemDialog from "./EditItemDialog";
