@@ -402,7 +402,7 @@ const BudgetTab = () => {
         <section className="mt-5">
           <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-primary">Expenses</h3>
+              <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
