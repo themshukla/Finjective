@@ -745,18 +745,16 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
       {/* Expanded: show actual + progress + remaining */}
       {expanded && (
         <>
-          <div className="flex items-center justify-end mt-1">
-            <span className="text-[12px] text-muted-foreground tabular-nums">
-              ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
+          <div className="flex justify-end gap-3 mt-1">
+            <span className="text-[11px] text-muted-foreground tabular-nums">${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual</span>
+            <span className={`text-[11px] tabular-nums ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
+              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
             </span>
           </div>
           <div className="w-full flex items-center gap-2 mt-1">
             <Progress value={barPct} className={`h-[3px] flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
             <span className={`text-[11px] tabular-nums flex-shrink-0 ${over ? "text-expense" : "text-muted-foreground"}`}>
               {pct.toFixed(0)}%
-            </span>
-            <span className={`text-[11px] tabular-nums flex-shrink-0 ${remainingAmt >= 0 ? "text-muted-foreground" : "text-expense"}`}>
-              {remainingAmt < 0 ? "-" : ""}${Math.abs(remainingAmt).toLocaleString("en-US", { minimumFractionDigits: 2 })} left
             </span>
           </div>
         </>
