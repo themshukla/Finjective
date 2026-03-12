@@ -684,7 +684,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
   return (
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1.5 active:opacity-80 transition-opacity text-left">
       {/* Row 1: name (inline edit on tap) | budgeted + badge + chevron */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         {isEditingName ? (
           <input
             autoFocus
@@ -693,16 +693,18 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
             onBlur={commitName}
             onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
             onClick={e => e.stopPropagation()}
-            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground flex-1 min-w-0"
+            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground min-w-0 flex-1"
           />
         ) : (
           <span
             onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
-            className="text-[15px] font-medium text-foreground leading-none flex-1 min-w-0 truncate"
+            className="text-[15px] font-medium text-foreground leading-none shrink-0 max-w-[55%] truncate"
           >
             {category.name}
           </span>
         )}
+        {/* Spacer — tap triggers onTransactions */}
+        {!isEditingName && <div className="flex-1" />}
         <span className="flex items-center gap-1.5 flex-shrink-0">
           {isEditingBudget ? (
             <input
@@ -719,7 +721,7 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
           ) : (
             <span
               onClick={startEditBudget}
-              className="text-[15px] font-medium tabular-nums text-foreground leading-none"
+              className="text-[15px] font-medium tabular-nums text-foreground leading-none shrink-0"
             >
               ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
