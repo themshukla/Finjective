@@ -356,7 +356,7 @@ const BudgetTab = () => {
         <section>
           <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-primary">Income</h3>
+              <h3 className="text-[17px] font-normal text-primary">Income</h3>
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedIncome.toLocaleString()} budgeted</span>
@@ -402,7 +402,7 @@ const BudgetTab = () => {
         <section className="mt-5">
           <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-primary">Expenses</h3>
+              <h3 className="text-[17px] font-normal text-primary">Expenses</h3>
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[10px] text-muted-foreground tabular-nums">${totalBudgetedExpenses.toLocaleString()} budgeted</span>
@@ -462,7 +462,7 @@ const BudgetTab = () => {
               <div className="sticky top-0 z-10 rounded-xl bg-muted border border-border px-3 py-1.5 -mx-1.5">
                 <div className="flex justify-between items-center">
                   <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="active:opacity-70 transition-opacity">
-                    <h3 className="text-sm font-bold text-primary">{section.name}</h3>
+                    <h3 className="text-[17px] font-normal text-primary">{section.name}</h3>
                   </button>
                   <button onClick={() => setDeletingSectionId(section.id)} className="text-muted-foreground hover:text-expense p-1 rounded-full transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
@@ -646,7 +646,7 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
       {/* Row 1: name (→ edit) | chevron/badge */}
       <div className="flex items-center justify-between">
         <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-xs font-medium text-foreground leading-none">{category.name}</p>
+          <p className="text-[15px] font-medium text-foreground leading-none">{category.name}</p>
         </span>
         <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-auto py-0.5">
           {(category.transactions ?? []).length > 0 && (
