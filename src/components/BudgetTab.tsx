@@ -730,9 +730,11 @@ function CategoryCard({ category, variant, expanded, onNameEdit, onBudgetEdit, o
               ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
           )}
-          <button onClick={onTransactions} className="active:opacity-60 transition-opacity p-0.5 -mr-0.5">
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+          {expanded && (
+            <button onClick={onTransactions} className="active:opacity-60 transition-opacity p-0.5 -mr-0.5">
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
         </div>
       </div>
       {/* Expanded: show actual + progress + remaining */}
