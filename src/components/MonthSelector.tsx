@@ -12,22 +12,21 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
 
   const now = new Date();
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(now, "yyyy-MM");
-  const isPast = selectedMonth < now && !isCurrentMonth;
-  const isFuture = selectedMonth > now && !isCurrentMonth;
+  const nowKey = format(now, "yyyy-MM");
+  const selectedKey = format(selectedMonth, "yyyy-MM");
 
   const prevMonth = subMonths(selectedMonth, 1);
   const nextMonth = addMonths(selectedMonth, 1);
-  const nowKey = format(now, "yyyy-MM");
 
-  // Center = ALWAYS today (never moves), filled blue.
+  // Center = ALWAYS today (never moves).
   // Left  = prev of selected → tapping navigates one step back.
   // Right = next of selected → tapping navigates one step forward.
-  // Selected pill (left or right) is circled in blue.
+  // Whichever pill matches the selected month gets the blue circle.
   const months = [
     {
       date: prevMonth, action: prevMonth,
       label: format(prevMonth, "MMM"), subLabel: format(prevMonth, "yyyy"),
-      isSelected: isPast && format(prevMonth, "yyyy-MM") === format(selectedMonth, "yyyy-MM"),
+      isSelected: format(prevMonth, "yyyy-MM") === selectedKey,
       isToday: format(prevMonth, "yyyy-MM") === nowKey,
     },
     {
@@ -38,12 +37,11 @@ const MonthSelector = ({ collapsed = false, activeTab = "budget" }: MonthSelecto
     {
       date: nextMonth, action: nextMonth,
       label: format(nextMonth, "MMM"), subLabel: format(nextMonth, "yyyy"),
-      isSelected: isFuture && format(nextMonth, "yyyy-MM") === format(selectedMonth, "yyyy-MM"),
+      isSelected: format(nextMonth, "yyyy-MM") === selectedKey,
       isToday: format(nextMonth, "yyyy-MM") === nowKey,
     },
   ];
 
-  // Chevrons step relative to selected month
   const prev = prevMonth;
   const next = nextMonth;
 
