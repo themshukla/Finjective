@@ -649,7 +649,9 @@ const BudgetTab = () => {
   );
 };
 
-function CategoryCard({ category, variant, onTap, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onTap: () => void; onTransactions: () => void }) {
+function CategoryCard({ category, variant, onNameEdit, onTransactions }: { category: BudgetCategory; variant: "income" | "expense"; onNameEdit: (name: string) => void; onTransactions: () => void }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameVal, setNameVal] = useState(category.name);
   const spent = (category.transactions ?? []).reduce((s, t) => s + t.amount, 0);
   const budgeted = isNaN(category.budgeted) ? 0 : category.budgeted;
   const pct = budgeted > 0 ? (spent / budgeted) * 100 : 0;
@@ -657,37 +659,48 @@ function CategoryCard({ category, variant, onTap, onTransactions }: { category: 
   const over = spent > budgeted;
   const remainingAmt = budgeted - spent;
 
-  // Entire card opens transactions; name & budget stop propagation to open edit instead
+  const commitName = () => {
+    const trimmed = nameVal.trim();
+    if (trimmed && trimmed !== category.name) onNameEdit(trimmed);
+    else setNameVal(category.name);
+    setIsEditingName(false);
+  };
+
   return (
     <button onClick={onTransactions} className="w-full rounded-xl bg-card border border-border px-3 py-1 active:opacity-80 transition-opacity text-left">
-      {/* Row 1: name (→ edit) | chevron/badge */}
-      <div className="flex items-center justify-between">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-[15px] font-medium text-foreground leading-none">{category.name}</p>
-        </span>
-        <span className="flex items-center gap-1 text-muted-foreground flex-shrink-0 ml-auto py-0.5">
+      {/* Row 1: name (inline edit on tap) | budgeted + badge/chevron */}
+      <div className="flex items-center justify-between gap-2">
+        {isEditingName ? (
+          <input
+            autoFocus
+            value={nameVal}
+            onChange={e => setNameVal(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={e => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setNameVal(category.name); setIsEditingName(false); } }}
+            onClick={e => e.stopPropagation()}
+            className="text-[15px] font-medium bg-transparent border-0 outline-none text-foreground flex-1 min-w-0 py-0.5"
+          />
+        ) : (
+          <span
+            onClick={e => { e.stopPropagation(); setIsEditingName(true); setNameVal(category.name); }}
+            className="text-[15px] font-medium text-foreground leading-none py-0.5 flex-1 min-w-0 truncate"
+          >
+            {category.name}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-sm font-medium tabular-nums text-muted-foreground leading-none">
+            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </span>
           {(category.transactions ?? []).length > 0 && (
             <span className="flex items-center justify-center h-4 min-w-4 px-1 rounded-full border border-primary bg-card text-primary text-[9px] font-bold">
               {(category.transactions ?? []).length}
             </span>
           )}
-          <ChevronRight className="h-3.5 w-3.5" />
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
         </span>
       </div>
-      {/* Row 2: budgeted (→ edit) | actual */}
-      <div className="flex items-baseline justify-between mt-0.5">
-        <span onClick={e => { e.stopPropagation(); onTap(); }} className="shrink-0 text-left py-0.5 pr-2">
-          <p className="text-sm font-medium tabular-nums text-muted-foreground leading-none">
-            ${budgeted.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-        </span>
-        <span className="flex-shrink-0 ml-auto py-0.5">
-          <p className="text-xs text-muted-foreground tabular-nums leading-none">
-            ${spent.toLocaleString("en-US", { minimumFractionDigits: 2 })} actual
-          </p>
-        </span>
-      </div>
-      {/* Row 3: progress bar + % | remaining */}
+      {/* Row 2: progress bar + % | remaining */}
       <div className="w-full flex items-center justify-between gap-2 mt-0.5 py-0.5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Progress value={barPct} className={`h-1 flex-1 ${over ? "[&>div]:bg-expense" : "[&>div]:bg-primary"}`} />
